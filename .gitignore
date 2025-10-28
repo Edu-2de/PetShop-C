@@ -1,1 +1,58 @@
-﻿
+﻿# Visual Studio / .NET generic ignores
+
+## Build
+bin/
+obj/
+
+## Visual Studio
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+## Rider / JetBrains
+.idea/
+*.sublime-workspace
+
+## VS Code
+.vscode/
+
+## NuGet
+*.nupkg
+packages/
+
+## Entity Framework Local DB and DB files
+*.mdf
+*.ldf
+*.sqlite
+*.db
+
+## User secrets / local settings
+appsettings.Development.json
+appsettings.Local.json
+.env
+
+## Logs and temporary
+*.log
+*.tmp
+*.temp
+
+## Test results
+TestResults/
+*.trx
+
+## Publish output
+publish/
+
+## Coverage
+coverage/
+*.coverage
+*.coveragexml
+
+## Node (if you use any frontend)
+node_modules/
+
+# OSX / Thumbs.db
+.DS_Store
+Thumbs.db
