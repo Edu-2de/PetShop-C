@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("SIGA-PET")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+b961ad2babb442e2310b2eb3ef9b8b78fbea20d3")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+13a6610dfc40b7f3a88f774db4101b60decd5564")]
 [assembly: System.Reflection.AssemblyProductAttribute("SIGA-PET")]
 [assembly: System.Reflection.AssemblyTitleAttribute("SIGA-PET")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
