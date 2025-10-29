@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using SIGA_PET.Data;
+using SIGA_PET.Profiles;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,6 +11,8 @@ builder.Services.AddControllers();
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(connectionString));
+
+builder.Services.AddAutoMapper(typeof(MappingProfile));
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
