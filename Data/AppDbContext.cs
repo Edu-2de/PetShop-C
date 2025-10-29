@@ -10,7 +10,7 @@ namespace SIGA_PET.Data
         }
 
         // DbSets para todas as entidades
-        public DbSet<Tutor> Tutors { get; set; }
+        public DbSet<Tutor> Tutores { get; set; }
         public DbSet<Animal> Animais { get; set; }
         public DbSet<Funcionario> Funcionarios { get; set; }
         public DbSet<Servico> Servicos { get; set; }
@@ -24,6 +24,9 @@ namespace SIGA_PET.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+
+            // Mapear a entidade Tutor para a tabela "Tutores"
+            modelBuilder.Entity<Tutor>().ToTable("Tutores");
 
             // Configurações de relacionamentos e constraints
 
