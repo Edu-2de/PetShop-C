@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-﻿﻿# Visual Studio / .NET generic ignores
-=======
-﻿# Visual Studio / .NET generic ignores
->>>>>>> eaff9f9369ba8c93fc52d784184c6f871d83b868
+# Visual Studio / .NET generic ignores
 
 ## Build
 bin/
