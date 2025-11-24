@@ -14,12 +14,12 @@ import { FormsModule } from '@angular/forms';
 })
 export class TutorListComponent implements OnInit {
   // Usaremos Signals para reatividade
-  private tutores = signal<Tutor[]>([]);
+  private tutoresSignal = signal<Tutor[]>([]);
   termoBusca = signal<string>('');
 
   // O `computed` signal recalcula automaticamente quando `tutores` ou `termoBusca` mudam.
   tutoresFiltrados = computed(() => {
-    const tutores = this.tutores();
+    const tutores = this.tutoresSignal();
     const termo = this.termoBusca().toLowerCase();
     if (!termo) {
       return tutores;
@@ -36,8 +36,8 @@ export class TutorListComponent implements OnInit {
   }
   
   carregarTutores(): void {
-    this.tutorService.listar().subscribe(data => {
-      this.tutores.set(data); // Define o valor do signal
+    this.tutorService.listar().subscribe((data: Tutor[]) => {
+      this.tutoresSignal.set(data); // Define o valor do signal
     });
   }
 
@@ -47,12 +47,13 @@ export class TutorListComponent implements OnInit {
     this.termoBusca.set(target.value);
   }
 
-  excluir(id: string): void {
+  excluir(id: number | undefined): void {
+    if (id === undefined) return;
     if (confirm('Deseja realmente excluir este tutor?')) {
       this.tutorService.deletar(id).subscribe({
         next: () => {
-        // Atualiza o signal removendo o tutor excluído
-        this.tutores.update(tutoresAtuais => tutoresAtuais.filter(t => t.id !== id));
+          // Atualiza o signal removendo o tutor excluído
+          this.tutoresSignal.update(tutoresAtuais => tutoresAtuais.filter(t => t.id !== id));
         },
         error: (err) => console.error('Erro ao excluir tutor', err)
       });

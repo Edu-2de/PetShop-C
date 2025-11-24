@@ -4,7 +4,7 @@
       <h2 class="mb-0">{{ isEdit ? 'Editar Fornecedor' : 'Novo Fornecedor' }}</h2>
     </div>
     <div class="card-body">
-      <form (ngSubmit)="save()">
+      <form (ngSubmit)="salvar()">
         <div class="row g-3">
           <!-- Nome -->
           <div class="col-md-6">
@@ -12,22 +12,22 @@
             <input type="text" class="form-control" id="nome" [(ngModel)]="fornecedor.nome" name="nome" required />
           </div>
 
-          <!-- Contato -->
+          <!-- CNPJ -->
           <div class="col-md-6">
-            <label for="contato" class="form-label">Pessoa de Contato</label>
-            <input type="text" class="form-control" id="contato" [(ngModel)]="fornecedor.contato" name="contato" />
+            <label for="cnpj" class="form-label">CNPJ</label>
+            <input type="text" class="form-control" id="cnpj" [(ngModel)]="fornecedor.cnpj" name="cnpj" />
           </div>
 
           <!-- Telefone -->
           <div class="col-md-6">
-            <label for="telefone" class="form-label">Telefone</label>
-            <input type="tel" class="form-control" id="telefone" [(ngModel)]="fornecedor.telefone" name="telefone" required />
+            <label for="contato" class="form-label">Telefone</label>
+            <input type="tel" class="form-control" id="contato" [(ngModel)]="fornecedor.telefone" name="contato" />
           </div>
 
           <!-- Email -->
           <div class="col-md-6">
             <label for="email" class="form-label">Email</label>
-            <input type="email" class="form-control" id="email" [(ngModel)]="fornecedor.email" name="email" required />
+            <input type="email" class="form-control" id="email" [(ngModel)]="fornecedor.email" name="email" />
           </div>
 
           <!-- Endereço -->

@@ -1,169 +1,178 @@
 # ?? SIGA-PET - Sistema Integrado de Gestão para PetShop
 
-Sistema completo de gestão para PetShop com Backend em ASP.NET Core e Frontend em Angular.
+Sistema completo de gestão para PetShop desenvolvido com **ASP.NET Core 8.0** (Backend) e **Angular 17+** (Frontend).
 
-## ?? Pré-requisitos
+---
 
-- **.NET 8.0 SDK** ou superior
-- **Node.js 20.15+** (recomendado 20.19+ ou 22.12+)
-- **npm**
-- **SQL Server** ou **LocalDB**
+## ?? Tecnologias
 
-> ?? **Nota sobre Node.js**: O projeto funciona com Node.js v20.15.1 usando `npx @angular/cli@17`. Warnings são esperados mas a aplicação funciona normalmente.
+### Backend
+- **ASP.NET Core 8.0** - Framework web
+- **Entity Framework Core** - ORM
+- **SQL Server / LocalDB** - Banco de dados
+- **AutoMapper** - Mapeamento objeto-objeto
+- **Swagger / OpenAPI** - Documentação da API
+
+### Frontend
+- **Angular 17+** - Framework SPA
+- **TypeScript** - Linguagem
+- **RxJS** - Programação reativa
+- **Bootstrap 5** - UI Framework
+
+---
 
 ## ?? Início Rápido
 
-### Antes de Começar (Primeira vez)
+### Pré-requisitos
+- [.NET 8.0 SDK](https://dotnet.microsoft.com/download)
+- [Node.js 20.15+](https://nodejs.org/)
+- SQL Server ou LocalDB
 
-1. **Criar certificado HTTPS** (opcional - já feito se você seguiu o guia):
-```powershell
-dotnet dev-certs https --clean
-dotnet dev-certs https --trust
+### 1. Clonar o Repositório
+```bash
+git clone https://github.com/Edu-2de/PetShop-C.git
+cd PetShop-C
 ```
 
-2. **Criar banco de dados**:
-```powershell
+### 2. Configurar Banco de Dados
+```bash
 cd Backend
 dotnet ef database update
 cd ..
 ```
 
-### Iniciar Aplicação
-
-**Windows (PowerShell):**
+### 3. Iniciar Aplicação
 ```powershell
+# PowerShell
 .\start-dev.ps1
 ```
 
-**Windows (CMD):**
 ```cmd
+# CMD
 start-dev.bat
 ```
 
-> ?? **Os scripts criam automaticamente a pasta `wwwroot` e usam HTTP para evitar problemas de certificado**
-
-## ?? URLs da Aplicação
-
-### Desenvolvimento (HTTP - Configuração Atual)
+### 4. Acessar
+- **Backend (Swagger)**: http://localhost:5000/swagger
 - **Frontend**: http://localhost:4200
-- **Backend API**: http://localhost:5000
-- **Swagger**: http://localhost:5000/swagger
 
-### Produção (HTTPS - Após configurar certificado)
-- **Frontend**: https://localhost:4200
-- **Backend API**: https://localhost:7000
-- **Swagger**: https://localhost:7000/swagger
-
-## ?? Parar os Servidores
-
-**Windows (PowerShell):**
-```powershell
-.\stop-dev.ps1
-```
-
-**Windows (CMD):**
-```cmd
-stop-dev.bat
-```
+---
 
 ## ?? Estrutura do Projeto
 
 ```
 PetShop-C/
-??? Backend/                 # API ASP.NET Core
-?   ??? Controllers/         # Endpoints da API (6 controllers)
-?   ??? Models/             # Entidades do banco (10 modelos)
-?   ??? DTOs/               # Objetos de transferência (18 DTOs)
-?   ??? Data/               # Contexto do EF Core
-?   ??? Profiles/           # Mapeamentos AutoMapper
-?   ??? Migrations/         # Migrações do banco
+??? Backend/                    # API ASP.NET Core
+?   ??? Controllers/            # 6 Controllers (Tutor, Animal, Produto, etc)
+?   ??? Models/                 # 10 Entidades do banco
+?   ??? DTOs/                   # 18 Data Transfer Objects
+?   ??? Data/                   # DbContext EF Core
+?   ??? Profiles/               # Configuração AutoMapper
+?   ??? Migrations/             # Migrations do banco
 ?
-??? Frontend/               # Aplicação Angular
-?   ??? src/
-?   ?   ??? app/
-?   ?   ?   ??? model/      # Interfaces TypeScript
-?   ?   ?   ??? service/    # Serviços HTTP
-?   ?   ?   ??? pages/      # Componentes de páginas
-?   ?   ??? environments/   # Configurações de ambiente
+??? Frontend/                   # Aplicação Angular
+?   ??? src/app/
+?   ?   ??? model/              # 6 Interfaces TypeScript
+?   ?   ??? service/            # 6 Services HTTP
+?   ?   ??? environments/       # Configuração de ambiente
+?   ??? ...
 ?
-??? start-dev.ps1           # Script PowerShell para iniciar
-??? start-dev.bat           # Script CMD para iniciar
-??? stop-dev.ps1            # Script PowerShell para parar
-??? stop-dev.bat            # Script CMD para parar
+??? start-dev.ps1              # Script inicialização (PowerShell)
+??? start-dev.bat              # Script inicialização (CMD)
+??? stop-dev.ps1               # Script parar servidores
+??? stop-dev.bat               # Script parar servidores
+??? README.md                  # Este arquivo
+??? ARQUITETURA.md             # Documentação técnica detalhada
 ```
+
+---
 
 ## ??? Banco de Dados
 
-O projeto usa **SQL Server LocalDB** por padrão.
+### Entidades (10 tabelas)
+1. **Tutor** - Donos de pets
+2. **Animal** - Pets cadastrados
+3. **Produto** - Produtos do estoque
+4. **Servico** - Serviços oferecidos (banho, tosa, etc)
+5. **Agendamento** - Agendamentos de serviços
+6. **Fornecedor** - Fornecedores
+7. **Funcionario** - Funcionários (futuro)
+8. **Venda** - Vendas (futuro)
+9. **ItemVenda** - Itens de venda (futuro)
+10. **RegistroProntuario** - Prontuário médico (futuro)
 
-### Criar/Atualizar o Banco de Dados
-
+### Comandos Úteis
 ```bash
-cd Backend
-dotnet ef database update
-```
-
-### Criar uma Nova Migration
-
-```bash
-cd Backend
+# Criar nova migration
 dotnet ef migrations add NomeDaMigracao
+
+# Atualizar banco
+dotnet ef database update
+
+# Reverter migration
+dotnet ef database update PreviousMigrationName
+
+# Limpar e recriar banco
+dotnet ef database drop -f
 dotnet ef database update
 ```
 
-## ?? Endpoints da API
+---
 
-### Tutores
+## ?? API Endpoints
+
+### Tutores (`/api/Tutor`)
 - `GET /api/Tutor` - Listar todos
 - `GET /api/Tutor/{id}` - Buscar por ID
-- `POST /api/Tutor` - Criar novo
+- `POST /api/Tutor` - Criar
 - `PUT /api/Tutor/{id}` - Atualizar
 - `DELETE /api/Tutor/{id}` - Deletar
 
-### Animais (Pets)
+### Animais (`/api/Animal`)
 - `GET /api/Animal` - Listar todos
 - `GET /api/Animal/{id}` - Buscar por ID
 - `GET /api/Animal/tutor/{tutorId}` - Buscar por tutor
-- `POST /api/Animal` - Criar novo
+- `POST /api/Animal` - Criar
 - `PUT /api/Animal/{id}` - Atualizar
 - `DELETE /api/Animal/{id}` - Deletar
 
-### Produtos
+### Produtos (`/api/Produto`)
 - `GET /api/Produto` - Listar todos
 - `GET /api/Produto/{id}` - Buscar por ID
-- `GET /api/Produto/ativos` - Listar ativos
-- `POST /api/Produto` - Criar novo
+- `GET /api/Produto/ativos` - Listar apenas ativos
+- `POST /api/Produto` - Criar
 - `PUT /api/Produto/{id}` - Atualizar
 - `DELETE /api/Produto/{id}` - Deletar
 
-### Serviços
+### Serviços (`/api/Servico`)
 - `GET /api/Servico` - Listar todos
 - `GET /api/Servico/{id}` - Buscar por ID
-- `GET /api/Servico/ativos` - Listar ativos
-- `POST /api/Servico` - Criar novo
+- `GET /api/Servico/ativos` - Listar apenas ativos
+- `POST /api/Servico` - Criar
 - `PUT /api/Servico/{id}` - Atualizar
 - `DELETE /api/Servico/{id}` - Deletar
 
-### Agendamentos
+### Agendamentos (`/api/Agendamento`)
 - `GET /api/Agendamento` - Listar todos
 - `GET /api/Agendamento/{id}` - Buscar por ID
 - `GET /api/Agendamento/animal/{animalId}` - Buscar por animal
 - `GET /api/Agendamento/data/{data}` - Buscar por data
-- `POST /api/Agendamento` - Criar novo
+- `POST /api/Agendamento` - Criar
 - `PUT /api/Agendamento/{id}` - Atualizar
 - `DELETE /api/Agendamento/{id}` - Deletar
 
-### Fornecedores
+### Fornecedores (`/api/Fornecedor`)
 - `GET /api/Fornecedor` - Listar todos
 - `GET /api/Fornecedor/{id}` - Buscar por ID
-- `POST /api/Fornecedor` - Criar novo
+- `POST /api/Fornecedor` - Criar
 - `PUT /api/Fornecedor/{id}` - Atualizar
 - `DELETE /api/Fornecedor/{id}` - Deletar
 
+---
+
 ## ?? Configuração
 
-### Backend - appsettings.json
-
+### Backend - `appsettings.json`
 ```json
 {
   "ConnectionStrings": {
@@ -172,121 +181,155 @@ dotnet ef database update
 }
 ```
 
-### Frontend - environment.ts
-
+### Frontend - `environment.ts`
 ```typescript
 export const environment = {
   production: false,
-  apiUrl: 'http://localhost:5000/api'  // HTTP para desenvolvimento
+  apiUrl: 'http://localhost:5000/api'
 };
 ```
 
-## ??? Tecnologias Utilizadas
+---
 
-### Backend
-- ASP.NET Core 8.0
-- Entity Framework Core
-- SQL Server / LocalDB
-- AutoMapper
-- Swagger/OpenAPI
+## ?? Desenvolvimento
 
-### Frontend
-- Angular 17+
-- TypeScript
-- RxJS
-- HttpClient
-
-## ?? Funcionalidades
-
-- ? **Gestão de Tutores** - Cadastro de donos de pets
-- ? **Gestão de Animais** - Registro de pets com informações detalhadas
-- ? **Gestão de Produtos** - Controle de estoque
-- ? **Gestão de Serviços** - Banho, tosa, consultas, etc.
-- ? **Agendamentos** - Sistema de agendamento de serviços
-- ? **Gestão de Fornecedores** - Cadastro de fornecedores
-
-## ?? Avisos Esperados (Podem Ignorar)
-
-### Warnings do Node.js
+### Executar Backend Manualmente
+```bash
+cd Backend
+dotnet run --launch-profile http
 ```
-Node.js version v20.15.1 detected.
-The Angular CLI requires a minimum Node.js version of v20.19
-```
-**Status:** ?? **NORMAL** - Aplicação funciona usando `npx @angular/cli@17`
 
-### Vulnerabilidades NPM
+### Executar Frontend Manualmente
+```bash
+cd Frontend
+npm install
+npm start
 ```
-2 moderate severity vulnerabilities
+
+### Build de Produção
+
+**Backend:**
+```bash
+cd Backend
+dotnet publish -c Release -o ./publish
 ```
-**Status:** ?? **BAIXO RISCO** - Vite em ambiente de desenvolvimento
+
+**Frontend:**
+```bash
+cd Frontend
+npm run build
+# Arquivos gerados em: dist/
+```
+
+---
+
+## ?? Testes
+
+### Testar API com Swagger
+1. Acesse http://localhost:5000/swagger
+2. Clique em "Try it out" em qualquer endpoint
+3. Execute e veja o resultado
+
+### Exemplo de POST (Criar Tutor)
+```json
+{
+  "nome": "João Silva",
+  "telefone": "(11) 98765-4321",
+  "email": "joao@exemplo.com",
+  "endereco": "Rua Exemplo, 123"
+}
+```
+
+---
 
 ## ?? Problemas Comuns
 
 ### Erro: "Unable to configure HTTPS endpoint"
 **Solução:**
-```powershell
+```bash
 dotnet dev-certs https --clean
 dotnet dev-certs https --trust
 ```
-Ou use HTTP (configuração atual dos scripts).
 
-### Erro: "wwwroot não encontrado"
-**Solução:** Os scripts criam automaticamente. Se erro persistir:
-```powershell
-mkdir Backend\wwwroot
-```
-
-### Erro: "Porta já em uso"
+### Erro: Porta já em uso
 **Solução:**
 ```powershell
 .\stop-dev.ps1
 .\start-dev.ps1
 ```
 
-### Frontend não carrega
-**Solução:** Aguarde 10-30 segundos após iniciar - Angular precisa compilar
+### Frontend não compila
+**Solução:**
+```bash
+cd Frontend
+rm -rf node_modules package-lock.json
+npm install
+```
 
-### Node.js incompatível
-**Solução:** Scripts usam `npx @angular/cli@17` que funciona com v20.15.1
+---
 
-> ?? **Mais soluções**: Consulte [TROUBLESHOOTING.md](TROUBLESHOOTING.md) e [CORRECAO-CERTIFICADO.md](CORRECAO-CERTIFICADO.md)
+## ?? Documentação Adicional
+
+- **[ARQUITETURA.md](ARQUITETURA.md)** - Documentação técnica detalhada da arquitetura do sistema
+
+---
 
 ## ?? Contribuindo
 
-1. Faça um fork do projeto
+1. Fork o projeto
 2. Crie uma branch para sua feature (`git checkout -b feature/MinhaFeature`)
 3. Commit suas mudanças (`git commit -m 'Adiciona MinhaFeature'`)
 4. Push para a branch (`git push origin feature/MinhaFeature`)
 5. Abra um Pull Request
 
+---
+
+## ?? Funcionalidades Implementadas
+
+- ? CRUD completo de Tutores
+- ? CRUD completo de Animais
+- ? CRUD completo de Produtos
+- ? CRUD completo de Serviços
+- ? CRUD completo de Agendamentos
+- ? CRUD completo de Fornecedores
+- ? Relacionamento entre entidades
+- ? Validações de dados
+- ? Tratamento de erros
+- ? Documentação Swagger
+- ? CORS configurado
+- ? Models e Services do Frontend
+
+### ?? Em Desenvolvimento
+- ? Componentes do Frontend (UI)
+- ? Autenticação e Autorização
+- ? Relatórios
+- ? Dashboard
+
+---
+
 ## ?? Licença
 
 Este projeto está sob a licença MIT.
 
+---
+
 ## ?? Autores
 
-- Equipe Edu-2de
-
-## ?? Documentação Adicional
-
-- **[PRIMEIRO-USO.md](PRIMEIRO-USO.md)** - Guia passo a passo para iniciantes
-- **[CORRECAO-CERTIFICADO.md](CORRECAO-CERTIFICADO.md)** ? - Solução para erros de certificado e Node.js
-- **[GUIA-RAPIDO.md](GUIA-RAPIDO.md)** - Referência rápida de comandos
-- **[TROUBLESHOOTING.md](TROUBLESHOOTING.md)** - Soluções para problemas comuns
-- **[CHECKLIST.md](CHECKLIST.md)** - Verificação de funcionalidades
-- **[ARQUITETURA.md](ARQUITETURA.md)** - Arquitetura técnica do sistema
-- **[PROJETO-COMPLETO.md](PROJETO-COMPLETO.md)** - Visão geral completa
-
-## ?? Suporte
-
-Para suporte:
-1. Consulte [CORRECAO-CERTIFICADO.md](CORRECAO-CERTIFICADO.md) para problemas de certificado
-2. Consulte [TROUBLESHOOTING.md](TROUBLESHOOTING.md) para outros problemas
-3. Verifique a documentação acima
-4. Abra uma issue no GitHub
+**Equipe Edu-2de**
+- GitHub: [@Edu-2de](https://github.com/Edu-2de)
+- Repositório: [PetShop-C](https://github.com/Edu-2de/PetShop-C)
 
 ---
 
-**Status:** ? **100% Funcional** (usando HTTP)
-**Última Atualização:** Hoje
-**Versão:** 1.0.1
+## ?? Suporte
+
+Para dúvidas ou problemas:
+1. Consulte a documentação em [ARQUITETURA.md](ARQUITETURA.md)
+2. Abra uma issue no GitHub
+3. Entre em contato com a equipe
+
+---
+
+**Versão:** 1.0.0  
+**Status:** ? Backend funcional | ? Frontend em desenvolvimento  
+**Última Atualização:** Novembro 2024

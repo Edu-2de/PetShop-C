@@ -1,12 +1,17 @@
 export interface Agenda {
-  agendamentoId?: number;
+  agendamentoId: number;
   animalId: number;
-  funcionarioId?: number;
   servicoId: number;
-  dataHora: string;
-  status: 'Agendado' | 'Concluído' | 'Cancelado';
+  funcionarioId?: number;
+  dataHora: Date;
+  status: string;
   observacoes?: string;
   animalNome?: string;
   servicoNome?: string;
   funcionarioNome?: string;
+  
+  // Aliases para compatibilidade com componentes antigos
+  id?: number;
+  petid?: number;
+  data?: Date;
 }

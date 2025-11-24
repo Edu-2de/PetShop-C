@@ -1,40 +1,54 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { Fornecedor } from '../../../model/fornecedor.model';
-import { FornecedorService } from '../../../service/fornecedor/forncedor';
+import { FornecedorService } from '../../../service/fornecedor/fornecedor';
+import { FormsModule } from '@angular/forms';
 
 @Component({
-  selector: 'app-forncedor-list',
+  selector: 'app-fornecedor-list',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, FormsModule],
   templateUrl: './forncedor-list.html',
-  styleUrl: './forncedor-list.scss'
+  styleUrls: ['./forncedor-list.scss']
 })
 export class ForncedorListComponent implements OnInit {
-  private readonly service = inject(FornecedorService);
+  fornecedores = signal<Fornecedor[]>([]);
+  termoBusca = signal<string>('');
 
-  fornecedores: Fornecedor[] = [];
+  fornecedoresFiltrados = computed(() => {
+    const fornecedores = this.fornecedores();
+    const termo = this.termoBusca().toLowerCase();
+    if (!termo) {
+      return fornecedores;
+    }
+    return fornecedores.filter(f =>
+      f.nome.toLowerCase().includes(termo)
+    );
+  });
+
+  constructor(private fornecedorService: FornecedorService) {}
 
   ngOnInit(): void {
-    this.loadFornecedores();
+    this.carregarFornecedores();
   }
 
-  loadFornecedores(): void {
-    this.service.findAll().subscribe((data) => {
-      this.fornecedores = data;
+  carregarFornecedores(): void {
+    this.fornecedorService.listar().subscribe((data: Fornecedor[]) => {
+      this.fornecedores.set(data);
     });
   }
 
-  delete(fornecedor: Fornecedor): void {
-    if (
-      confirm(
-        `Tem certeza que deseja excluir o fornecedor "${fornecedor.nome}"?`
-      )
-    ) {
-      this.service.delete(fornecedor).subscribe({
-        next: () => this.loadFornecedores(),
-        error: (err) => alert('Erro ao excluir fornecedor: ' + err.message),
+  buscar(event: Event): void {
+    const target = event.target as HTMLInputElement;
+    this.termoBusca.set(target.value);
+  }
+
+  excluir(id: number | undefined): void {
+    if (id === undefined) return;
+    if (confirm('Deseja realmente excluir este fornecedor?')) {
+      this.fornecedorService.delete(id).subscribe(() => {
+        this.fornecedores.update(fornecedoresAtuais => fornecedoresAtuais.filter(f => f.id !== id));
       });
     }
   }

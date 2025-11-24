@@ -13,8 +13,7 @@ import { TutorService } from '../../../service/tutores/tutor.service';
   styleUrl: './tutor-form.scss'
 })
 export class TutorFormComponent implements OnInit {
-  // Usar Partial<Tutor> torna todas as propriedades, incluindo 'id', opcionais.
-  tutor: Tutor = { id: '', nome: '', email: '', telefone: '' };
+  tutor: Partial<Tutor> = { nome: '', email: '', telefone: '', endereco: '' };
   isEdit: boolean = false;
 
   constructor(
@@ -27,7 +26,7 @@ export class TutorFormComponent implements OnInit {
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
       this.isEdit = true;
-      this.tutorService.buscarPorId(id).subscribe((tutor) => {
+      this.tutorService.buscarPorId(Number(id)).subscribe((tutor) => {
         this.tutor = tutor;
       });
     }
@@ -35,14 +34,11 @@ export class TutorFormComponent implements OnInit {
 
   salvar(): void {
     if (this.isEdit && this.tutor.id) {
-      // MODO EDIÇÃO: O tutor já tem um ID, então chamamos o método de ATUALIZAR
       this.tutorService.atualizar(this.tutor.id, this.tutor as Tutor).subscribe(() => {
         this.router.navigate(['/tutores']);
       });
     } else {
-      // MODO CRIAÇÃO: O tutor não tem ID. A API irá criar um.
-      // O 'as' garante que estamos enviando um objeto sem o 'id'.
-      this.tutorService.criar(this.tutor as Omit<Tutor, 'id'>).subscribe(() => {
+      this.tutorService.criar(this.tutor as Tutor).subscribe(() => {
         this.router.navigate(['/tutores']);
       });
     }

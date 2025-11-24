@@ -6,14 +6,14 @@ import { ServicoPet } from '../../../model/servico-pet.model';
 import { ServicoPetService } from '../../../service/servico-pet/servico-pet';
 
 @Component({
-  selector: 'app-servicos-pet-form',
+  selector: 'app-servico-pet-form',
   standalone: true,
   imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './servicos-pet.form.html',
-  styleUrl: './servicos-pet.form.scss'
+  styleUrls: ['./servicos-pet.form.scss']
 })
 export class ServicoPetFormComponent implements OnInit {
-  servico: Partial<ServicoPet> = { nome: '', preco: 0, descricao: '', duracao: 0, ativo: true };
+  servico: Partial<ServicoPet> = { nome: '', preco: 0, descricao: '', ativo: true };
   isEdit = false;
   titulo = 'Novo Serviço';
 
@@ -28,7 +28,7 @@ export class ServicoPetFormComponent implements OnInit {
     if (id) {
       this.isEdit = true;
       this.titulo = 'Editar Serviço';
-      this.servicoPetService.buscarPorId(id).subscribe(servico => {
+      this.servicoPetService.buscarPorId(Number(id)).subscribe(servico => {
         this.servico = servico;
       });
     }
@@ -36,11 +36,13 @@ export class ServicoPetFormComponent implements OnInit {
 
   salvar(): void {
     if (this.isEdit && this.servico.id) {
-      this.servicoPetService.atualizar(this.servico.id, this.servico as ServicoPet)
-        .subscribe(() => this.router.navigate(['/servicos']));
+      this.servicoPetService.atualizar(this.servico.id, this.servico).subscribe(() => {
+        this.router.navigate(['/servicos']);
+      });
     } else {
-      this.servicoPetService.criar(this.servico as Omit<ServicoPet, 'id'>)
-        .subscribe(() => this.router.navigate(['/servicos']));
+      this.servicoPetService.criar(this.servico).subscribe(() => {
+        this.router.navigate(['/servicos']);
+      });
     }
   }
 }

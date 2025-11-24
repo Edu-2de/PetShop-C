@@ -14,14 +14,14 @@ import { ServicoPetService } from '../../service/servico-pet/servico-pet';
   standalone: true,
   imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './agenda-form.html',
-  styleUrl: './agenda-form.scss'
+  styleUrls: ['./agenda-form.scss']
 })
 export class AgendaFormComponent implements OnInit {
-  agendamento: Partial<Agenda> = { status: 'Agendado' };
-  isEdit = false;
-  titulo = 'Novo Agendamento';
+  agendamento: Partial<Agenda> = { dataHora: new Date(), status: 'Pendente' };
   pets: Pet[] = [];
   servicos: ServicoPet[] = [];
+  isEdit = false;
+  titulo = 'Novo Agendamento';
 
   constructor(
     private agendaService: AgendaService,
@@ -32,14 +32,14 @@ export class AgendaFormComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.petService.listar().subscribe(data => this.pets = data);
-    this.servicoPetService.listar().subscribe(data => this.servicos = data.filter(s => s.ativo));
+    this.petService.listar().subscribe((data: Pet[]) => this.pets = data);
+    this.servicoPetService.listar().subscribe((data: ServicoPet[]) => this.servicos = data);
 
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
       this.isEdit = true;
       this.titulo = 'Editar Agendamento';
-      this.agendaService.buscarPorId(id).subscribe(data => {
+      this.agendaService.buscarPorId(Number(id)).subscribe((data: Agenda) => {
         this.agendamento = data;
       });
     }
@@ -47,11 +47,13 @@ export class AgendaFormComponent implements OnInit {
 
   salvar(): void {
     if (this.isEdit && this.agendamento.id) {
-      this.agendaService.atualizar(this.agendamento.id, this.agendamento as Agenda)
-        .subscribe(() => this.router.navigate(['/agenda']));
+      this.agendaService.atualizar(this.agendamento.id, this.agendamento).subscribe(() => {
+        this.router.navigate(['/agenda']);
+      });
     } else {
-      this.agendaService.criar(this.agendamento as Omit<Agenda, 'id'>)
-        .subscribe(() => this.router.navigate(['/agenda']));
+      this.agendaService.criar(this.agendamento).subscribe(() => {
+        this.router.navigate(['/agenda']);
+      });
     }
   }
 }

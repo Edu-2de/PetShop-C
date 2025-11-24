@@ -1,6 +1,6 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, map } from 'rxjs';
 import { Agenda } from '../../model/agenda.model';
 import { environment } from '../../../environments/environment';
 
@@ -8,32 +8,58 @@ import { environment } from '../../../environments/environment';
   providedIn: 'root'
 })
 export class AgendaService {
-  private apiUrl = `${environment.apiUrl}/Agendamento`;
+  private readonly http = inject(HttpClient);
+  private readonly apiUrl = `${environment.apiUrl}/Agendamento`;
 
-  constructor(private http: HttpClient) { }
+  findAll(): Observable<Agenda[]> {
+    return this.http.get<Agenda[]>(this.apiUrl).pipe(
+      map(agendas => agendas.map(a => ({ 
+        ...a, 
+        id: a.agendamentoId,
+        petid: a.animalId,
+        data: a.dataHora
+      })))
+    );
+  }
 
   listar(): Observable<Agenda[]> {
-    return this.http.get<Agenda[]>(this.apiUrl);
+    return this.findAll();
   }
 
   buscarPorId(id: number): Observable<Agenda> {
-    return this.http.get<Agenda>(`${this.apiUrl}/${id}`);
+    return this.http.get<Agenda>(`${this.apiUrl}/${id}`).pipe(
+      map(a => ({ 
+        ...a, 
+        id: a.agendamentoId,
+        petid: a.animalId,
+        data: a.dataHora
+      }))
+    );
   }
 
-  buscarPorAnimal(animalId: number): Observable<Agenda[]> {
-    return this.http.get<Agenda[]>(`${this.apiUrl}/animal/${animalId}`);
+  criar(agenda: Partial<Agenda>): Observable<Agenda> {
+    const payload = { 
+      ...agenda, 
+      animalId: agenda.animalId || agenda.petid,
+      dataHora: agenda.dataHora || agenda.data
+    };
+    return this.http.post<Agenda>(this.apiUrl, payload).pipe(
+      map(a => ({ 
+        ...a, 
+        id: a.agendamentoId,
+        petid: a.animalId,
+        data: a.dataHora
+      }))
+    );
   }
 
-  buscarPorData(data: string): Observable<Agenda[]> {
-    return this.http.get<Agenda[]>(`${this.apiUrl}/data/${data}`);
-  }
-
-  criar(agenda: Omit<Agenda, 'agendamentoId' | 'animalNome' | 'servicoNome' | 'funcionarioNome'>): Observable<Agenda> {
-    return this.http.post<Agenda>(this.apiUrl, agenda);
-  }
-
-  atualizar(id: number, agenda: Omit<Agenda, 'agendamentoId' | 'animalNome' | 'servicoNome' | 'funcionarioNome'>): Observable<void> {
-    return this.http.put<void>(`${this.apiUrl}/${id}`, agenda);
+  atualizar(id: number, agenda: Partial<Agenda>): Observable<void> {
+    const payload = { 
+      ...agenda, 
+      animalId: agenda.animalId || agenda.petid,
+      dataHora: agenda.dataHora || agenda.data
+    };
+    return this.http.put<void>(`${this.apiUrl}/${id}`, payload);
   }
 
   deletar(id: number): Observable<void> {

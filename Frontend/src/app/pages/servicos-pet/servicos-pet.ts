@@ -32,7 +32,13 @@ export class ServicoPetListComponent implements OnInit {
   constructor(private servicoPetService: ServicoPetService) {}
 
   ngOnInit(): void {
-    this.servicoPetService.listar().subscribe(data => this.servicos.set(data));
+    this.carregarServicos();
+  }
+
+  carregarServicos(): void {
+    this.servicoPetService.listar().subscribe(data => {
+      this.servicos.set(data);
+    });
   }
 
   buscar(event: Event): void {
@@ -40,7 +46,8 @@ export class ServicoPetListComponent implements OnInit {
     this.termoBusca.set(target.value);
   }
 
-  excluir(id: string): void {
+  excluir(id: number | undefined): void {
+    if (id === undefined) return;
     if (confirm('Deseja realmente excluir este serviço?')) {
       this.servicoPetService.deletar(id).subscribe(() => {
         this.servicos.update(servicosAtuais => servicosAtuais.filter(s => s.id !== id));

@@ -1,12 +1,16 @@
 export interface Pet {
-  animalId?: number;
+  animalId: number;
   nome: string;
-  especie?: string;
-  raca?: string;
-  dataNascimento?: string;
-  tutorId: number;
+  especie: string;
+  raca: string;
+  dataNascimento: Date;
+  sexo: string;
+  pelagem: string;
   observacoes?: string;
-  sexo?: string;
-  pelagem?: string;
+  tutorId: number;
   tutorNome?: string;
+  
+  // Aliases para compatibilidade com componentes antigos
+  id?: number;
+  nascimento?: Date;
 }

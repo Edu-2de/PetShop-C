@@ -1,11 +1,16 @@
 export interface Produto {
-  produtoId?: number;
+  produtoId: number;
   nome: string;
-  descricao?: string;
-  quantidade: number;
+  descricao: string;
   preco: number;
-  fornecedorId?: number;
-  codigoBarras?: string;
+  quantidadeEstoque: number;
   ativo: boolean;
+  fornecedorId: number;
   fornecedorNome?: string;
+  
+  // Aliases para compatibilidade com componentes antigos
+  id?: number;
+  categoria?: string;
+  fotoUrl?: string;
+  fornecedorid?: number;
 }

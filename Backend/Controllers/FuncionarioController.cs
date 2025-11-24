@@ -9,29 +9,29 @@ namespace SIGA_PET.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class FornecedorController : ControllerBase
+    public class FuncionarioController : ControllerBase
     {
         private readonly AppDbContext _context;
         private readonly IMapper _mapper;
 
-        public FornecedorController(AppDbContext context, IMapper mapper)
+        public FuncionarioController(AppDbContext context, IMapper mapper)
         {
             _context = context;
             _mapper = mapper;
         }
 
-        // GET: api/Fornecedor
+        // GET: api/Funcionario
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<FornecedorDto>>> GetFornecedores()
+        public async Task<ActionResult<IEnumerable<FuncionarioDto>>> GetFuncionarios()
         {
             try
             {
-                var fornecedores = await _context.Fornecedores
+                var funcionarios = await _context.Funcionarios
                     .AsNoTracking()
                     .ToListAsync();
 
-                var fornecedoresDto = _mapper.Map<IEnumerable<FornecedorDto>>(fornecedores);
-                return Ok(fornecedoresDto);
+                var funcionariosDto = _mapper.Map<IEnumerable<FuncionarioDto>>(funcionarios);
+                return Ok(funcionariosDto);
             }
             catch (Exception ex)
             {
@@ -39,21 +39,21 @@ namespace SIGA_PET.Controllers
             }
         }
 
-        // GET: api/Fornecedor/5
+        // GET: api/Funcionario/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<FornecedorDto>> GetFornecedor(int id)
+        public async Task<ActionResult<FuncionarioDto>> GetFuncionario(int id)
         {
             try
             {
-                var fornecedor = await _context.Fornecedores.FindAsync(id);
+                var funcionario = await _context.Funcionarios.FindAsync(id);
 
-                if (fornecedor == null)
+                if (funcionario == null)
                 {
-                    return NotFound($"Fornecedor com ID {id} não encontrado.");
+                    return NotFound($"Funcionário com ID {id} não encontrado.");
                 }
 
-                var fornecedorDto = _mapper.Map<FornecedorDto>(fornecedor);
-                return Ok(fornecedorDto);
+                var funcionarioDto = _mapper.Map<FuncionarioDto>(funcionario);
+                return Ok(funcionarioDto);
             }
             catch (Exception ex)
             {
@@ -61,9 +61,9 @@ namespace SIGA_PET.Controllers
             }
         }
 
-        // POST: api/Fornecedor
+        // POST: api/Funcionario
         [HttpPost]
-        public async Task<ActionResult<FornecedorDto>> CreateFornecedor([FromBody] CreateFornecedorDto createFornecedorDto)
+        public async Task<ActionResult<FuncionarioDto>> CreateFuncionario([FromBody] CreateFuncionarioDto createFuncionarioDto)
         {
             try
             {
@@ -72,13 +72,14 @@ namespace SIGA_PET.Controllers
                     return BadRequest(ModelState);
                 }
 
-                var fornecedor = _mapper.Map<Fornecedor>(createFornecedorDto);
+                var funcionario = _mapper.Map<Funcionario>(createFuncionarioDto);
 
-                _context.Fornecedores.Add(fornecedor);
+                // Se DataContratacao não for fornecida, o model define um default (UtcNow), mas você pode ajustar aqui.
+                _context.Funcionarios.Add(funcionario);
                 await _context.SaveChangesAsync();
 
-                var fornecedorDto = _mapper.Map<FornecedorDto>(fornecedor);
-                return CreatedAtAction(nameof(GetFornecedor), new { id = fornecedor.FornecedorId }, fornecedorDto);
+                var funcionarioDto = _mapper.Map<FuncionarioDto>(funcionario);
+                return CreatedAtAction(nameof(GetFuncionario), new { id = funcionario.FuncionarioId }, funcionarioDto);
             }
             catch (Exception ex)
             {
@@ -86,9 +87,9 @@ namespace SIGA_PET.Controllers
             }
         }
 
-        // PUT: api/Fornecedor/5
+        // PUT: api/Funcionario/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateFornecedor(int id, [FromBody] UpdateFornecedorDto updateFornecedorDto)
+        public async Task<IActionResult> UpdateFuncionario(int id, [FromBody] UpdateFuncionarioDto updateFuncionarioDto)
         {
             try
             {
@@ -97,15 +98,15 @@ namespace SIGA_PET.Controllers
                     return BadRequest(ModelState);
                 }
 
-                var fornecedor = await _context.Fornecedores.FindAsync(id);
-                if (fornecedor == null)
+                var funcionario = await _context.Funcionarios.FindAsync(id);
+                if (funcionario == null)
                 {
-                    return NotFound($"Fornecedor com ID {id} não encontrado.");
+                    return NotFound($"Funcionário com ID {id} não encontrado.");
                 }
 
-                _mapper.Map(updateFornecedorDto, fornecedor);
+                _mapper.Map(updateFuncionarioDto, funcionario);
 
-                _context.Entry(fornecedor).State = EntityState.Modified;
+                _context.Entry(funcionario).State = EntityState.Modified;
                 await _context.SaveChangesAsync();
 
                 return NoContent();
@@ -120,19 +121,19 @@ namespace SIGA_PET.Controllers
             }
         }
 
-        // DELETE: api/Fornecedor/5
+        // DELETE: api/Funcionario/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteFornecedor(int id)
+        public async Task<IActionResult> DeleteFuncionario(int id)
         {
             try
             {
-                var fornecedor = await _context.Fornecedores.FindAsync(id);
-                if (fornecedor == null)
+                var funcionario = await _context.Funcionarios.FindAsync(id);
+                if (funcionario == null)
                 {
-                    return NotFound($"Fornecedor com ID {id} não encontrado.");
+                    return NotFound($"Funcionário com ID {id} não encontrado.");
                 }
 
-                _context.Fornecedores.Remove(fornecedor);
+                _context.Funcionarios.Remove(funcionario);
                 await _context.SaveChangesAsync();
 
                 return NoContent();

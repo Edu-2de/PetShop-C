@@ -5,7 +5,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Produto } from '../../../model/produto.model';
 import { ProdutoService } from '../../../service/produtos/produto.service';
 import { Fornecedor } from '../../../model/fornecedor.model';
-import { FornecedorService } from '../../../service/fornecedor/forncedor';
+import { FornecedorService } from '../../../service/fornecedor/fornecedor';
 
 @Component({
   selector: 'app-produto-form',
@@ -20,37 +20,32 @@ export class ProdutoFormComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
 
-  produto: Produto = this.getEmptyProduto();
+  produto: Partial<Produto> = { nome: '', preco: 0, descricao: '', quantidadeEstoque: 0, ativo: true };
+  fornecedores: Fornecedor[] = [];
   isEdit = false;
   titulo = 'Novo Produto';
-  fornecedores: Fornecedor[] = [];
 
   ngOnInit(): void {
+    this.fornecedorService.listar().subscribe((data) => this.fornecedores = data);
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
       this.isEdit = true;
       this.titulo = 'Editar Produto';
-      this.produtoService.findById(id).subscribe((produto) => {
+      this.produtoService.findById(Number(id)).subscribe((produto) => {
         this.produto = produto;
       });
     }
-
-    this.fornecedorService.findAll().subscribe((data) => {
-      this.fornecedores = data;
-    });
   }
 
   salvar(): void {
     if (this.isEdit && this.produto.id) {
-      this.produtoService.update(this.produto)
-        .subscribe(() => this.router.navigate(['/produtos']));
+      this.produtoService.update(this.produto.id, this.produto).subscribe(() => {
+        this.router.navigate(['/produtos']);
+      });
     } else {
-      this.produtoService.create(this.produto)
-        .subscribe(() => this.router.navigate(['/produtos']));
+      this.produtoService.create(this.produto).subscribe(() => {
+        this.router.navigate(['/produtos']);
+      });
     }
-  }
-
-  private getEmptyProduto(): Produto {
-    return { id: '', nome: '', categoria: '', preco: 0, descricao: '', fornecedorid: '', fotoUrl: '' };
   }
 }

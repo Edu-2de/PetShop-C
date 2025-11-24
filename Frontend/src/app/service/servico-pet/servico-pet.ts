@@ -1,6 +1,6 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, map } from 'rxjs';
 import { ServicoPet } from '../../model/servico-pet.model';
 import { environment } from '../../../environments/environment';
 
@@ -8,27 +8,32 @@ import { environment } from '../../../environments/environment';
   providedIn: 'root'
 })
 export class ServicoPetService {
-  private apiUrl = `${environment.apiUrl}/Servico`;
+  private readonly http = inject(HttpClient);
+  private readonly apiUrl = `${environment.apiUrl}/Servico`;
 
-  constructor(private http: HttpClient) { }
+  findAll(): Observable<ServicoPet[]> {
+    return this.http.get<ServicoPet[]>(this.apiUrl).pipe(
+      map(servicos => servicos.map(s => ({ ...s, id: s.servicoId })))
+    );
+  }
 
   listar(): Observable<ServicoPet[]> {
-    return this.http.get<ServicoPet[]>(this.apiUrl);
+    return this.findAll();
   }
 
   buscarPorId(id: number): Observable<ServicoPet> {
-    return this.http.get<ServicoPet>(`${this.apiUrl}/${id}`);
+    return this.http.get<ServicoPet>(`${this.apiUrl}/${id}`).pipe(
+      map(s => ({ ...s, id: s.servicoId }))
+    );
   }
 
-  listarAtivos(): Observable<ServicoPet[]> {
-    return this.http.get<ServicoPet[]>(`${this.apiUrl}/ativos`);
+  criar(servico: Partial<ServicoPet>): Observable<ServicoPet> {
+    return this.http.post<ServicoPet>(this.apiUrl, servico).pipe(
+      map(s => ({ ...s, id: s.servicoId }))
+    );
   }
 
-  criar(servico: Omit<ServicoPet, 'servicoId'>): Observable<ServicoPet> {
-    return this.http.post<ServicoPet>(this.apiUrl, servico);
-  }
-
-  atualizar(id: number, servico: Omit<ServicoPet, 'servicoId'>): Observable<void> {
+  atualizar(id: number, servico: Partial<ServicoPet>): Observable<void> {
     return this.http.put<void>(`${this.apiUrl}/${id}`, servico);
   }
 

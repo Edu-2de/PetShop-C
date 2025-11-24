@@ -1,8 +1,11 @@
 export interface Tutor {
-  tutorId?: number;
+  tutorId: number;
   nome: string;
-  email?: string;
-  telefone?: string;
-  endereco?: string;
-  dataCadastro?: string;
+  telefone: string;
+  email: string;
+  endereco: string;
+  dataCadastro?: Date;
+  
+  // Alias para compatibilidade com componentes antigos
+  id?: number;
 }
