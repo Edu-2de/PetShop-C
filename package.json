@@ -1,0 +1,34 @@
+{
+  "name": "siga-pet",
+  "version": "1.0.0",
+  "description": "Sistema Integrado de Gestão para PetShop",
+  "scripts": {
+    "start": "concurrently \"npm run start:backend\" \"npm run start:frontend\"",
+    "start:backend": "cd Backend && dotnet run --launch-profile https",
+    "start:frontend": "cd Frontend && npm start",
+    "build": "npm run build:backend && npm run build:frontend",
+    "build:backend": "cd Backend && dotnet build",
+    "build:frontend": "cd Frontend && npm run build",
+    "test:backend": "cd Backend && dotnet test",
+    "test:frontend": "cd Frontend && npm test",
+    "migration:add": "cd Backend && dotnet ef migrations add",
+    "migration:update": "cd Backend && dotnet ef database update",
+    "migration:remove": "cd Backend && dotnet ef migrations remove",
+    "db:update": "cd Backend && dotnet ef database update",
+    "db:drop": "cd Backend && dotnet ef database drop -f",
+    "install:all": "npm run install:frontend",
+    "install:frontend": "cd Frontend && npm install"
+  },
+  "keywords": [
+    "petshop",
+    "gestao",
+    "angular",
+    "dotnet",
+    "entityframework"
+  ],
+  "author": "Edu-2de",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^8.2.0"
+  }
+}

@@ -1,62 +1,47 @@
-<<<<<<< HEAD
-﻿﻿# Visual Studio / .NET generic ignores
-=======
-﻿# Visual Studio / .NET generic ignores
->>>>>>> eaff9f9369ba8c93fc52d784184c6f871d83b868
+# SIGA-PET - Sistema Integrado de Gest�o
 
-## Build
-bin/
-obj/
+## Backend (.NET)
+Backend/bin/
+Backend/obj/
+Backend/.vs/
+Backend/*.user
+Backend/publish/
+Backend/TestResults/
+Backend/coverage/
+Backend/appsettings.Development.json
+Backend/appsettings.Local.json
 
-## Visual Studio
-.vs/
-*.user
-*.suo
-*.userosscache
-*.sln.docstates
+## Frontend (Angular)
+Frontend/node_modules/
+Frontend/dist/
+Frontend/.angular/
+Frontend/.vscode/
+Frontend/*.log
 
-## Rider / JetBrains
-.idea/
-*.sublime-workspace
-
-## VS Code
-.vscode/
-
-## NuGet
-*.nupkg
-packages/
-
-## Entity Framework Local DB and DB files
+## Database
 *.mdf
 *.ldf
 *.sqlite
 *.db
 
-## User secrets / local settings
-appsettings.Development.json
-appsettings.Local.json
-.env
+## IDEs
+.vs/
+.vscode/
+.idea/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
 
-## Logs and temporary
+## Logs
 *.log
 *.tmp
 *.temp
 
-## Test results
-TestResults/
-*.trx
-
-## Publish output
-publish/
-
-## Coverage
-coverage/
-*.coverage
-*.coveragexml
-
-## Node (if you use any frontend)
-node_modules/
-
-# OSX / Thumbs.db
+## OS
 .DS_Store
 Thumbs.db
+
+## Environment
+.env
+.env.local
