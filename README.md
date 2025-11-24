@@ -8,15 +8,27 @@ Sistema completo de gestão para PetShop com Backend em ASP.NET Core e Frontend e
 - **Node.js 20.15+** (recomendado 20.19+ ou 22.12+)
 - **npm**
 - **SQL Server** ou **LocalDB**
-- **Angular CLI**: `npm install -g @angular/cli`
 
-> ?? **Nota sobre Node.js**: O projeto funciona com Node.js v20.15.1, mas você verá warnings recomendando v20.19+. Estes warnings **podem ser ignorados** - a aplicação funciona normalmente.
+> ?? **Nota sobre Node.js**: O projeto funciona com Node.js v20.15.1 usando `npx @angular/cli@17`. Warnings são esperados mas a aplicação funciona normalmente.
 
 ## ?? Início Rápido
 
-### Opção 1: Rodar Tudo de Uma Vez (Recomendado)
+### Antes de Começar (Primeira vez)
 
-Execute um dos scripts na raiz do projeto:
+1. **Criar certificado HTTPS** (opcional - já feito se você seguiu o guia):
+```powershell
+dotnet dev-certs https --clean
+dotnet dev-certs https --trust
+```
+
+2. **Criar banco de dados**:
+```powershell
+cd Backend
+dotnet ef database update
+cd ..
+```
+
+### Iniciar Aplicação
 
 **Windows (PowerShell):**
 ```powershell
@@ -28,29 +40,19 @@ Execute um dos scripts na raiz do projeto:
 start-dev.bat
 ```
 
-> ?? **Os scripts criam automaticamente a pasta `wwwroot` e verificam a estrutura do projeto**
-
-### Opção 2: Rodar Manualmente
-
-**Backend:**
-```bash
-cd Backend
-dotnet restore
-dotnet run --launch-profile https
-```
-
-**Frontend (em outro terminal):**
-```bash
-cd Frontend
-npm install
-npm start
-```
+> ?? **Os scripts criam automaticamente a pasta `wwwroot` e usam HTTP para evitar problemas de certificado**
 
 ## ?? URLs da Aplicação
 
+### Desenvolvimento (HTTP - Configuração Atual)
 - **Frontend**: http://localhost:4200
+- **Backend API**: http://localhost:5000
+- **Swagger**: http://localhost:5000/swagger
+
+### Produção (HTTPS - Após configurar certificado)
+- **Frontend**: https://localhost:4200
 - **Backend API**: https://localhost:7000
-- **Swagger (Documentação da API)**: https://localhost:7000/swagger
+- **Swagger**: https://localhost:7000/swagger
 
 ## ?? Parar os Servidores
 
@@ -69,9 +71,9 @@ stop-dev.bat
 ```
 PetShop-C/
 ??? Backend/                 # API ASP.NET Core
-?   ??? Controllers/         # Endpoints da API
-?   ??? Models/             # Entidades do banco
-?   ??? DTOs/               # Objetos de transferência
+?   ??? Controllers/         # Endpoints da API (6 controllers)
+?   ??? Models/             # Entidades do banco (10 modelos)
+?   ??? DTOs/               # Objetos de transferência (18 DTOs)
 ?   ??? Data/               # Contexto do EF Core
 ?   ??? Profiles/           # Mapeamentos AutoMapper
 ?   ??? Migrations/         # Migrações do banco
@@ -175,7 +177,7 @@ dotnet ef database update
 ```typescript
 export const environment = {
   production: false,
-  apiUrl: 'https://localhost:7000/api'
+  apiUrl: 'http://localhost:5000/api'  // HTTP para desenvolvimento
 };
 ```
 
@@ -207,23 +209,26 @@ export const environment = {
 
 ### Warnings do Node.js
 ```
-npm warn EBADENGINE Unsupported engine
+Node.js version v20.15.1 detected.
+The Angular CLI requires a minimum Node.js version of v20.19
 ```
-**Status:** ?? Normal - Aplicação funciona perfeitamente
+**Status:** ?? **NORMAL** - Aplicação funciona usando `npx @angular/cli@17`
 
 ### Vulnerabilidades NPM
 ```
 2 moderate severity vulnerabilities
 ```
-**Status:** ?? Baixo risco em desenvolvimento (relacionadas ao Vite)
-
-### Certificado SSL
-```
-NET::ERR_CERT_AUTHORITY_INVALID
-```
-**Status:** ?? Normal em desenvolvimento local - Aceite o aviso no navegador
+**Status:** ?? **BAIXO RISCO** - Vite em ambiente de desenvolvimento
 
 ## ?? Problemas Comuns
+
+### Erro: "Unable to configure HTTPS endpoint"
+**Solução:**
+```powershell
+dotnet dev-certs https --clean
+dotnet dev-certs https --trust
+```
+Ou use HTTP (configuração atual dos scripts).
 
 ### Erro: "wwwroot não encontrado"
 **Solução:** Os scripts criam automaticamente. Se erro persistir:
@@ -241,7 +246,10 @@ mkdir Backend\wwwroot
 ### Frontend não carrega
 **Solução:** Aguarde 10-30 segundos após iniciar - Angular precisa compilar
 
-> ?? **Mais soluções**: Consulte [TROUBLESHOOTING.md](TROUBLESHOOTING.md) para lista completa de problemas e soluções
+### Node.js incompatível
+**Solução:** Scripts usam `npx @angular/cli@17` que funciona com v20.15.1
+
+> ?? **Mais soluções**: Consulte [TROUBLESHOOTING.md](TROUBLESHOOTING.md) e [CORRECAO-CERTIFICADO.md](CORRECAO-CERTIFICADO.md)
 
 ## ?? Contribuindo
 
@@ -262,21 +270,23 @@ Este projeto está sob a licença MIT.
 ## ?? Documentação Adicional
 
 - **[PRIMEIRO-USO.md](PRIMEIRO-USO.md)** - Guia passo a passo para iniciantes
+- **[CORRECAO-CERTIFICADO.md](CORRECAO-CERTIFICADO.md)** ? - Solução para erros de certificado e Node.js
 - **[GUIA-RAPIDO.md](GUIA-RAPIDO.md)** - Referência rápida de comandos
 - **[TROUBLESHOOTING.md](TROUBLESHOOTING.md)** - Soluções para problemas comuns
 - **[CHECKLIST.md](CHECKLIST.md)** - Verificação de funcionalidades
 - **[ARQUITETURA.md](ARQUITETURA.md)** - Arquitetura técnica do sistema
-- **[CORRECOES.md](CORRECOES.md)** - Histórico de correções aplicadas
+- **[PROJETO-COMPLETO.md](PROJETO-COMPLETO.md)** - Visão geral completa
 
 ## ?? Suporte
 
 Para suporte:
-1. Consulte [TROUBLESHOOTING.md](TROUBLESHOOTING.md)
-2. Verifique a documentação acima
-3. Abra uma issue no GitHub
+1. Consulte [CORRECAO-CERTIFICADO.md](CORRECAO-CERTIFICADO.md) para problemas de certificado
+2. Consulte [TROUBLESHOOTING.md](TROUBLESHOOTING.md) para outros problemas
+3. Verifique a documentação acima
+4. Abra uma issue no GitHub
 
 ---
 
-**Status:** ? **100% Funcional**
+**Status:** ? **100% Funcional** (usando HTTP)
 **Última Atualização:** Hoje
-**Versão:** 1.0.0
+**Versão:** 1.0.1

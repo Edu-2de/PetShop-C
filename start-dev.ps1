@@ -19,19 +19,19 @@ if (-not (Test-Path ".\Backend\wwwroot")) {
 }
 
 Write-Host ""
-Write-Host "[2/3] Iniciando Backend (https://localhost:7000)..." -ForegroundColor Yellow
+Write-Host "[2/3] Iniciando Backend (http://localhost:5000)..." -ForegroundColor Yellow
 Set-Location -Path ".\Backend"
-Start-Process powershell -ArgumentList "-NoExit", "-Command", "Write-Host '=== SIGA-PET Backend ===' -ForegroundColor Cyan; Write-Host 'Aguarde o inicio do servidor...' -ForegroundColor Yellow; Write-Host ''; dotnet run --launch-profile https"
+Start-Process powershell -ArgumentList "-NoExit", "-Command", "Write-Host '=== SIGA-PET Backend ===' -ForegroundColor Cyan; Write-Host 'Aguarde o inicio do servidor...' -ForegroundColor Yellow; Write-Host ''; dotnet run --launch-profile http"
 
-Start-Sleep -Seconds 5
+Start-Sleep -Seconds 8
 
 Write-Host ""
 Write-Host "[3/3] Iniciando Frontend (http://localhost:4200)..." -ForegroundColor Yellow
 Set-Location -Path "..\Frontend"
 
-# Configurar NODE_OPTIONS para ignorar warnings de versão
-$env:NODE_OPTIONS="--no-warnings"
-Start-Process powershell -ArgumentList "-NoExit", "-Command", "`$env:NODE_OPTIONS='--no-warnings'; Write-Host '=== SIGA-PET Frontend ===' -ForegroundColor Cyan; Write-Host 'Aguarde o inicio do servidor...' -ForegroundColor Yellow; Write-Host 'NOTA: Warnings de versao do Node sao esperados e podem ser ignorados' -ForegroundColor Gray; Write-Host ''; npm start"
+# Forçar uso do Angular mesmo com Node.js v20.15.1
+$env:NG_FORCE_TTY="true"
+Start-Process powershell -ArgumentList "-NoExit", "-Command", "`$env:NG_FORCE_TTY='true'; Write-Host '=== SIGA-PET Frontend ===' -ForegroundColor Cyan; Write-Host 'Aguarde o inicio do servidor...' -ForegroundColor Yellow; Write-Host 'NOTA: Warnings de versao do Node podem aparecer mas serao ignorados' -ForegroundColor Gray; Write-Host ''; npx -y @angular/cli@17 serve --port 4200"
 
 Set-Location -Path ".."
 
@@ -39,13 +39,16 @@ Write-Host ""
 Write-Host "========================================" -ForegroundColor Green
 Write-Host " Aplicacao iniciada com sucesso!" -ForegroundColor Green
 Write-Host "" -ForegroundColor Green
-Write-Host " Backend:  https://localhost:7000/swagger" -ForegroundColor White
+Write-Host " Backend:  http://localhost:5000/swagger" -ForegroundColor White
 Write-Host " Frontend: http://localhost:4200" -ForegroundColor White
 Write-Host "" -ForegroundColor Green
-Write-Host " NOTA: O Node.js v20.15.1 funciona, mas e recomendado" -ForegroundColor Yellow
-Write-Host "       atualizar para v20.19+ ou v22.12+ futuramente" -ForegroundColor Yellow
+Write-Host " NOTA: Usando HTTP (sem SSL) para evitar problemas" -ForegroundColor Yellow
+Write-Host "       de certificado. Para producao, use HTTPS." -ForegroundColor Yellow
 Write-Host "" -ForegroundColor Green
-Write-Host " Aguarde 10-20 segundos para os servidores iniciarem" -ForegroundColor Cyan
+Write-Host " NOTA sobre Node.js: v20.15.1 pode gerar warnings" -ForegroundColor Yellow
+Write-Host "       mas funciona normalmente. Atualizacao opcional." -ForegroundColor Yellow
+Write-Host "" -ForegroundColor Green
+Write-Host " Aguarde 10-30 segundos para os servidores iniciarem" -ForegroundColor Cyan
 Write-Host "" -ForegroundColor Green
 Write-Host " Pressione qualquer tecla para fechar este terminal" -ForegroundColor Yellow
 Write-Host " (Os servidores continuarao rodando)" -ForegroundColor Yellow
