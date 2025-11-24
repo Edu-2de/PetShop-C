@@ -1,3 +1,4 @@
+
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -49,7 +50,7 @@ namespace SIGA_PET.Controllers
 
                 if (tutor == null)
                 {
-                    return NotFound($"Tutor com ID {id} n„o encontrado.");
+                    return NotFound($"Tutor com ID {id} n√£o encontrado.");
                 }
 
                 var tutorDto = _mapper.Map<TutorDto>(tutor);
@@ -100,7 +101,7 @@ namespace SIGA_PET.Controllers
                 var tutor = await _context.Tutores.FindAsync(id);
                 if (tutor == null)
                 {
-                    return NotFound($"Tutor com ID {id} n„o encontrado.");
+                    return NotFound($"Tutor com ID {id} n√£o encontrado.");
                 }
 
                 _mapper.Map(updateTutorDto, tutor);
@@ -112,7 +113,7 @@ namespace SIGA_PET.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                return Conflict("Erro de concorrÍncia. O registro foi modificado por outro usu·rio.");
+                return Conflict("Erro de concorr√™ncia. O registro foi modificado por outro usu√°rio.");
             }
             catch (Exception ex)
             {
@@ -129,7 +130,7 @@ namespace SIGA_PET.Controllers
                 var tutor = await _context.Tutores.FindAsync(id);
                 if (tutor == null)
                 {
-                    return NotFound($"Tutor com ID {id} n„o encontrado.");
+                    return NotFound($"Tutor com ID {id} n√£o encontrado.");
                 }
 
                 _context.Tutores.Remove(tutor);
