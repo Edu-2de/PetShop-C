@@ -1,40 +1,21 @@
+<section class="hero-section fade-in">
+  <div class="hero-content">
+    <h1 class="hero-title">SIGA-PET</h1>
+    <p class="hero-subtitle">Cuidamos do seu melhor amigo com produtos de qualidade e serviços especializados.</p>
+    <a routerLink="/produtos" class="btn-hero rounded-pill">
+      Ver Produtos
+    </a>
+  </div>
+</section>
 
-
-<!-- Banner Carousel (aparece APENAS se houver banners) -->
-<ng-container *ngIf="bannersLoaded && banners.length > 0">
-  <section class="banner-slider" (mouseenter)="pauseRotation()" (mouseleave)="resumeRotation()">
-    <div class="banner-wrapper">
-      <div class="banner-slide" *ngFor="let b of banners; let i = index" [class.active]="i === currentBanner">
-        <img [src]="b" [alt]="'Banner '+(i+1)" />
-      </div>
-    </div>
-    <button class="banner-nav prev" (click)="prevBanner()" aria-label="Banner anterior">‹</button>
-    <button class="banner-nav next" (click)="nextBanner()" aria-label="Próximo banner">›</button>
-    <div class="banner-indicators">
-      <span *ngFor="let b of banners; let i = index" 
-            [class.active]="i === currentBanner"
-            (click)="currentBanner = i"></span>
-    </div>
-  </section>
-</ng-container>
-
-<!-- Hero Section (aparece APENAS se NÃO houver banners) -->
-<ng-container *ngIf="bannersLoaded && banners.length === 0">
-  <section class="hero-section fade-in">
-    <div class="hero-content">
-      <h1 class="hero-title">SIGA-PET</h1>
-      <p class="hero-subtitle">Tudo para o seu pet em um só lugar. Produtos de qualidade e serviços especializados.</p>
-      <a routerLink="/produtos" class="btn-hero">Explorar Produtos</a>
-    </div>
-  </section>
-</ng-container>
-
-<!-- Categorias -->
 <section class="categories-section animate-on-scroll">
   <div class="container">
     <h2 class="section-title">Categorias</h2>
     <div class="categories-grid">
       <div class="category-card" *ngFor="let cat of categories" (click)="navigate(cat.link)">
+        <div class="category-icon-wrapper mb-3">
+          <span class="fs-1">{{ getCategoryIcon(cat.icon) }}</span>
+        </div>
         <div class="category-title">{{ cat.title }}</div>
         <div class="category-desc">{{ cat.desc }}</div>
       </div>
@@ -42,73 +23,30 @@
   </div>
 </section>
 
-<!-- Produtos em Destaque -->
-<section class="products-section animate-on-scroll">
+<section class="products-section animate-on-scroll bg-white">
   <div class="container">
-    <div class="section-header">
-      <h2 class="section-title">Produtos em Destaque</h2>
-      <a routerLink="/produtos" class="view-all-link">Ver todos os produtos →</a>
-    </div>
-    
-    <div *ngIf="produtosCarregando" class="loading-message">
-      <div class="spinner"></div>
-      <p>Carregando produtos...</p>
+    <div class="section-header d-flex justify-content-between align-items-center mb-4">
+      <h2 class="section-title mb-0">Destaques</h2>
+      <a routerLink="/produtos" class="view-all-link">Ver todos →</a>
     </div>
 
-    <div *ngIf="!produtosCarregando && produtosErro" class="error-message">
-      <p>Erro ao carregar produtos. Tente novamente mais tarde.</p>
-    </div>
+    <app-card-produtos></app-card-produtos>
 
-    <div *ngIf="!produtosCarregando && !produtosErro && produtos.length === 0" class="empty-message">
-      <div class="empty-icon-box">
-        <div class="empty-icon"></div>
-      </div>
-      <p>Nenhum produto disponível no momento.</p>
-      <p class="empty-subtitle">Em breve teremos novidades!</p>
-    </div>
-
-    <div *ngIf="!produtosCarregando && produtos.length > 0" class="products-grid">
-      <div class="product-card slide-up" *ngFor="let produto of produtos">
-        <div class="product-image">
-          <img [src]="getProdutoImagem(produto)" [alt]="produto.nome" />
-          <div class="product-badge" *ngIf="produto.quantidadeEstoque < 5 && produto.quantidadeEstoque > 0">
-            Últimas unidades
-          </div>
-          <div class="product-badge out-of-stock" *ngIf="produto.quantidadeEstoque === 0">
-            Esgotado
-          </div>
-        </div>
-        <div class="product-info">
-          <h3 class="product-name">{{ produto.nome }}</h3>
-          <p class="product-description">{{ produto.descricao }}</p>
-          <div class="product-footer">
-            <span class="product-price">{{ formatPreco(produto.preco) }}</span>
-            <button class="btn-add-cart" 
-                    [disabled]="produto.quantidadeEstoque === 0"
-                    (click)="verProduto(produto)">
-              {{ produto.quantidadeEstoque === 0 ? 'Indisponível' : 'Ver detalhes' }}
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
   </div>
 </section>
 
-<!-- Recursos/Vantagens -->
 <section class="features-section animate-on-scroll">
   <div class="container">
-    <h2 class="section-title">Por que comprar conosco?</h2>
+    <h2 class="section-title">Por que nos escolher?</h2>
     <div class="features-grid">
       <div class="feature-card slide-up" *ngFor="let f of features">
-        <div class="feature-title">{{ f.title }}</div>
-        <div class="feature-desc">{{ f.desc }}</div>
+        <div class="feature-title mb-2 fw-bold text-primary">{{ f.title }}</div>
+        <div class="feature-desc text-muted">{{ f.desc }}</div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- Footer -->
 <footer class="main-footer animate-on-scroll">
   <div class="footer-content">
     <div class="footer-grid">
@@ -128,7 +66,7 @@
         <div class="footer-title">Navegação</div>
         <ul class="footer-links">
           <li><a routerLink="/produtos">Produtos</a></li>
-          <li><a routerLink="/agenda">Agendar Serviço</a></li>
+          <li><a routerLink="/agenda/novo">Agendar Serviço</a></li>
           <li><a href="#categorias">Categorias</a></li>
           <li><a href="#sobre">Sobre Nós</a></li>
         </ul>
