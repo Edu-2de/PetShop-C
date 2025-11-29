@@ -1,3 +1,5 @@
+/* admin-dashboard.component.scss */
+
 .admin-container {
   background-color: #f5f5f7;
   min-height: 100%;
@@ -11,6 +13,8 @@
 /* Cards KPIs */
 .metric-card {
   border-color: rgba(0,0,0,0.05) !important;
+  /* Melhoria: will-change avisa o navegador que haverá animação, melhorando a performance */
+  will-change: transform, box-shadow;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 
   &:hover {
@@ -22,6 +26,7 @@
 /* Cards Menu */
 .nav-card.transition-hover {
   border-color: rgba(0,0,0,0.05) !important;
+  will-change: transform, box-shadow;
   transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 
   &:hover {
@@ -42,6 +47,7 @@
 
 /* Animation */
 .fade-in {
+  /* O forwards garante que o elemento mantenha o estado final da animação */
   animation: fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
