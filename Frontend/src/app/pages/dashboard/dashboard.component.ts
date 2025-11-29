@@ -1,21 +1,22 @@
 import { Component, AfterViewInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-// Correção: Adicionado RouterLink na importação
+// CORREÇÃO: Adicionado RouterLink na lista de imports
 import { RouterModule, Router, RouterLink } from '@angular/router';
 import { ProdutoService } from '../../service/produtos/produto.service';
 import { Produto } from '../../model/produto.model';
 import { AuthService } from '../../service/auth/auth.service';
+// O import abaixo agora funcionará porque renomeamos a classe no passo 1
 import { CardProdutosComponent } from '../card-produtos/card-produtos';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  // Correção: RouterLink agora existe
   imports: [CommonModule, RouterLink, CardProdutosComponent],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss']
 })
 export class DashboardComponent implements AfterViewInit, OnDestroy {
+  // Informações para compradores
   categories = [
     { title: 'Rações', desc: 'Alimentação balanceada para seu pet', icon: 'nutrition', link: '/produtos' },
     { title: 'Brinquedos', desc: 'Diversão garantida', icon: 'toys', link: '/produtos' },
@@ -32,16 +33,18 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
     { title: 'Programa de Fidelidade', desc: 'Acumule pontos e ganhe descontos em suas compras.', icon: 'loyalty' }
   ];
 
+  // Placeholder para banners (evita erro 404 local)
   banners: string[] = [
     'https://placehold.co/1200x400/1abc9c/ffffff?text=Bem-vindo+ao+SIGA-PET',
     'https://placehold.co/1200x400/3498db/ffffff?text=Cuidamos+com+Amor',
     'https://placehold.co/1200x400/9b59b6/ffffff?text=Agende+seu+Banho+e+Tosa'
   ];
+
   currentBanner = 0;
   rotationInterval: any;
   rotationDelay = 8000;
   paused = false;
-  bannersLoaded = false;
+  bannersLoaded = true; // Força como true para exibir os placeholders
 
   produtos: Produto[] = [];
   produtosCarregando = true;
@@ -52,7 +55,8 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
     private produtoService: ProdutoService,
     public authService: AuthService
   ) {
-    this.loadAvailableBanners();
+    // this.loadAvailableBanners(); // Comentado para usar placeholders e evitar erro 404
+    this.initBannerRotation(); // Inicia rotação dos placeholders
     this.loadProdutos();
   }
 
@@ -65,42 +69,10 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
     this.handleHeaderShadowOnScroll();
   }
 
-  loadAvailableBanners(): void {
-    // Código para carregar banners locais se existirem, senão mantém os placeholders
-    const maxBanners = 10;
-    let checkedCount = 0;
-
-    // Lista temporária para verificar imagens locais
-    const localBanners: string[] = [];
-
-    for (let i = 1; i <= maxBanners; i++) {
-      const src = `/assets/images/carousel/banner${i}.jpg`;
-      const img = new Image();
-
-      img.onload = () => {
-        localBanners.push(src);
-        checkedCount++;
-        this.checkFinish(checkedCount, maxBanners, localBanners);
-      };
-
-      img.onerror = () => {
-        checkedCount++;
-        this.checkFinish(checkedCount, maxBanners, localBanners);
-      };
-
-      img.src = src;
-    }
-  }
-
-  checkFinish(count: number, max: number, found: string[]) {
-    if (count === max) {
-      if (found.length > 0) {
-        this.banners = found; // Se achou locais, usa eles
-      }
-      this.bannersLoaded = true;
-      this.initBannerRotation();
-    }
-  }
+  // Método original comentado para evitar erros de 404 no console
+  /*
+  loadAvailableBanners(): void { ... }
+  */
 
   loadProdutos(): void {
     this.produtoService.listar().subscribe({
@@ -157,7 +129,7 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
     if (produto.imagens && produto.imagens.length > 0) {
       return produto.imagens[0].url;
     }
-    return 'assets/images/no-image.png'; // Caminho simplificado para placeholder
+    return 'assets/images/no-image.png';
   }
 
   formatPreco(preco: number): string {
@@ -165,7 +137,8 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
   }
 
   verProduto(produto: Produto): void {
-    this.router.navigate(['/produtos/editar', produto.produtoId]); // Ajustado rota para teste ou visualização
+    // Redireciona para visualização (ajuste conforme suas rotas)
+    this.router.navigate(['/produtos/editar', produto.produtoId]);
   }
 
   getCategoryIcon(icon: string): string {
