@@ -4,7 +4,7 @@ import { RouterLink, Router } from '@angular/router';
 import { Produto } from '../../model/produto.model';
 import { ProdutoService } from '../../service/produtos/produto.service';
 import { Fornecedor } from '../../model/fornecedor.model';
-// CORREÇÃO: Caminho aponta para 'fornecedor' (correto)
+// CORREÇÃO: Pasta 'fornecedor', arquivo 'forncedor'
 import { FornecedorService } from '../../service/fornecedor/fornecedor';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../service/auth/auth.service';
@@ -44,7 +44,6 @@ export class ProdutoListComponent implements OnInit {
   }
 
   carregarDados(): void {
-    // Tipagem explícita (produtos: Produto[])
     this.produtoService.listar().subscribe((produtos: Produto[]) => {
       this.produtos.set(produtos);
     });

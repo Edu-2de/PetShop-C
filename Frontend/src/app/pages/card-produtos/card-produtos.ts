@@ -22,7 +22,7 @@ export class CardProdutosComponent implements OnInit {
   }
 
   carregarProdutos() {
-    // Tipagem explícita (data: Produto[])
+    // Tipagem explícita para evitar erro TS7006
     this.produtoService.listar().subscribe({
       next: (data: Produto[]) => {
         this.produtos = data.filter((p: Produto) => p.ativo).slice(0, 8);

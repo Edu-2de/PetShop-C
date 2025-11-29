@@ -3,8 +3,8 @@ import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { Fornecedor } from '../../../model/fornecedor.model';
 import { FormsModule } from '@angular/forms';
-// CORREÇÃO: Caminho aponta para a pasta correta do serviço 'fornecedor'
-import { FornecedorService } from '../../../service/fornecedor/fornecedor';
+// CORREÇÃO: Pasta 'fornecedor', arquivo 'forncedor'
+import { FornecedorService } from '../../../service/fornecedor/forncedor';
 
 @Component({
   selector: 'app-fornecedor-list',
