@@ -12,8 +12,8 @@ using SIGA_PET.Data;
 namespace SIGA_PET.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20251124125412_AddProdutoImagem")]
-    partial class AddProdutoImagem
+    [Migration("20251129223500_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -51,8 +51,7 @@ namespace SIGA_PET.Migrations
 
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("AgendamentoId");
 
@@ -109,6 +108,28 @@ namespace SIGA_PET.Migrations
                     b.HasIndex("TutorId");
 
                     b.ToTable("Animais");
+                });
+
+            modelBuilder.Entity("SIGA_PET.Models.Categoria", b =>
+                {
+                    b.Property<int>("CategoriaId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CategoriaId"));
+
+                    b.Property<string>("Descricao")
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<string>("Nome")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.HasKey("CategoriaId");
+
+                    b.ToTable("Categorias");
                 });
 
             modelBuilder.Entity("SIGA_PET.Models.Fornecedor", b =>
@@ -168,32 +189,22 @@ namespace SIGA_PET.Migrations
                     b.Property<DateTime>("DataContratacao")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("Email")
-                        .HasMaxLength(150)
-                        .HasColumnType("nvarchar(150)");
-
-                    b.Property<string>("Login")
-                        .HasMaxLength(60)
-                        .HasColumnType("nvarchar(60)");
-
                     b.Property<string>("Nome")
                         .IsRequired()
                         .HasMaxLength(120)
                         .HasColumnType("nvarchar(120)");
 
-                    b.Property<string>("PasswordHash")
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
                     b.Property<string>("Telefone")
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
+                    b.Property<int>("UsuarioId")
+                        .HasColumnType("int");
+
                     b.HasKey("FuncionarioId");
 
-                    b.HasIndex("Login")
-                        .IsUnique()
-                        .HasFilter("[Login] IS NOT NULL");
+                    b.HasIndex("UsuarioId")
+                        .IsUnique();
 
                     b.ToTable("Funcionarios");
                 });
@@ -243,6 +254,9 @@ namespace SIGA_PET.Migrations
                     b.Property<bool>("Ativo")
                         .HasColumnType("bit");
 
+                    b.Property<int?>("CategoriaId")
+                        .HasColumnType("int");
+
                     b.Property<string>("CodigoBarras")
                         .HasMaxLength(80)
                         .HasColumnType("nvarchar(80)");
@@ -262,13 +276,12 @@ namespace SIGA_PET.Migrations
                     b.Property<decimal>("Preco")
                         .HasColumnType("decimal(10,2)");
 
-                    b.Property<int>("Quantidade")
-                        .HasColumnType("int");
-
                     b.Property<int>("QuantidadeEstoque")
                         .HasColumnType("int");
 
                     b.HasKey("ProdutoId");
+
+                    b.HasIndex("CategoriaId");
 
                     b.HasIndex("CodigoBarras");
 
@@ -383,10 +396,6 @@ namespace SIGA_PET.Migrations
                     b.Property<DateTime>("DataCadastro")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("Email")
-                        .HasMaxLength(150)
-                        .HasColumnType("nvarchar(150)");
-
                     b.Property<string>("Endereco")
                         .HasMaxLength(250)
                         .HasColumnType("nvarchar(250)");
@@ -400,11 +409,48 @@ namespace SIGA_PET.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
+                    b.Property<int>("UsuarioId")
+                        .HasColumnType("int");
+
                     b.HasKey("TutorId");
 
-                    b.HasIndex("Email");
+                    b.HasIndex("UsuarioId")
+                        .IsUnique();
 
-                    b.ToTable("Tutores", (string)null);
+                    b.ToTable("Tutores");
+                });
+
+            modelBuilder.Entity("SIGA_PET.Models.Usuario", b =>
+                {
+                    b.Property<int>("UsuarioId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("UsuarioId"));
+
+                    b.Property<bool>("Ativo")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.Property<string>("PasswordHash")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("TipoUsuario")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.HasKey("UsuarioId");
+
+                    b.HasIndex("Email")
+                        .IsUnique();
+
+                    b.ToTable("Usuarios");
                 });
 
             modelBuilder.Entity("SIGA_PET.Models.Venda", b =>
@@ -481,6 +527,17 @@ namespace SIGA_PET.Migrations
                     b.Navigation("Tutor");
                 });
 
+            modelBuilder.Entity("SIGA_PET.Models.Funcionario", b =>
+                {
+                    b.HasOne("SIGA_PET.Models.Usuario", "Usuario")
+                        .WithOne("Funcionario")
+                        .HasForeignKey("SIGA_PET.Models.Funcionario", "UsuarioId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Usuario");
+                });
+
             modelBuilder.Entity("SIGA_PET.Models.ItemVenda", b =>
                 {
                     b.HasOne("SIGA_PET.Models.Produto", "Produto")
@@ -508,10 +565,17 @@ namespace SIGA_PET.Migrations
 
             modelBuilder.Entity("SIGA_PET.Models.Produto", b =>
                 {
+                    b.HasOne("SIGA_PET.Models.Categoria", "Categoria")
+                        .WithMany("Produtos")
+                        .HasForeignKey("CategoriaId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
                     b.HasOne("SIGA_PET.Models.Fornecedor", "Fornecedor")
                         .WithMany("Produtos")
                         .HasForeignKey("FornecedorId")
                         .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("Categoria");
 
                     b.Navigation("Fornecedor");
                 });
@@ -545,6 +609,17 @@ namespace SIGA_PET.Migrations
                     b.Navigation("Funcionario");
                 });
 
+            modelBuilder.Entity("SIGA_PET.Models.Tutor", b =>
+                {
+                    b.HasOne("SIGA_PET.Models.Usuario", "Usuario")
+                        .WithOne("Tutor")
+                        .HasForeignKey("SIGA_PET.Models.Tutor", "UsuarioId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Usuario");
+                });
+
             modelBuilder.Entity("SIGA_PET.Models.Venda", b =>
                 {
                     b.HasOne("SIGA_PET.Models.Funcionario", "Funcionario")
@@ -567,6 +642,11 @@ namespace SIGA_PET.Migrations
                     b.Navigation("Agendamentos");
 
                     b.Navigation("Registros");
+                });
+
+            modelBuilder.Entity("SIGA_PET.Models.Categoria", b =>
+                {
+                    b.Navigation("Produtos");
                 });
 
             modelBuilder.Entity("SIGA_PET.Models.Fornecedor", b =>
@@ -602,6 +682,13 @@ namespace SIGA_PET.Migrations
                     b.Navigation("Animais");
 
                     b.Navigation("Vendas");
+                });
+
+            modelBuilder.Entity("SIGA_PET.Models.Usuario", b =>
+                {
+                    b.Navigation("Funcionario");
+
+                    b.Navigation("Tutor");
                 });
 
             modelBuilder.Entity("SIGA_PET.Models.Venda", b =>

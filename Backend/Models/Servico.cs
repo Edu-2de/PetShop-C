@@ -3,18 +3,28 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SIGA_PET.Models
 {
-    public class CreateTutorDto
+    public class Servico
     {
-        [Required]
+        public int ServicoId { get; set; }
+
+        [Required(ErrorMessage = "Nome é obrigatório")]
+        [StringLength(120, ErrorMessage = "Nome deve ter no máximo 120 caracteres")]
         public string Nome { get; set; } = string.Empty;
 
-        [Required]
-        [EmailAddress]
-        public string Email { get; set; } = string.Empty;
+        [StringLength(500, ErrorMessage = "Descrição deve ter no máximo 500 caracteres")]
+        public string? Descricao { get; set; }
 
-        [Required]
-        public string Senha { get; set; } = string.Empty;
+        [Column(TypeName = "decimal(10,2)")]
+        [Range(0, 9999.99, ErrorMessage = "Preço deve estar entre 0 e 9999,99")]
+        public decimal Preco { get; set; }
 
-        public string? Telefone { get; set; }
-        public string? Endereco { get; set; }
+        [Range(1, 480, ErrorMessage = "Duração deve estar entre 1 e 480 minutos")]
+        public int DuracaoMinutos { get; set; }
+
+        public bool Ativo { get; set; } = true;
+
+        // Relacionamentos
+        public virtual ICollection<Agendamento> Agendamentos { get; set; } = new List<Agendamento>();
+        public virtual ICollection<ItemVenda> ItemVendas { get; set; } = new List<ItemVenda>();
     }
+}

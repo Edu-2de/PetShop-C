@@ -28,6 +28,7 @@ namespace SIGA_PET.Controllers
             {
                 var produtos = await _context.Produtos
                     .Include(p => p.Fornecedor)
+                    .Include(p => p.Imagens) // Incluir imagens
                     .AsNoTracking()
                     .ToListAsync();
 
@@ -48,6 +49,7 @@ namespace SIGA_PET.Controllers
             {
                 var produto = await _context.Produtos
                     .Include(p => p.Fornecedor)
+                    .Include(p => p.Imagens)
                     .FirstOrDefaultAsync(p => p.ProdutoId == id);
 
                 if (produto == null)
@@ -72,6 +74,7 @@ namespace SIGA_PET.Controllers
             {
                 var produtos = await _context.Produtos
                     .Include(p => p.Fornecedor)
+                    .Include(p => p.Imagens)
                     .Where(p => p.Ativo)
                     .AsNoTracking()
                     .ToListAsync();
@@ -96,6 +99,7 @@ namespace SIGA_PET.Controllers
 
             var produtos = await _context.Produtos
                 .Include(p => p.Fornecedor)
+                .Include(p => p.Imagens)
                 .AsNoTracking()
                 .Where(p => p.Nome.Contains(name))
                 .ToListAsync();
@@ -130,12 +134,22 @@ namespace SIGA_PET.Controllers
                     }
                 }
 
+                // Verificar se a categoria existe (se fornecido) [NOVO]
+                if (createProdutoDto.CategoriaId.HasValue)
+                {
+                    var categoriaExists = await _context.Categorias.AnyAsync(c => c.CategoriaId == createProdutoDto.CategoriaId.Value);
+                    if (!categoriaExists)
+                    {
+                        return BadRequest($"Categoria com ID {createProdutoDto.CategoriaId} não encontrado.");
+                    }
+                }
+
                 var produto = _mapper.Map<Produto>(createProdutoDto);
 
                 _context.Produtos.Add(produto);
                 await _context.SaveChangesAsync();
 
-                // Recarregar com os dados do fornecedor
+                // Recarregar com os dados do fornecedor e imagens (vazio)
                 if (produto.FornecedorId.HasValue)
                 {
                     await _context.Entry(produto).Reference(p => p.Fornecedor).LoadAsync();
@@ -174,6 +188,16 @@ namespace SIGA_PET.Controllers
                     if (!fornecedorExists)
                     {
                         return BadRequest($"Fornecedor com ID {updateProdutoDto.FornecedorId} não encontrado.");
+                    }
+                }
+
+                // Verificar se a categoria existe (se fornecido) [NOVO]
+                if (updateProdutoDto.CategoriaId.HasValue)
+                {
+                    var categoriaExists = await _context.Categorias.AnyAsync(c => c.CategoriaId == updateProdutoDto.CategoriaId.Value);
+                    if (!categoriaExists)
+                    {
+                        return BadRequest($"Categoria com ID {updateProdutoDto.CategoriaId} não encontrado.");
                     }
                 }
 

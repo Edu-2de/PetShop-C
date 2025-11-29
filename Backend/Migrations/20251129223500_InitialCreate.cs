@@ -12,6 +12,20 @@ namespace SIGA_PET.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
+                name: "Categorias",
+                columns: table => new
+                {
+                    CategoriaId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Nome = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    Descricao = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Categorias", x => x.CategoriaId);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Fornecedores",
                 columns: table => new
                 {
@@ -20,31 +34,14 @@ namespace SIGA_PET.Migrations
                     Nome = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: false),
                     Contato = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: true),
                     Email = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: true),
+                    Cnpj = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: true),
+                    RazaoSocial = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: true),
                     Telefone = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: true),
                     Endereco = table.Column<string>(type: "nvarchar(300)", maxLength: 300, nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Fornecedores", x => x.FornecedorId);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Funcionarios",
-                columns: table => new
-                {
-                    FuncionarioId = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Nome = table.Column<string>(type: "nvarchar(120)", maxLength: 120, nullable: false),
-                    Cargo = table.Column<string>(type: "nvarchar(80)", maxLength: 80, nullable: true),
-                    Telefone = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: true),
-                    Email = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: true),
-                    Login = table.Column<string>(type: "nvarchar(60)", maxLength: 60, nullable: true),
-                    PasswordHash = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
-                    DataContratacao = table.Column<DateTime>(type: "datetime2", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Funcionarios", x => x.FuncionarioId);
                 });
 
             migrationBuilder.CreateTable(
@@ -65,20 +62,19 @@ namespace SIGA_PET.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Tutores",
+                name: "Usuarios",
                 columns: table => new
                 {
-                    TutorId = table.Column<int>(type: "int", nullable: false)
+                    UsuarioId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Nome = table.Column<string>(type: "nvarchar(120)", maxLength: 120, nullable: false),
-                    Telefone = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: true),
-                    Email = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: true),
-                    Endereco = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: true),
-                    DataCadastro = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    Email = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: false),
+                    PasswordHash = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    TipoUsuario = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    Ativo = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Tutores", x => x.TutorId);
+                    table.PrimaryKey("PK_Usuarios", x => x.UsuarioId);
                 });
 
             migrationBuilder.CreateTable(
@@ -89,21 +85,94 @@ namespace SIGA_PET.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Nome = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: false),
                     Descricao = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
-                    Quantidade = table.Column<int>(type: "int", nullable: false),
+                    QuantidadeEstoque = table.Column<int>(type: "int", nullable: false),
                     Preco = table.Column<decimal>(type: "decimal(10,2)", nullable: false),
-                    FornecedorId = table.Column<int>(type: "int", nullable: true),
+                    Ativo = table.Column<bool>(type: "bit", nullable: false),
                     CodigoBarras = table.Column<string>(type: "nvarchar(80)", maxLength: 80, nullable: true),
-                    Ativo = table.Column<bool>(type: "bit", nullable: false)
+                    FornecedorId = table.Column<int>(type: "int", nullable: true),
+                    CategoriaId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Produtos", x => x.ProdutoId);
+                    table.ForeignKey(
+                        name: "FK_Produtos_Categorias_CategoriaId",
+                        column: x => x.CategoriaId,
+                        principalTable: "Categorias",
+                        principalColumn: "CategoriaId",
+                        onDelete: ReferentialAction.SetNull);
                     table.ForeignKey(
                         name: "FK_Produtos_Fornecedores_FornecedorId",
                         column: x => x.FornecedorId,
                         principalTable: "Fornecedores",
                         principalColumn: "FornecedorId",
                         onDelete: ReferentialAction.SetNull);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Funcionarios",
+                columns: table => new
+                {
+                    FuncionarioId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    UsuarioId = table.Column<int>(type: "int", nullable: false),
+                    Nome = table.Column<string>(type: "nvarchar(120)", maxLength: 120, nullable: false),
+                    Cargo = table.Column<string>(type: "nvarchar(80)", maxLength: 80, nullable: true),
+                    Telefone = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: true),
+                    DataContratacao = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Funcionarios", x => x.FuncionarioId);
+                    table.ForeignKey(
+                        name: "FK_Funcionarios_Usuarios_UsuarioId",
+                        column: x => x.UsuarioId,
+                        principalTable: "Usuarios",
+                        principalColumn: "UsuarioId",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Tutores",
+                columns: table => new
+                {
+                    TutorId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Nome = table.Column<string>(type: "nvarchar(120)", maxLength: 120, nullable: false),
+                    Telefone = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: true),
+                    Endereco = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: true),
+                    DataCadastro = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UsuarioId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Tutores", x => x.TutorId);
+                    table.ForeignKey(
+                        name: "FK_Tutores_Usuarios_UsuarioId",
+                        column: x => x.UsuarioId,
+                        principalTable: "Usuarios",
+                        principalColumn: "UsuarioId",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ProdutoImagens",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Url = table.Column<string>(type: "nvarchar(300)", maxLength: 300, nullable: false),
+                    ProdutoId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ProdutoImagens", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ProdutoImagens_Produtos_ProdutoId",
+                        column: x => x.ProdutoId,
+                        principalTable: "Produtos",
+                        principalColumn: "ProdutoId",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -172,7 +241,7 @@ namespace SIGA_PET.Migrations
                     FuncionarioId = table.Column<int>(type: "int", nullable: true),
                     ServicoId = table.Column<int>(type: "int", nullable: false),
                     DataHora = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    Status = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    Status = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Observacoes = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true)
                 },
                 constraints: table =>
@@ -230,7 +299,7 @@ namespace SIGA_PET.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "ItemVendas",
+                name: "ItensVenda",
                 columns: table => new
                 {
                     ItemVendaId = table.Column<int>(type: "int", nullable: false)
@@ -243,21 +312,21 @@ namespace SIGA_PET.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ItemVendas", x => x.ItemVendaId);
+                    table.PrimaryKey("PK_ItensVenda", x => x.ItemVendaId);
                     table.ForeignKey(
-                        name: "FK_ItemVendas_Produtos_ProdutoId",
+                        name: "FK_ItensVenda_Produtos_ProdutoId",
                         column: x => x.ProdutoId,
                         principalTable: "Produtos",
                         principalColumn: "ProdutoId",
                         onDelete: ReferentialAction.SetNull);
                     table.ForeignKey(
-                        name: "FK_ItemVendas_Servicos_ServicoId",
+                        name: "FK_ItensVenda_Servicos_ServicoId",
                         column: x => x.ServicoId,
                         principalTable: "Servicos",
                         principalColumn: "ServicoId",
                         onDelete: ReferentialAction.SetNull);
                     table.ForeignKey(
-                        name: "FK_ItemVendas_Vendas_VendaId",
+                        name: "FK_ItensVenda_Vendas_VendaId",
                         column: x => x.VendaId,
                         principalTable: "Vendas",
                         principalColumn: "VendaId",
@@ -285,26 +354,35 @@ namespace SIGA_PET.Migrations
                 column: "TutorId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Funcionarios_Login",
+                name: "IX_Funcionarios_UsuarioId",
                 table: "Funcionarios",
-                column: "Login",
-                unique: true,
-                filter: "[Login] IS NOT NULL");
+                column: "UsuarioId",
+                unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_ItemVendas_ProdutoId",
-                table: "ItemVendas",
+                name: "IX_ItensVenda_ProdutoId",
+                table: "ItensVenda",
                 column: "ProdutoId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ItemVendas_ServicoId",
-                table: "ItemVendas",
+                name: "IX_ItensVenda_ServicoId",
+                table: "ItensVenda",
                 column: "ServicoId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ItemVendas_VendaId",
-                table: "ItemVendas",
+                name: "IX_ItensVenda_VendaId",
+                table: "ItensVenda",
                 column: "VendaId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ProdutoImagens_ProdutoId",
+                table: "ProdutoImagens",
+                column: "ProdutoId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Produtos_CategoriaId",
+                table: "Produtos",
+                column: "CategoriaId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Produtos_CodigoBarras",
@@ -327,9 +405,16 @@ namespace SIGA_PET.Migrations
                 column: "FuncionarioId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Tutores_Email",
+                name: "IX_Tutores_UsuarioId",
                 table: "Tutores",
-                column: "Email");
+                column: "UsuarioId",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Usuarios_Email",
+                table: "Usuarios",
+                column: "Email",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Vendas_FuncionarioId",
@@ -349,13 +434,13 @@ namespace SIGA_PET.Migrations
                 name: "Agendamentos");
 
             migrationBuilder.DropTable(
-                name: "ItemVendas");
+                name: "ItensVenda");
+
+            migrationBuilder.DropTable(
+                name: "ProdutoImagens");
 
             migrationBuilder.DropTable(
                 name: "RegistrosProntuario");
-
-            migrationBuilder.DropTable(
-                name: "Produtos");
 
             migrationBuilder.DropTable(
                 name: "Servicos");
@@ -364,16 +449,25 @@ namespace SIGA_PET.Migrations
                 name: "Vendas");
 
             migrationBuilder.DropTable(
-                name: "Animais");
+                name: "Produtos");
 
             migrationBuilder.DropTable(
-                name: "Fornecedores");
+                name: "Animais");
 
             migrationBuilder.DropTable(
                 name: "Funcionarios");
 
             migrationBuilder.DropTable(
+                name: "Categorias");
+
+            migrationBuilder.DropTable(
+                name: "Fornecedores");
+
+            migrationBuilder.DropTable(
                 name: "Tutores");
+
+            migrationBuilder.DropTable(
+                name: "Usuarios");
         }
     }
 }

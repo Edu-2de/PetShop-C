@@ -9,9 +9,12 @@ namespace SIGA_PET.DTOs
         public int? FuncionarioId { get; set; }
         public int ServicoId { get; set; }
         public DateTime DataHora { get; set; }
-        public string Status { get; set; } = "Agendado";
+
+        // Mantemos string para facilitar o JSON, o AutoMapper converte o Enum para String aqui
+        public string Status { get; set; } = "Pendente";
+
         public string? Observacoes { get; set; }
-        
+
         // Informações relacionadas para exibição
         public string? AnimalNome { get; set; }
         public string? ServicoNome { get; set; }
@@ -32,7 +35,7 @@ namespace SIGA_PET.DTOs
         public DateTime DataHora { get; set; }
 
         [StringLength(50, ErrorMessage = "Status deve ter no máximo 50 caracteres")]
-        public string Status { get; set; } = "Agendado";
+        public string Status { get; set; } = "Pendente";
 
         [StringLength(500, ErrorMessage = "Observações deve ter no máximo 500 caracteres")]
         public string? Observacoes { get; set; }
@@ -52,7 +55,7 @@ namespace SIGA_PET.DTOs
         public DateTime DataHora { get; set; }
 
         [StringLength(50, ErrorMessage = "Status deve ter no máximo 50 caracteres")]
-        public string Status { get; set; } = "Agendado";
+        public string Status { get; set; } = "Pendente";
 
         [StringLength(500, ErrorMessage = "Observações deve ter no máximo 500 caracteres")]
         public string? Observacoes { get; set; }

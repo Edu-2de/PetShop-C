@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using SIGA_PET.Data;
 using SIGA_PET.DTOs;
 using SIGA_PET.Models;
+using SIGA_PET.Enums;
 
 namespace SIGA_PET.Controllers
 {
@@ -128,37 +129,27 @@ namespace SIGA_PET.Controllers
                     return BadRequest(ModelState);
                 }
 
-                // Verificar se o animal existe
                 var animalExists = await _context.Animais.AnyAsync(a => a.AnimalId == createAgendamentoDto.AnimalId);
-                if (!animalExists)
-                {
-                    return BadRequest($"Animal com ID {createAgendamentoDto.AnimalId} não encontrado.");
-                }
+                if (!animalExists) return BadRequest($"Animal com ID {createAgendamentoDto.AnimalId} não encontrado.");
 
-                // Verificar se o serviço existe
                 var servicoExists = await _context.Servicos.AnyAsync(s => s.ServicoId == createAgendamentoDto.ServicoId);
-                if (!servicoExists)
-                {
-                    return BadRequest($"Serviço com ID {createAgendamentoDto.ServicoId} não encontrado.");
-                }
+                if (!servicoExists) return BadRequest($"Serviço com ID {createAgendamentoDto.ServicoId} não encontrado.");
 
-                // 1. Verificar se o Funcionário já tem agendamento nesse horário
                 if (createAgendamentoDto.FuncionarioId.HasValue)
                 {
                     var conflitoFuncionario = await _context.Agendamentos
                         .AnyAsync(a => a.FuncionarioId == createAgendamentoDto.FuncionarioId
                                        && a.DataHora == createAgendamentoDto.DataHora
-                                       && a.Status != "Cancelado");
+                                       && a.Status != StatusAgendamento.Cancelado);
 
                     if (conflitoFuncionario)
                         return BadRequest("Este funcionário já possui um agendamento neste horário.");
                 }
 
-                // 2. Verificar se o Animal já tem agendamento nesse horário
                 var conflitoPet = await _context.Agendamentos
                     .AnyAsync(a => a.AnimalId == createAgendamentoDto.AnimalId
                                    && a.DataHora == createAgendamentoDto.DataHora
-                                   && a.Status != "Cancelado");
+                                   && a.Status != StatusAgendamento.Cancelado);
 
                 if (conflitoPet)
                     return BadRequest("Este pet já possui um agendamento neste horário.");
@@ -168,7 +159,6 @@ namespace SIGA_PET.Controllers
                 _context.Agendamentos.Add(agendamento);
                 await _context.SaveChangesAsync();
 
-                // Recarregar com os dados relacionados
                 await _context.Entry(agendamento).Reference(a => a.Animal).LoadAsync();
                 await _context.Entry(agendamento).Reference(a => a.Servico).LoadAsync();
                 if (agendamento.FuncionarioId.HasValue)
@@ -191,40 +181,17 @@ namespace SIGA_PET.Controllers
         {
             try
             {
-                if (!ModelState.IsValid)
-                {
-                    return BadRequest(ModelState);
-                }
+                if (!ModelState.IsValid) return BadRequest(ModelState);
 
                 var agendamento = await _context.Agendamentos.FindAsync(id);
-                if (agendamento == null)
-                {
-                    return NotFound($"Agendamento com ID {id} não encontrado.");
-                }
+                if (agendamento == null) return NotFound($"Agendamento com ID {id} não encontrado.");
 
-                // Verificar se o animal existe
-                var animalExists = await _context.Animais.AnyAsync(a => a.AnimalId == updateAgendamentoDto.AnimalId);
-                if (!animalExists)
-                {
-                    return BadRequest($"Animal com ID {updateAgendamentoDto.AnimalId} não encontrado.");
-                }
+                // Validações básicas de existência
+                if (!await _context.Animais.AnyAsync(a => a.AnimalId == updateAgendamentoDto.AnimalId))
+                    return BadRequest("Animal não encontrado.");
 
-                // Verificar se o serviço existe
-                var servicoExists = await _context.Servicos.AnyAsync(s => s.ServicoId == updateAgendamentoDto.ServicoId);
-                if (!servicoExists)
-                {
-                    return BadRequest($"Serviço com ID {updateAgendamentoDto.ServicoId} não encontrado.");
-                }
-
-                // Verificar se o funcionário existe (se fornecido)
-                if (updateAgendamentoDto.FuncionarioId.HasValue)
-                {
-                    var funcionarioExists = await _context.Funcionarios.AnyAsync(f => f.FuncionarioId == updateAgendamentoDto.FuncionarioId.Value);
-                    if (!funcionarioExists)
-                    {
-                        return BadRequest($"Funcionário com ID {updateAgendamentoDto.FuncionarioId} não encontrado.");
-                    }
-                }
+                if (!await _context.Servicos.AnyAsync(s => s.ServicoId == updateAgendamentoDto.ServicoId))
+                    return BadRequest("Serviço não encontrado.");
 
                 _mapper.Map(updateAgendamentoDto, agendamento);
 
@@ -235,7 +202,7 @@ namespace SIGA_PET.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                return Conflict("Erro de concorrência. O registro foi modificado por outro usuário.");
+                return Conflict("Erro de concorrência.");
             }
             catch (Exception ex)
             {
@@ -250,10 +217,7 @@ namespace SIGA_PET.Controllers
             try
             {
                 var agendamento = await _context.Agendamentos.FindAsync(id);
-                if (agendamento == null)
-                {
-                    return NotFound($"Agendamento com ID {id} não encontrado.");
-                }
+                if (agendamento == null) return NotFound($"Agendamento com ID {id} não encontrado.");
 
                 _context.Agendamentos.Remove(agendamento);
                 await _context.SaveChangesAsync();

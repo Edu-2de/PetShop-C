@@ -27,21 +27,4 @@ namespace SIGA_PET.Models
         public virtual ICollection<RegistroProntuario> Registros { get; set; } = new List<RegistroProntuario>();
         public virtual ICollection<Venda> Vendas { get; set; } = new List<Venda>();
     }
-
-    public class CreateFuncionarioDto
-    {
-        [Required]
-        public string Nome { get; set; } = string.Empty;
-
-        [Required]
-        [EmailAddress]
-        public string Email { get; set; } = string.Empty;
-
-        [Required]
-        public string Senha { get; set; } = string.Empty;
-
-        public string? Cargo { get; set; }
-        public string? Telefone { get; set; }
-        public DateTime? DataContratacao { get; set; }
-    }
 }

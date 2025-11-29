@@ -27,7 +27,6 @@ namespace SIGA_PET.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginDto loginDto)
         {
-            // Busca na tabela USUARIOS agora
             var user = await _context.Usuarios
                 .Include(u => u.Funcionario)
                 .Include(u => u.Tutor)
@@ -41,7 +40,6 @@ namespace SIGA_PET.Controllers
 
             var token = GenerateJwtToken(user);
 
-            // Retorna dados básicos para o frontend saber quem é
             var nome = user.Funcionario?.Nome ?? user.Tutor?.Nome ?? "Admin";
             var idVinculo = user.Funcionario?.FuncionarioId ?? user.Tutor?.TutorId ?? 0;
 
@@ -52,13 +50,12 @@ namespace SIGA_PET.Controllers
                 {
                     email = user.Email,
                     nome = nome,
-                    cargo = user.TipoUsuario, // Admin, Funcionario ou Tutor
+                    cargo = user.TipoUsuario,
                     id = idVinculo
                 }
             });
         }
 
-        // Rota para criar o primeiro usuário (Seed)
         [HttpPost("seed")]
         public async Task<IActionResult> Seed()
         {
@@ -90,8 +87,7 @@ namespace SIGA_PET.Controllers
             {
                 Nome = "João Funcionário",
                 Cargo = "Atendente",
-                UsuarioId = funcUser.UsuarioId, // Vínculo
-                Email = "func@sigapet.com"
+                UsuarioId = funcUser.UsuarioId
             };
             _context.Funcionarios.Add(funcionario);
 
@@ -101,7 +97,7 @@ namespace SIGA_PET.Controllers
 
         private string GenerateJwtToken(Usuario user)
         {
-            var key = Encoding.ASCII.GetBytes(_configuration["Jwt:Key"] ?? "chave_super_secreta_padrao_123");
+            var key = Encoding.ASCII.GetBytes(_configuration["Jwt:Key"] ?? "MinhaChaveSecretaSuperSegura123!");
             var claims = new[]
             {
                 new Claim(JwtRegisteredClaimNames.Sub, user.Email),

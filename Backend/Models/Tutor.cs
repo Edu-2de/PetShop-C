@@ -3,28 +3,31 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SIGA_PET.Models
 {
-    public class Funcionario
+    public class Tutor
     {
-        public int FuncionarioId { get; set; }
+        public int TutorId { get; set; }
+
+        [Required(ErrorMessage = "Nome é obrigatório")]
+        [StringLength(120, ErrorMessage = "Nome deve ter no máximo 120 caracteres")]
+        public string Nome { get; set; } = string.Empty;
+
+        [StringLength(20, ErrorMessage = "Telefone deve ter no máximo 20 caracteres")]
+        public string? Telefone { get; set; }
+
+
+        [StringLength(250, ErrorMessage = "Endereço deve ter no máximo 250 caracteres")]
+        public string? Endereco { get; set; }
+
+        public DateTime DataCadastro { get; set; } = DateTime.UtcNow;
+
+        // Chave estrangeira para o Usuário (Login)
         public int UsuarioId { get; set; }
 
         [ForeignKey("UsuarioId")]
         public virtual Usuario Usuario { get; set; } = null!;
 
-        [Required]
-        [StringLength(120)]
-        public string Nome { get; set; } = string.Empty;
-
-        [StringLength(80)]
-        public string? Cargo { get; set; }
-
-        [StringLength(20)]
-        public string? Telefone { get; set; }
-
-        public DateTime DataContratacao { get; set; } = DateTime.UtcNow;
-
-        public virtual ICollection<Agendamento> Agendamentos { get; set; } = new List<Agendamento>();
-        public virtual ICollection<RegistroProntuario> Registros { get; set; } = new List<RegistroProntuario>();
+        // Relacionamentos
+        public virtual ICollection<Animal> Animais { get; set; } = new List<Animal>();
         public virtual ICollection<Venda> Vendas { get; set; } = new List<Venda>();
     }
 }

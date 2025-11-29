@@ -40,6 +40,16 @@ namespace SIGA_PET.Controllers
         [HttpPost]
         public async Task<ActionResult<VendaDto>> CreateVenda([FromBody] CreateVendaDto createVendaDto)
         {
+            // Validação preliminar dos itens para evitar estado inconsistente
+            foreach (var itemDto in createVendaDto.Itens)
+            {
+                if (itemDto.ProdutoId == null && itemDto.ServicoId == null)
+                    return BadRequest("Cada item da venda deve ter um Produto OU um Serviço vinculado.");
+
+                if (itemDto.ProdutoId != null && itemDto.ServicoId != null)
+                    return BadRequest("Um item não pode ser Produto e Serviço ao mesmo tempo.");
+            }
+
             using var transaction = await _context.Database.BeginTransactionAsync();
             try
             {
