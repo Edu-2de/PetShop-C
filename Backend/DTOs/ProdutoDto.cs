@@ -23,14 +23,14 @@ namespace SIGA_PET.DTOs
 
         public bool Ativo { get; set; }
         public int? FornecedorId { get; set; }
+        public int? CategoriaId { get; set; } // [Novo]
 
-        // Informações do fornecedor para exibição
+        // Informações para exibição
         public string NomeFornecedor { get; set; } = string.Empty;
 
         // Coleção de imagens do produto
         public ICollection<ProdutoImagemDto> Imagens { get; set; } = new List<ProdutoImagemDto>();
     }
-
 
     public class CreateProdutoDto
     {
@@ -49,6 +49,7 @@ namespace SIGA_PET.DTOs
         public int QuantidadeEstoque { get; set; }
 
         public int? FornecedorId { get; set; }
+        public int? CategoriaId { get; set; } // [Novo]
 
         public bool Ativo { get; set; } = true;
     }
@@ -70,6 +71,7 @@ namespace SIGA_PET.DTOs
         public int QuantidadeEstoque { get; set; }
 
         public int? FornecedorId { get; set; }
+        public int? CategoriaId { get; set; } // [Novo]
 
         public bool Ativo { get; set; }
     }

@@ -9,12 +9,8 @@ namespace SIGA_PET.Data
         {
         }
 
-        // DbSets para todas as entidades
-        // Novas tabelas
         public DbSet<Usuario> Usuarios { get; set; }
         public DbSet<Categoria> Categorias { get; set; }
-
-        // Tabelas existentes
         public DbSet<Tutor> Tutores { get; set; }
         public DbSet<Animal> Animais { get; set; }
         public DbSet<Produto> Produtos { get; set; }
@@ -31,143 +27,93 @@ namespace SIGA_PET.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            // =================================================================
-            // NOVAS CONFIGURAÇÕES (Refatoração)
-            // =================================================================
+            // Conversão de Enum para String no banco
+            modelBuilder.Entity<Agendamento>()
+                .Property(a => a.Status)
+                .HasConversion<string>();
 
-            // Configuração Usuario -> Tutor (1:1)
+            // =============================================================
+            // CORREÇÃO DO ERRO DE CICLO/MULTIPLOS CAMINHOS (Cascade Paths)
+            // =============================================================
+
+            // Usuario -> Tutor (1:1)
             modelBuilder.Entity<Tutor>()
                 .HasOne(t => t.Usuario)
                 .WithOne(u => u.Tutor)
                 .HasForeignKey<Tutor>(t => t.UsuarioId)
-                .OnDelete(DeleteBehavior.Cascade); // Se deletar usuario, deleta perfil de tutor
+                .OnDelete(DeleteBehavior.Restrict); // <--- OBRIGATÓRIO SER RESTRICT
 
-            // Configuração Usuario -> Funcionario (1:1)
+            // Usuario -> Funcionario (1:1)
             modelBuilder.Entity<Funcionario>()
                 .HasOne(f => f.Usuario)
                 .WithOne(u => u.Funcionario)
                 .HasForeignKey<Funcionario>(f => f.UsuarioId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.Restrict); // <--- OBRIGATÓRIO SER RESTRICT
 
-            // Configuração Categoria -> Produto (1:N)
+            // =============================================================
+
+            // Categoria -> Produto (1:N)
             modelBuilder.Entity<Produto>()
                 .HasOne(p => p.Categoria)
                 .WithMany(c => c.Produtos)
                 .HasForeignKey(p => p.CategoriaId)
-                .OnDelete(DeleteBehavior.SetNull); // Se deletar categoria, produto fica sem categoria (opcional)
-
-            // =================================================================
-            // CONFIGURAÇÕES ORIGINAIS
-            // =================================================================
-
-            // Mapear a entidade Tutor para a tabela "Tutores"
-            modelBuilder.Entity<Tutor>().ToTable("Tutores");
+                .OnDelete(DeleteBehavior.SetNull);
 
             // Tutor -> Animal (1:N)
             modelBuilder.Entity<Animal>()
-                .HasOne(a => a.Tutor)
-                .WithMany(t => t.Animais)
-                .HasForeignKey(a => a.TutorId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .HasOne(a => a.Tutor).WithMany(t => t.Animais).HasForeignKey(a => a.TutorId).OnDelete(DeleteBehavior.Cascade);
 
             // Animal -> Agendamento (1:N)
             modelBuilder.Entity<Agendamento>()
-                .HasOne(ag => ag.Animal)
-                .WithMany(an => an.Agendamentos)
-                .HasForeignKey(ag => ag.AnimalId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .HasOne(ag => ag.Animal).WithMany(an => an.Agendamentos).HasForeignKey(ag => ag.AnimalId).OnDelete(DeleteBehavior.Cascade);
 
-            // Funcionario -> Agendamento (1:N) - opcional
+            // Funcionario -> Agendamento (1:N)
             modelBuilder.Entity<Agendamento>()
-                .HasOne(ag => ag.Funcionario)
-                .WithMany(f => f.Agendamentos)
-                .HasForeignKey(ag => ag.FuncionarioId)
-                .OnDelete(DeleteBehavior.SetNull);
+                .HasOne(ag => ag.Funcionario).WithMany(f => f.Agendamentos).HasForeignKey(ag => ag.FuncionarioId).OnDelete(DeleteBehavior.SetNull);
 
             // Servico -> Agendamento (1:N)
             modelBuilder.Entity<Agendamento>()
-                .HasOne(ag => ag.Servico)
-                .WithMany(s => s.Agendamentos)
-                .HasForeignKey(ag => ag.ServicoId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .HasOne(ag => ag.Servico).WithMany(s => s.Agendamentos).HasForeignKey(ag => ag.ServicoId).OnDelete(DeleteBehavior.Restrict);
 
             // Animal -> RegistroProntuario (1:N)
             modelBuilder.Entity<RegistroProntuario>()
-                .HasOne(rp => rp.Animal)
-                .WithMany(a => a.Registros)
-                .HasForeignKey(rp => rp.AnimalId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .HasOne(rp => rp.Animal).WithMany(a => a.Registros).HasForeignKey(rp => rp.AnimalId).OnDelete(DeleteBehavior.Cascade);
 
-            // Funcionario -> RegistroProntuario (1:N) - opcional
+            // Funcionario -> RegistroProntuario (1:N)
             modelBuilder.Entity<RegistroProntuario>()
-                .HasOne(rp => rp.Funcionario)
-                .WithMany(f => f.Registros)
-                .HasForeignKey(rp => rp.FuncionarioId)
-                .OnDelete(DeleteBehavior.SetNull);
+                .HasOne(rp => rp.Funcionario).WithMany(f => f.Registros).HasForeignKey(rp => rp.FuncionarioId).OnDelete(DeleteBehavior.SetNull);
 
-            // Fornecedor -> Produto (1:N) - opcional
+            // Fornecedor -> Produto (1:N)
             modelBuilder.Entity<Produto>()
-                .HasOne(p => p.Fornecedor)
-                .WithMany(f => f.Produtos)
-                .HasForeignKey(p => p.FornecedorId)
-                .OnDelete(DeleteBehavior.SetNull);
+                .HasOne(p => p.Fornecedor).WithMany(f => f.Produtos).HasForeignKey(p => p.FornecedorId).OnDelete(DeleteBehavior.SetNull);
 
-            // Tutor -> Venda (1:N) - opcional
+            // Tutor -> Venda (1:N)
             modelBuilder.Entity<Venda>()
-                .HasOne(v => v.Tutor)
-                .WithMany(t => t.Vendas)
-                .HasForeignKey(v => v.TutorId)
-                .OnDelete(DeleteBehavior.SetNull);
+                .HasOne(v => v.Tutor).WithMany(t => t.Vendas).HasForeignKey(v => v.TutorId).OnDelete(DeleteBehavior.SetNull);
 
-            // Funcionario -> Venda (1:N) - opcional
+            // Funcionario -> Venda (1:N)
             modelBuilder.Entity<Venda>()
-                .HasOne(v => v.Funcionario)
-                .WithMany(f => f.Vendas)
-                .HasForeignKey(v => v.FuncionarioId)
-                .OnDelete(DeleteBehavior.SetNull);
+                .HasOne(v => v.Funcionario).WithMany(f => f.Vendas).HasForeignKey(v => v.FuncionarioId).OnDelete(DeleteBehavior.SetNull);
 
             // Venda -> ItemVenda (1:N)
             modelBuilder.Entity<ItemVenda>()
-                .HasOne(iv => iv.Venda)
-                .WithMany(v => v.Itens)
-                .HasForeignKey(iv => iv.VendaId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .HasOne(iv => iv.Venda).WithMany(v => v.Itens).HasForeignKey(iv => iv.VendaId).OnDelete(DeleteBehavior.Cascade);
 
-            // Produto -> ItemVenda (1:N) - opcional
+            // Produto -> ItemVenda (1:N)
             modelBuilder.Entity<ItemVenda>()
-                .HasOne(iv => iv.Produto)
-                .WithMany(p => p.ItemVendas)
-                .HasForeignKey(iv => iv.ProdutoId)
-                .OnDelete(DeleteBehavior.SetNull);
+                .HasOne(iv => iv.Produto).WithMany(p => p.ItemVendas).HasForeignKey(iv => iv.ProdutoId).OnDelete(DeleteBehavior.SetNull);
 
-            // Servico -> ItemVenda (1:N) - opcional
+            // Servico -> ItemVenda (1:N)
             modelBuilder.Entity<ItemVenda>()
-                .HasOne(iv => iv.Servico)
-                .WithMany(s => s.ItemVendas)
-                .HasForeignKey(iv => iv.ServicoId)
-                .OnDelete(DeleteBehavior.SetNull);
+                .HasOne(iv => iv.Servico).WithMany(s => s.ItemVendas).HasForeignKey(iv => iv.ServicoId).OnDelete(DeleteBehavior.SetNull);
 
-            // Produto -> ProdutoImagem (1:N) - exclusão em cascata
+            // Produto -> ProdutoImagem (1:N)
             modelBuilder.Entity<ProdutoImagem>()
-                .HasOne(pi => pi.Produto)
-                .WithMany(p => p.Imagens)
-                .HasForeignKey(pi => pi.ProdutoId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .HasOne(pi => pi.Produto).WithMany(p => p.Imagens).HasForeignKey(pi => pi.ProdutoId).OnDelete(DeleteBehavior.Cascade);
 
-            // Índices para melhor performance
-            modelBuilder.Entity<Tutor>()
-                .HasIndex(t => t.Email);
-
-            // O Login agora estará na tabela Usuario, mas se manteve o campo em Funcionario para migração, pode deixar o index.
-            // Se removeu do modelo Funcionario, remova esta linha. Assumindo que a migração será completa:
-            // modelBuilder.Entity<Funcionario>().HasIndex(f => f.Login).IsUnique(); 
-            // Em vez disso, indexamos o email do usuário:
-            modelBuilder.Entity<Usuario>()
-                .HasIndex(u => u.Email)
-                .IsUnique();
-
-            modelBuilder.Entity<Produto>()
-                .HasIndex(p => p.CodigoBarras);
+            // Índices
+            modelBuilder.Entity<Usuario>().HasIndex(u => u.Email).IsUnique();
+            modelBuilder.Entity<Produto>().HasIndex(p => p.CodigoBarras);
         }
     }
 }

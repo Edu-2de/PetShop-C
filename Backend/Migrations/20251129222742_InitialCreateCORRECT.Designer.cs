@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SIGA_PET.Data;
 
@@ -11,9 +12,11 @@ using SIGA_PET.Data;
 namespace SIGA_PET.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251129222742_InitialCreateCORRECT")]
+    partial class InitialCreateCORRECT
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -529,7 +532,7 @@ namespace SIGA_PET.Migrations
                     b.HasOne("SIGA_PET.Models.Usuario", "Usuario")
                         .WithOne("Funcionario")
                         .HasForeignKey("SIGA_PET.Models.Funcionario", "UsuarioId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Usuario");
@@ -611,7 +614,7 @@ namespace SIGA_PET.Migrations
                     b.HasOne("SIGA_PET.Models.Usuario", "Usuario")
                         .WithOne("Tutor")
                         .HasForeignKey("SIGA_PET.Models.Tutor", "UsuarioId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Usuario");
