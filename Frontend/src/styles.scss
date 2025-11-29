@@ -1,66 +1,39 @@
-
-@use "bootstrap/scss/bootstrap";
+/* Global Styles - SIGA-PET */
+@use "bootstrap/scss/bootstrap" with ( $primary: #1d1d1f );
 @import "bootstrap-icons/font/bootstrap-icons.css";
 
 body {
   background-color: #f5f5f7;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  color: #1d1d1f;
 }
-
-/* Footer (Seu estilo pedido) */
-.main-footer {
-  background: #2b2b2b;
-  color: #fff;
-  padding: 70px 0 30px;
-  margin-top: auto;
-}
-/* ... (Adicione o restante do CSS do footer que você já tinha e gostou) ... */
 
 /* --- CORREÇÃO DO HEADER --- */
-/* Garante que o avatar NUNCA amasse */
 .avatar-circle {
   width: 38px !important;
   height: 38px !important;
-  min-width: 38px !important;
+  min-width: 38px !important; /* CRÍTICO: Impede deformação */
   flex-shrink: 0 !important;
   object-fit: cover;
 }
 
-/* Corrige o container da direita para não esticar */
 .navbar-collapse {
-  flex-grow: 1;
-  display: flex;
-  align-items: center;
+  flex-grow: 1; /* Ocupa espaço disponível */
 }
 
-/* Empurra o conteúdo da direita para o final */
 .ms-auto {
-  margin-left: auto !important;
+  margin-left: auto !important; /* Força alinhamento à direita */
 }
 
-/* Remove setinha do dropdown */
 .no-caret::after {
   display: none !important;
 }
 
-/* Utilitários de Texto */
-.text-xs {
-  font-size: 11px;
-}
-
-.ls-1 {
-  letter-spacing: 1px;
-}
-
-.fw-500 {
-  font-weight: 500;
-}
-
-/* Footer Global */
+/* Footer */
 .main-footer {
   background: #fff;
   border-top: 1px solid #e5e5e5;
-  padding: 60px 0 30px;
+  padding: 80px 0 40px;
   margin-top: auto;
 }
 
@@ -72,7 +45,7 @@ body {
 
 .footer-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
   gap: 40px;
 }
 
@@ -80,14 +53,16 @@ body {
   font-size: 1.2rem;
   font-weight: 700;
   color: #1d1d1f;
+  letter-spacing: -0.5px;
 }
 
 .footer-title {
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   font-weight: 600;
-  color: #1d1d1f;
+  color: #86868b;
   margin-bottom: 1rem;
   text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .footer-links {
@@ -96,7 +71,7 @@ body {
 }
 
 .footer-links li {
-  margin-bottom: 8px;
+  margin-bottom: 10px;
 }
 
 .footer-links a {
@@ -110,13 +85,3 @@ body {
   color: #000;
   text-decoration: underline;
 }
-
-.footer-bottom {
-  border-top: 1px solid #e5e5e5;
-  padding-top: 24px;
-  text-align: center;
-  font-size: 0.75rem;
-  color: #86868b;
-}
-
-
