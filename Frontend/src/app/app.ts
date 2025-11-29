@@ -1,42 +1,37 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
+import { RouterModule, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router'; // Importação única
 import { FormsModule } from '@angular/forms';
 import { AuthService } from './service/auth/auth.service';
-import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [
-    CommonModule,
-    RouterModule, // Substitui RouterOutlet, RouterLink, RouterLinkActive
-    FormsModule
-  ],
+  imports: [CommonModule, RouterModule, FormsModule],
   templateUrl: './app.html',
   styleUrl: './app.scss'
 })
 export class AppComponent {
   title = 'SIGA-PET';
   searchQuery: string = '';
+  
+  // Injeção de dependência correta
+  public authService = inject(AuthService);
+  private router = inject(Router);
 
-  constructor(public authService: AuthService, private router: Router) { }
+  // CORREÇÃO CRÍTICA: Atribuir o Signal a uma propriedade
+  currentUser = this.authService.getCurrentUser();
+
+  searchProducts(): void {
+    if (this.searchQuery.trim()) {
+      this.router.navigate(['/produtos'], { 
+        queryParams: { search: this.searchQuery } 
+      });
+    }
+  }
 
   logout(event: Event): void {
     event.preventDefault();
     this.authService.logout();
-  }
-
-  currentUser() {
-    return this.authService.getCurrentUser();
-  }
-
-  searchProducts(): void {
-    if (this.searchQuery.trim()) {
-      // Navega para a rota de produtos com o parâmetro de busca (exemplo)
-      // Você pode precisar ajustar a lógica do ProdutoListComponent para ler isso
-      console.log('Buscando por:', this.searchQuery);
-      // this.router.navigate(['/produtos'], { queryParams: { q: this.searchQuery } });
-    }
   }
 }
