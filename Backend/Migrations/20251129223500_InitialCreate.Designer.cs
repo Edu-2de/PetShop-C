@@ -12,8 +12,8 @@ using SIGA_PET.Data;
 namespace SIGA_PET.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20251129222742_InitialCreateCORRECT")]
-    partial class InitialCreateCORRECT
+    [Migration("20251129223500_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -532,7 +532,7 @@ namespace SIGA_PET.Migrations
                     b.HasOne("SIGA_PET.Models.Usuario", "Usuario")
                         .WithOne("Funcionario")
                         .HasForeignKey("SIGA_PET.Models.Funcionario", "UsuarioId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Usuario");
@@ -614,7 +614,7 @@ namespace SIGA_PET.Migrations
                     b.HasOne("SIGA_PET.Models.Usuario", "Usuario")
                         .WithOne("Tutor")
                         .HasForeignKey("SIGA_PET.Models.Tutor", "UsuarioId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Usuario");
