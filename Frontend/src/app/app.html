@@ -1,5 +1,6 @@
 <nav id="mainNav" class="navbar navbar-expand-lg navbar-light bg-white shadow-sm fixed-top">
   <div class="container-fluid px-4">
+
     <a class="navbar-brand brand-logo d-flex align-items-center" routerLink="/">
       <i class="bi bi-heart-pulse-fill text-primary fs-4 me-2"></i>
       <span class="fw-bold text-dark">SIGA-PET</span>
@@ -12,44 +13,52 @@
     <div class="collapse navbar-collapse" id="navbarNav">
 
       <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-3">
-        <li class="nav-item" *ngIf="authService.isAdmin()">
-          <a class="nav-link text-primary fw-bold" routerLink="/admin" routerLinkActive="active">
-            <i class="bi bi-speedometer2 me-1"></i>Painel
-          </a>
-        </li>
 
-        <li class="nav-item">
-          <a class="nav-link" routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">Home</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" routerLink="/produtos" routerLinkActive="active">Produtos</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" routerLink="/servicos" routerLinkActive="active">Serviços</a>
-        </li>
+        <ng-container *ngIf="authService.isAdmin()">
+          <li class="nav-item">
+            <a class="nav-link fw-medium" routerLink="/admin" routerLinkActive="active">
+              Painel
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
+              Home
+            </a>
+          </li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+              Gerenciar
+            </a>
+            <ul class="dropdown-menu border-0 shadow">
+              <li><a class="dropdown-item" routerLink="/tutores">Tutores</a></li>
+              <li><a class="dropdown-item" routerLink="/pets">Pets</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item" routerLink="/produtos">Produtos</a></li>
+              <li><a class="dropdown-item" routerLink="/servicos">Serviços</a></li>
+              <li><a class="dropdown-item" routerLink="/agenda">Agenda</a></li>
+              <li><a class="dropdown-item" routerLink="/fornecedores">Fornecedores</a></li>
+            </ul>
+          </li>
+        </ng-container>
 
-        <li class="nav-item" *ngIf="authService.isUser() && !authService.isAdmin()">
-          <a class="nav-link" routerLink="/agenda/novo" routerLinkActive="active">
-            <i class="bi bi-calendar-plus me-1"></i>Agendar
-          </a>
-        </li>
-
-        <li class="nav-item dropdown" *ngIf="authService.isAdmin()">
-          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-            Gerenciar
-          </a>
-          <ul class="dropdown-menu border-0 shadow">
-            <li><a class="dropdown-item" routerLink="/tutores"><i class="bi bi-people me-2"></i>Tutores</a></li>
-            <li><a class="dropdown-item" routerLink="/pets"><i class="bi bi-heart me-2"></i>Pets</a></li>
-            <li><a class="dropdown-item" routerLink="/produtos"><i class="bi bi-box-seam me-2"></i>Produtos</a></li>
-            <li><a class="dropdown-item" routerLink="/servicos"><i class="bi bi-scissors me-2"></i>Serviços</a></li>
-            <li><a class="dropdown-item" routerLink="/agenda"><i class="bi bi-calendar-check me-2"></i>Agenda Geral</a></li>
-            <li><a class="dropdown-item" routerLink="/fornecedores"><i class="bi bi-truck me-2"></i>Fornecedores</a></li>
-          </ul>
-        </li>
+        <ng-container *ngIf="!authService.isAdmin()">
+          <li class="nav-item">
+            <a class="nav-link" routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">Home</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" routerLink="/produtos" routerLinkActive="active">Produtos</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" routerLink="/servicos" routerLinkActive="active">Serviços</a>
+          </li>
+          <li class="nav-item" *ngIf="authService.isAuthenticated()">
+            <a class="nav-link" routerLink="/agenda/novo" routerLinkActive="active">Agendar</a>
+          </li>
+        </ng-container>
       </ul>
 
       <div class="d-flex align-items-center gap-3">
+
         <div class="input-group input-group-sm d-none d-lg-flex" style="width: 250px;" *ngIf="!authService.isAdmin()">
           <input type="text" class="form-control bg-light border-0" placeholder="Buscar..." [(ngModel)]="searchQuery" (keyup.enter)="searchProducts()">
           <button class="btn btn-light border-0" (click)="searchProducts()">
@@ -66,14 +75,17 @@
             <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center shadow-sm" style="width: 35px; height: 35px; font-size: 0.9rem;">
               {{ (currentUser()?.nome || 'U').charAt(0).toUpperCase() }}
             </div>
-            <span class="d-none d-md-block fw-medium small text-dark">
-              {{ (currentUser()?.nome || '').split(' ')[0] }}
-            </span>
+
+            <div class="d-none d-md-flex flex-column text-start lh-1">
+              <span class="fw-bold text-dark small">
+                {{ authService.isAdmin() ? 'Administrador' : (currentUser()?.nome || '').split(' ')[0] }}
+              </span>
+            </div>
           </button>
 
           <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 mt-2 p-2" style="width: 200px;">
             <li class="px-3 py-2 border-bottom mb-2">
-              <small class="text-muted d-block">Olá,</small>
+              <small class="text-muted d-block">Logado como</small>
               <span class="fw-bold text-truncate d-block">{{ currentUser()?.nome }}</span>
             </li>
 
@@ -90,12 +102,15 @@
             </li>
           </ul>
         </div>
-      </div>
 
+      </div>
     </div>
   </div>
 </nav>
 
+<main>
+  <router-outlet></router-outlet>
+</main>
 <main>
   <router-outlet></router-outlet>
 </main>
