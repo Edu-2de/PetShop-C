@@ -1,9 +1,10 @@
-import { Component, OnInit, signal, computed } from '@angular/core';
+import { Component, OnInit, signal, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { Fornecedor } from '../../../model/fornecedor.model';
-import { FornecedorService } from '../../../service/fornecedor/fornecedor';
 import { FormsModule } from '@angular/forms';
+// CORREÇÃO: Caminho aponta para a pasta correta do serviço 'fornecedor'
+import { FornecedorService } from '../../../service/fornecedor/fornecedor';
 
 @Component({
   selector: 'app-fornecedor-list',
@@ -13,21 +14,19 @@ import { FormsModule } from '@angular/forms';
   styleUrls: ['./forncedor-list.scss']
 })
 export class ForncedorListComponent implements OnInit {
+  private fornecedorService = inject(FornecedorService);
+
   fornecedores = signal<Fornecedor[]>([]);
   termoBusca = signal<string>('');
 
   fornecedoresFiltrados = computed(() => {
     const fornecedores = this.fornecedores();
     const termo = this.termoBusca().toLowerCase();
-    if (!termo) {
-      return fornecedores;
-    }
-    return fornecedores.filter(f =>
-      f.nome.toLowerCase().includes(termo)
-    );
+    if (!termo) return fornecedores;
+    return fornecedores.filter(f => f.nome.toLowerCase().includes(termo));
   });
 
-  constructor(private fornecedorService: FornecedorService) {}
+  constructor() { }
 
   ngOnInit(): void {
     this.carregarFornecedores();
@@ -48,7 +47,7 @@ export class ForncedorListComponent implements OnInit {
     if (id === undefined) return;
     if (confirm('Deseja realmente excluir este fornecedor?')) {
       this.fornecedorService.delete(id).subscribe(() => {
-        this.fornecedores.update(fornecedoresAtuais => fornecedoresAtuais.filter(f => f.id !== id));
+        this.fornecedores.update(atuais => atuais.filter(f => f.id !== id));
       });
     }
   }
