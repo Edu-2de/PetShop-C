@@ -1,20 +1,15 @@
 <div class="container mt-4">
-  <div class="card shadow-sm">
+
+  <div class="card shadow-sm" *ngIf="authService.isAdmin()">
     <div class="card-header bg-light py-3">
       <div class="d-flex justify-content-between align-items-center">
         <h2 class="mb-0">Gerenciamento de Serviços</h2>
         <div class="d-flex">
           <div class="input-group me-2">
-            <input
-              type="text"
-              class="form-control"
-              placeholder="Buscar por nome..."
-              [value]="termoBusca()"
-              (input)="buscar($event)">
+            <input type="text" class="form-control" placeholder="Buscar..." [value]="termoBusca()" (input)="buscar($event)">
           </div>
           <a routerLink="/servicos/novo" class="btn btn-primary text-nowrap">
-            <i class="bi bi-plus-circle me-1"></i>
-            Novo Serviço
+            <i class="bi bi-plus-circle me-1"></i> Novo
           </a>
         </div>
       </div>
@@ -24,23 +19,20 @@
         <table class="table table-hover align-middle">
           <thead class="table-light">
             <tr>
-              <th scope="col" class="border-end">Nome</th>
+              <th scope="col">Nome</th>
               <th scope="col">Descrição</th>
               <th scope="col">Preço</th>
-              <th scope="col">Duração (min)</th>
+              <th scope="col">Duração</th>
               <th scope="col">Status</th>
               <th scope="col" class="text-end">Ações</th>
             </tr>
           </thead>
           <tbody>
-            <tr *ngIf="servicosFiltrados().length === 0">
-              <td colspan="6" class="text-center py-4">Nenhum serviço encontrado.</td>
-            </tr>
             <tr *ngFor="let servico of servicosFiltrados()">
-              <td class="border-end">{{ servico.nome }}</td>
+              <td>{{ servico.nome }}</td>
               <td>{{ servico.descricao }}</td>
               <td>{{ servico.preco | currency:'BRL' }}</td>
-              <td>{{ servico.duracao }}</td>
+              <td>{{ servico.duracao }} min</td>
               <td>
                 <span class="badge" [ngClass]="servico.ativo ? 'text-bg-success' : 'text-bg-secondary'">
                   {{ servico.ativo ? 'Ativo' : 'Inativo' }}
@@ -56,4 +48,46 @@
       </div>
     </div>
   </div>
+
+  <div *ngIf="!authService.isAdmin()">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h2 class="fw-bold text-primary"><i class="bi bi-scissors me-2"></i>Nossos Serviços</h2>
+      <div class="input-group" style="max-width: 300px;">
+        <input type="text" class="form-control" placeholder="Busque um serviço..." [value]="termoBusca()" (input)="buscar($event)">
+        <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+      </div>
+    </div>
+
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+      <div class="col" *ngFor="let servico of servicosFiltrados()">
+        <div class="card h-100 shadow-sm border-0 service-card">
+          <div class="card-body text-center p-4">
+            <div class="service-icon mb-3 text-primary">
+              <i class="bi bi-stars" style="font-size: 2.5rem;"></i>
+            </div>
+            <h4 class="card-title fw-bold mb-3">{{ servico.nome }}</h4>
+            <p class="card-text text-muted mb-4">{{ servico.descricao }}</p>
+
+            <div class="d-flex justify-content-center align-items-center gap-3 mb-4">
+              <div class="badge bg-light text-dark p-2 border">
+                <i class="bi bi-clock me-1"></i> {{ servico.duracao }} min
+              </div>
+              <div class="h4 mb-0 text-primary fw-bold">
+                {{ servico.preco | currency:'BRL' }}
+              </div>
+            </div>
+
+            <button class="btn btn-primary w-100 rounded-pill py-2" (click)="agendar(servico)">
+              <i class="bi bi-calendar-plus me-2"></i>Agendar Agora
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="servicosFiltrados().length === 0" class="text-center py-5 mt-4">
+      <div class="text-muted fs-5">Nenhum serviço encontrado com este nome.</div>
+    </div>
+  </div>
+
 </div>
