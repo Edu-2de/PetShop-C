@@ -1,15 +1,26 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using SIGA_PET.Data;
 using SIGA_PET.Profiles;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
 using System.Text;
-
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllers();
+
+// 1. Configuração do Banco de Dados
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlServer(connectionString));
+
+// 2. Configuração do AutoMapper
+builder.Services.AddAutoMapper(typeof(MappingProfile));
+
+// 3. Configuração de Autenticação e JWT (APENAS UMA VEZ)
+var jwtKey = builder.Configuration["Jwt:Key"] ?? "MinhaChaveSecretaSuperSegura123!";
+var key = Encoding.ASCII.GetBytes(jwtKey);
 
 builder.Services.AddAuthentication(options =>
 {
@@ -18,67 +29,33 @@ builder.Services.AddAuthentication(options =>
 })
 .AddJwtBearer(options =>
 {
+    options.RequireHttpsMetadata = false;
+    options.SaveToken = true;
     options.TokenValidationParameters = new TokenValidationParameters
     {
-        ValidateIssuer = true,
-        ValidateAudience = true,
-        ValidateLifetime = true,
         ValidateIssuerSigningKey = true,
-        ValidIssuer = builder.Configuration["Jwt:Issuer"],
-        ValidAudience = builder.Configuration["Jwt:Audience"],
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!))
+        IssuerSigningKey = new SymmetricSecurityKey(key),
+        ValidateIssuer = false, // Em produção, configure para true e defina o Issuer
+        ValidateAudience = false // Em produção, configure para true e defina o Audience
     };
 });
 
-
-
-// Configurar Entity Framework
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(connectionString));
-
-
-builder.Services.AddAutoMapper(typeof(MappingProfile));
-
-// Configurar CORS para permitir requisições do frontend Angular
+// 4. Configuração do CORS
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAngularApp",
         policy =>
         {
-            policy.WithOrigins(
-                    "http://localhost:4200", 
-                    "http://localhost:4201",
-                    "https://localhost:4200",
-                    "https://localhost:4201")
+            policy.WithOrigins("http://localhost:4200")
                   .AllowAnyHeader()
                   .AllowAnyMethod()
                   .AllowCredentials();
         });
 });
 
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+// 5. Swagger
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-
-var key = Encoding.ASCII.GetBytes(builder.Configuration["Jwt:Key"] ?? "MinhaChaveSecretaSuperSegura123!");
-builder.Services.AddAuthentication(x =>
-{
-    x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-})
-.AddJwtBearer(x =>
-{
-    x.RequireHttpsMetadata = false;
-    x.SaveToken = true;
-    x.TokenValidationParameters = new TokenValidationParameters
-    {
-        ValidateIssuerSigningKey = true,
-        IssuerSigningKey = new SymmetricSecurityKey(key),
-        ValidateIssuer = false,
-        ValidateAudience = false
-    };
-});
 
 var app = builder.Build();
 
@@ -89,12 +66,12 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-// Comentar HTTPS redirect para desenvolvimento
-// app.UseHttpsRedirection();
+// app.UseHttpsRedirection(); // Mantenha comentado em dev se não tiver certificado configurado
 
-// Habilitar CORS
 app.UseCors("AllowAngularApp");
-app.UseAuthentication(); 
+
+// A ordem aqui é importante: Autenticação -> Autorização
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
