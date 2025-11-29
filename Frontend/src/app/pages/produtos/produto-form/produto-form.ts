@@ -6,8 +6,8 @@ import { Produto } from '../../../model/produto.model';
 import { ProdutoService } from '../../../service/produtos/produto.service';
 import { ProdutoImagemService } from '../../../service/produto-imagem/produto-imagem.service';
 import { Fornecedor } from '../../../model/fornecedor.model';
-// CORREÇÃO: Caminho correto do serviço (com 'e')
-import { FornecedorService } from '../../../service/fornecedor/fornecedor';
+// CORREÇÃO: Apontar para o arquivo real 'forncedor'
+import { FornecedorService } from '../../../service/fornecedor/forncedor';
 import { Categoria } from '../../../model/categoria.model';
 import { CategoriaService } from '../../../service/categorias/categoria.service';
 
