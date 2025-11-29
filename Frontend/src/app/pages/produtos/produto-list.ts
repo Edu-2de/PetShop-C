@@ -1,11 +1,12 @@
 import { Component, OnInit, signal, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { RouterLink, Router } from '@angular/router';
 import { Produto } from '../../model/produto.model';
 import { ProdutoService } from '../../service/produtos/produto.service';
 import { Fornecedor } from '../../model/fornecedor.model';
 import { FornecedorService } from '../../service/fornecedor/fornecedor';
 import { FormsModule } from '@angular/forms';
+import { AuthService } from '../../service/auth/auth.service'; // Importar AuthService
 
 @Component({
   selector: 'app-produto-list',
@@ -18,6 +19,10 @@ export class ProdutoListComponent implements OnInit {
   private produtos = signal<Produto[]>([]);
   private fornecedorMap = new Map<number, string>();
   termoBusca = signal<string>('');
+
+  // Injetar AuthService
+  public authService = inject(AuthService);
+  private router = inject(Router);
 
   produtosFiltrados = computed(() => {
     const produtos = this.produtos();
@@ -34,7 +39,7 @@ export class ProdutoListComponent implements OnInit {
   constructor(
     private produtoService: ProdutoService,
     private fornecedorService: FornecedorService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.carregarDados();
@@ -66,5 +71,14 @@ export class ProdutoListComponent implements OnInit {
         this.produtos.update(produtosAtuais => produtosAtuais.filter(p => p.id !== id));
       });
     }
+  }
+
+  // Método para simular compra
+  comprar(produto: Produto): void {
+    if (!this.authService.isAuthenticated()) {
+      this.router.navigate(['/login']);
+      return;
+    }
+    alert(`Produto "${produto.nome}" adicionado ao carrinho! (Simulação)`);
   }
 }

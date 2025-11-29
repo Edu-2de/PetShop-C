@@ -1,6 +1,6 @@
-import { Component, OnInit, signal, computed } from '@angular/core';
+import { Component, OnInit, signal, computed, inject } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { RouterLink, Router } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { Agenda } from '../../model/agenda.model';
 import { AgendaService } from '../../service/agenda/agenda';
@@ -9,6 +9,7 @@ import { PetService } from '../../service/pets/pet.service';
 import { ServicoPet } from '../../model/servico-pet.model';
 import { ServicoPetService } from '../../service/servico-pet/servico-pet';
 import { FormsModule } from '@angular/forms';
+import { AuthService } from '../../service/auth/auth.service';
 
 interface AgendamentoCompleto extends Agenda {
   pet?: Pet;
@@ -25,6 +26,9 @@ interface AgendamentoCompleto extends Agenda {
 export class AgendaListComponent implements OnInit {
   private agendamentos = signal<AgendamentoCompleto[]>([]);
   termoBusca = signal<string>('');
+
+  public authService = inject(AuthService);
+  private router = inject(Router);
 
   agendamentosFiltrados = computed(() => {
     const agendamentos = this.agendamentos();
@@ -44,13 +48,21 @@ export class AgendaListComponent implements OnInit {
     private agendaService: AgendaService,
     private petService: PetService,
     private servicoPetService: ServicoPetService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
+    // Lógica de Redirecionamento:
+    // Se NÃO for Admin, vai direto para "Agendar Novo" em vez de ver a lista
+    if (!this.authService.isAdmin()) {
+      this.router.navigate(['/agenda/novo']);
+      return;
+    }
+
     this.carregarAgendamentos();
   }
 
   carregarAgendamentos(): void {
+    // ... (código existente)
     forkJoin({
       agendamentos: this.agendaService.listar(),
       pets: this.petService.listar(),
@@ -69,6 +81,7 @@ export class AgendaListComponent implements OnInit {
     });
   }
 
+  // ... (restante dos métodos: buscar, excluir)
   buscar(event: Event): void {
     const target = event.target as HTMLInputElement;
     this.termoBusca.set(target.value);
