@@ -1,64 +1,43 @@
-import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
-import { AuthService } from '../../service/auth/auth.service';
+<div class="admin-header" >
+  <div class="container admin-container" >
+    <div class="d-flex justify-content-between align-items-center" >
+      <div>
+      <h1 class="mb-1" > Painel Administrativo < /h1>
+        < p > Gestão completa do sistema SIGA - PET < /p>
+          < /div>
+          < div class="d-none d-md-block text-end" >
+            <span class="badge bg-light text-dark border fw-normal px-3 py-2" >
+              <i class="bi bi-person-circle me-2" > </i>{{ user()?.nome }}
+                < /span>
+                < /div>
+                < /div>
+                < /div>
+                < /div>
 
-@Component({
-  selector: 'app-admin-dashboard',
-  standalone: true,
-  imports: [CommonModule, RouterLink],
-  templateUrl: './admin-dashboard.component.html',
-  styleUrls: ['./admin-dashboard.component.scss']
-})
-export class AdminDashboardComponent {
-  adminCards = [
-    {
-      title: 'Gerenciar Tutores',
-      icon: 'bi-people-fill',
-      description: 'Cadastrar e gerenciar tutores de pets',
-      link: '/tutores',
-      color: 'primary'
-    },
-    {
-      title: 'Gerenciar Pets',
-      icon: 'bi-heart-fill',
-      description: 'Cadastrar e gerenciar animais',
-      link: '/pets',
-      color: 'danger'
-    },
-    {
-      title: 'Gerenciar Produtos',
-      icon: 'bi-box-seam',
-      description: 'Cadastrar e gerenciar produtos',
-      link: '/produtos',
-      color: 'warning'
-    },
-    {
-      title: 'Gerenciar Serviços',
-      icon: 'bi-scissors',
-      description: 'Cadastrar e gerenciar serviços',
-      link: '/servicos',
-      color: 'info'
-    },
-    {
-      title: 'Agenda',
-      icon: 'bi-calendar-check',
-      description: 'Gerenciar agendamentos',
-      link: '/agenda',
-      color: 'success'
-    },
-    {
-      title: 'Fornecedores',
-      icon: 'bi-truck',
-      description: 'Gerenciar fornecedores',
-      link: '/fornecedores',
-      color: 'secondary'
-    }
-  ];
+                < div class="container admin-container pb-5" >
+                  <div class="row g-4" >
+                    <div class="col-md-6 col-lg-4" * ngFor="let card of adminCards" >
+                      <div class="card admin-card h-100" >
+                        <div class="card-body" >
+                          <div class="icon-box"[ngClass] = "'text-' + card.color" >
+                            <i class="bi"[class] = "card.icon" > </i>
+                              < /div>
 
-  constructor(public authService: AuthService) {}
+                              < h5 class="card-title" > {{ card.title }}</h5>
+                                < p class="card-text" > {{ card.description }}</p>
 
-  get user() {
-    return this.authService.getCurrentUser();
-  }
-}
+                                  < a[routerLink]="card.link" class="btn-link-custom" >
+                                    Gerenciar < i class="bi bi-arrow-right" > </i>
+                                      < /a>
+                                      < /div>
+                                      < /div>
+                                      < /div>
+                                      < /div>
+
+                                      < div class="mt-5 pt-4 border-top" >
+                                        <div class="info-box" >
+                                          <i class="bi bi-shield-check text-success" > </i>
+                                            < span > Área segura.Todas as ações são registradas para auditoria.< /span>
+                                              < /div>
+                                              < /div>
+                                              < /div>
