@@ -35,6 +35,16 @@ export class ProdutoService {
     );
   }
 
+  searchByName(name: string): Observable<Produto[]> {
+    return this.http.get<Produto[]>(`${this.apiUrl}/search?name=${name}`).pipe(
+      map(produtos => produtos.map(p => ({
+        ...p,
+        id: p.produtoId,
+        fornecedorid: p.fornecedorId
+      })))
+    );
+  }
+
   create(produto: Partial<Produto>): Observable<Produto> {
     const payload = { ...produto, fornecedorId: produto.fornecedorId || produto.fornecedorid };
     return this.http.post<Produto>(this.apiUrl, payload).pipe(

@@ -27,6 +27,12 @@ export class ServicoPetService {
     );
   }
 
+  searchByName(name: string): Observable<ServicoPet[]> {
+    return this.http.get<ServicoPet[]>(`${this.apiUrl}/search?name=${name}`).pipe(
+      map(servicos => servicos.map(s => ({ ...s, id: s.servicoId })))
+    );
+  }
+
   criar(servico: Partial<ServicoPet>): Observable<ServicoPet> {
     return this.http.post<ServicoPet>(this.apiUrl, servico).pipe(
       map(s => ({ ...s, id: s.servicoId }))

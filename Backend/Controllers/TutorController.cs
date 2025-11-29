@@ -1,4 +1,3 @@
-
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -38,6 +37,29 @@ namespace SIGA_PET.Controllers
             {
                 return StatusCode(500, $"Erro interno: {ex.Message}");
             }
+        }
+
+        // GET: api/Tutor/search
+        [HttpGet("search")]
+        public async Task<ActionResult<IEnumerable<TutorDto>>> SearchTutores([FromQuery] string name)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                return BadRequest("O nome para busca não pode ser vazio.");
+            }
+
+            var tutores = await _context.Tutores
+                .AsNoTracking()
+                .Where(t => t.Nome.Contains(name))
+                .ToListAsync();
+
+            if (!tutores.Any())
+            {
+                return NotFound("Nenhum tutor encontrado com o nome fornecido.");
+            }
+
+            var tutoresDto = _mapper.Map<IEnumerable<TutorDto>>(tutores);
+            return Ok(tutoresDto);
         }
 
         // GET: api/Tutor/5

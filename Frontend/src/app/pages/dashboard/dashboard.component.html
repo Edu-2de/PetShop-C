@@ -1,0 +1,169 @@
+
+
+<!-- Banner Carousel (aparece APENAS se houver banners) -->
+<ng-container *ngIf="bannersLoaded && banners.length > 0">
+  <section class="banner-slider" (mouseenter)="pauseRotation()" (mouseleave)="resumeRotation()">
+    <div class="banner-wrapper">
+      <div class="banner-slide" *ngFor="let b of banners; let i = index" [class.active]="i === currentBanner">
+        <img [src]="b" [alt]="'Banner '+(i+1)" />
+      </div>
+    </div>
+    <button class="banner-nav prev" (click)="prevBanner()" aria-label="Banner anterior">‹</button>
+    <button class="banner-nav next" (click)="nextBanner()" aria-label="Próximo banner">›</button>
+    <div class="banner-indicators">
+      <span *ngFor="let b of banners; let i = index" 
+            [class.active]="i === currentBanner"
+            (click)="currentBanner = i"></span>
+    </div>
+  </section>
+</ng-container>
+
+<!-- Hero Section (aparece APENAS se NÃO houver banners) -->
+<ng-container *ngIf="bannersLoaded && banners.length === 0">
+  <section class="hero-section fade-in">
+    <div class="hero-content">
+      <h1 class="hero-title">SIGA-PET</h1>
+      <p class="hero-subtitle">Tudo para o seu pet em um só lugar. Produtos de qualidade e serviços especializados.</p>
+      <a routerLink="/produtos" class="btn-hero">Explorar Produtos</a>
+    </div>
+  </section>
+</ng-container>
+
+<!-- Categorias -->
+<section class="categories-section animate-on-scroll">
+  <div class="container">
+    <h2 class="section-title">Categorias</h2>
+    <div class="categories-grid">
+      <div class="category-card" *ngFor="let cat of categories" (click)="navigate(cat.link)">
+        <div class="category-title">{{ cat.title }}</div>
+        <div class="category-desc">{{ cat.desc }}</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Produtos em Destaque -->
+<section class="products-section animate-on-scroll">
+  <div class="container">
+    <div class="section-header">
+      <h2 class="section-title">Produtos em Destaque</h2>
+      <a routerLink="/produtos" class="view-all-link">Ver todos os produtos →</a>
+    </div>
+    
+    <div *ngIf="produtosCarregando" class="loading-message">
+      <div class="spinner"></div>
+      <p>Carregando produtos...</p>
+    </div>
+
+    <div *ngIf="!produtosCarregando && produtosErro" class="error-message">
+      <p>Erro ao carregar produtos. Tente novamente mais tarde.</p>
+    </div>
+
+    <div *ngIf="!produtosCarregando && !produtosErro && produtos.length === 0" class="empty-message">
+      <div class="empty-icon-box">
+        <div class="empty-icon"></div>
+      </div>
+      <p>Nenhum produto disponível no momento.</p>
+      <p class="empty-subtitle">Em breve teremos novidades!</p>
+    </div>
+
+    <div *ngIf="!produtosCarregando && produtos.length > 0" class="products-grid">
+      <div class="product-card slide-up" *ngFor="let produto of produtos">
+        <div class="product-image">
+          <img [src]="getProdutoImagem(produto)" [alt]="produto.nome" />
+          <div class="product-badge" *ngIf="produto.quantidadeEstoque < 5 && produto.quantidadeEstoque > 0">
+            Últimas unidades
+          </div>
+          <div class="product-badge out-of-stock" *ngIf="produto.quantidadeEstoque === 0">
+            Esgotado
+          </div>
+        </div>
+        <div class="product-info">
+          <h3 class="product-name">{{ produto.nome }}</h3>
+          <p class="product-description">{{ produto.descricao }}</p>
+          <div class="product-footer">
+            <span class="product-price">{{ formatPreco(produto.preco) }}</span>
+            <button class="btn-add-cart" 
+                    [disabled]="produto.quantidadeEstoque === 0"
+                    (click)="verProduto(produto)">
+              {{ produto.quantidadeEstoque === 0 ? 'Indisponível' : 'Ver detalhes' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Recursos/Vantagens -->
+<section class="features-section animate-on-scroll">
+  <div class="container">
+    <h2 class="section-title">Por que comprar conosco?</h2>
+    <div class="features-grid">
+      <div class="feature-card slide-up" *ngFor="let f of features">
+        <div class="feature-title">{{ f.title }}</div>
+        <div class="feature-desc">{{ f.desc }}</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="main-footer animate-on-scroll">
+  <div class="footer-content">
+    <div class="footer-grid">
+      <div>
+        <div class="footer-brand">
+          <div class="brand-name">SIGA-PET</div>
+          <div class="brand-tagline">Seu Pet Shop de Confiança</div>
+        </div>
+        <p class="company-description">Oferecemos produtos de qualidade e serviços especializados para o bem-estar do seu pet.</p>
+        <div class="social-links">
+          <a href="#" class="social-link" aria-label="Facebook">Facebook</a>
+          <a href="#" class="social-link" aria-label="Instagram">Instagram</a>
+          <a href="#" class="social-link" aria-label="WhatsApp">WhatsApp</a>
+        </div>
+      </div>
+      <div>
+        <div class="footer-title">Navegação</div>
+        <ul class="footer-links">
+          <li><a routerLink="/produtos">Produtos</a></li>
+          <li><a routerLink="/agenda">Agendar Serviço</a></li>
+          <li><a href="#categorias">Categorias</a></li>
+          <li><a href="#sobre">Sobre Nós</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="footer-title">Atendimento</div>
+        <ul class="footer-links">
+          <li><a href="#">Dúvidas Frequentes</a></li>
+          <li><a href="#">Política de Troca</a></li>
+          <li><a href="#">Formas de Pagamento</a></li>
+          <li><a href="#">Frete e Entrega</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="footer-title">Contato</div>
+        <div class="contact-item">
+          <strong>Endereço</strong>
+          <span>Av. Paulista, 1000 - São Paulo - SP</span>
+        </div>
+        <div class="contact-item">
+          <strong>Telefone</strong>
+          <span>(11) 3000-1234</span>
+        </div>
+        <div class="contact-item">
+          <strong>E-mail</strong>
+          <span>contato@sigapet.com.br</span>
+        </div>
+        <div class="contact-item">
+          <strong>Horário</strong>
+          <span>Seg–Sex: 8h às 18h / Sáb: 8h às 12h</span>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="copyright">© 2024 SIGA-PET. Todos os direitos reservados.</div>
+    </div>
+  </div>
+</footer>

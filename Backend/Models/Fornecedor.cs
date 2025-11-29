@@ -17,7 +17,13 @@ namespace SIGA_PET.Models
         [StringLength(150, ErrorMessage = "Email deve ter no máximo 150 caracteres")]
         public string? Email { get; set; }
 
-        [StringLength(20, ErrorMessage = "Telefone deve ter no máximo 20 caracteres")]
+        [StringLength(150)]
+        public string? Cnpj { get; set; }
+
+        [StringLength(150)]
+        public string? RazaoSocial { get; set; }
+
+        [StringLength(20)]
         public string? Telefone { get; set; }
 
         [StringLength(300, ErrorMessage = "Endereço deve ter no máximo 300 caracteres")]

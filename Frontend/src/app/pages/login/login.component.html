@@ -1,0 +1,88 @@
+<div class="login-page">
+  <div class="login-container">
+    <div class="login-card">
+      <!-- Logo/Brand -->
+      <div class="login-header">
+        <i class="bi bi-heart-pulse-fill brand-icon"></i>
+        <h1 class="brand-title">SIGA-PET</h1>
+        <p class="brand-subtitle">Entre na sua conta</p>
+      </div>
+
+      <!-- Alert de Erro -->
+      <div class="alert alert-danger alert-custom" *ngIf="erro">
+        <i class="bi bi-exclamation-circle me-2"></i>
+        {{ erro }}
+      </div>
+
+      <!-- Informações de Teste -->
+      <div class="info-box" *ngIf="!erro">
+        <div class="info-title">
+          <i class="bi bi-info-circle me-2"></i>
+          Contas de teste
+        </div>
+        <div class="info-content">
+          <div class="info-item">
+            <strong>Admin:</strong> admin@sigapet.com / admin123
+          </div>
+          <div class="info-item">
+            <strong>Usuário:</strong> user@sigapet.com / user123
+          </div>
+        </div>
+      </div>
+
+      <!-- Formulário -->
+      <form (ngSubmit)="login()" class="login-form">
+        <!-- Campo Email -->
+        <div class="form-group">
+          <label for="email" class="form-label">Email</label>
+          <div class="input-wrapper">
+            <i class="bi bi-envelope input-icon"></i>
+            <input 
+              type="email" 
+              class="form-control form-input" 
+              id="email" 
+              [(ngModel)]="email"
+              name="email"
+              placeholder="seu@email.com"
+              required>
+          </div>
+        </div>
+
+        <!-- Campo Senha -->
+        <div class="form-group">
+          <label for="senha" class="form-label">Senha</label>
+          <div class="input-wrapper">
+            <i class="bi bi-lock input-icon"></i>
+            <input 
+              [type]="mostrarSenha ? 'text' : 'password'" 
+              class="form-control form-input" 
+              id="senha" 
+              [(ngModel)]="senha"
+              name="senha"
+              placeholder="Sua senha"
+              required>
+            <button 
+              type="button"
+              class="btn-toggle-password" 
+              (click)="toggleSenha()">
+              <i class="bi" [class.bi-eye]="!mostrarSenha" [class.bi-eye-slash]="mostrarSenha"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Botão Submit -->
+        <button type="submit" class="btn btn-submit">
+          Entrar
+        </button>
+      </form>
+
+      <!-- Link de Volta -->
+      <div class="login-footer">
+        <a routerLink="/" class="link-back">
+          <i class="bi bi-arrow-left me-1"></i>
+          Voltar para home
+        </a>
+      </div>
+    </div>
+  </div>
+</div>

@@ -85,6 +85,30 @@ namespace SIGA_PET.Controllers
             }
         }
 
+        // GET: api/Produto/search?name=...
+        [HttpGet("search")]
+        public async Task<ActionResult<IEnumerable<ProdutoDto>>> SearchProdutos([FromQuery] string name)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                return BadRequest("O nome para busca não pode ser vazio.");
+            }
+
+            var produtos = await _context.Produtos
+                .Include(p => p.Fornecedor)
+                .AsNoTracking()
+                .Where(p => p.Nome.Contains(name))
+                .ToListAsync();
+
+            if (!produtos.Any())
+            {
+                return NotFound("Nenhum produto encontrado com o nome fornecido.");
+            }
+
+            var produtosDto = _mapper.Map<IEnumerable<ProdutoDto>>(produtos);
+            return Ok(produtosDto);
+        }
+
         // POST: api/Produto
         [HttpPost]
         public async Task<ActionResult<ProdutoDto>> CreateProduto([FromBody] CreateProdutoDto createProdutoDto)

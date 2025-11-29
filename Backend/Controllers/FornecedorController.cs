@@ -39,6 +39,29 @@ namespace SIGA_PET.Controllers
             }
         }
 
+        // GET: api/Fornecedor/search?name=...
+        [HttpGet("search")]
+        public async Task<ActionResult<IEnumerable<FornecedorDto>>> SearchFornecedores([FromQuery] string name)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                return BadRequest("O nome para busca não pode ser vazio.");
+            }
+
+            var fornecedores = await _context.Fornecedores
+                .AsNoTracking()
+                .Where(f => f.Nome.Contains(name) || f.RazaoSocial.Contains(name))
+                .ToListAsync();
+
+            if (!fornecedores.Any())
+            {
+                return NotFound("Nenhum fornecedor encontrado com o nome ou razão social fornecida.");
+            }
+
+            var fornecedoresDto = _mapper.Map<IEnumerable<FornecedorDto>>(fornecedores);
+            return Ok(fornecedoresDto);
+        }
+
         // GET: api/Fornecedor/5
         [HttpGet("{id}")]
         public async Task<ActionResult<FornecedorDto>> GetFornecedor(int id)

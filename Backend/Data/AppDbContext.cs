@@ -12,14 +12,15 @@ namespace SIGA_PET.Data
         // DbSets para todas as entidades
         public DbSet<Tutor> Tutores { get; set; }
         public DbSet<Animal> Animais { get; set; }
+        public DbSet<Produto> Produtos { get; set; }
         public DbSet<Funcionario> Funcionarios { get; set; }
         public DbSet<Servico> Servicos { get; set; }
         public DbSet<Agendamento> Agendamentos { get; set; }
-        public DbSet<RegistroProntuario> RegistrosProntuario { get; set; }
-        public DbSet<Produto> Produtos { get; set; }
         public DbSet<Fornecedor> Fornecedores { get; set; }
         public DbSet<Venda> Vendas { get; set; }
-        public DbSet<ItemVenda> ItemVendas { get; set; }
+        public DbSet<ItemVenda> ItensVenda { get; set; }
+        public DbSet<RegistroProntuario> RegistrosProntuario { get; set; }
+        public DbSet<ProdutoImagem> ProdutoImagens { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -113,6 +114,13 @@ namespace SIGA_PET.Data
                 .WithMany(s => s.ItemVendas)
                 .HasForeignKey(iv => iv.ServicoId)
                 .OnDelete(DeleteBehavior.SetNull);
+
+            // Produto -> ProdutoImagem (1:N) - exclusão em cascata
+            modelBuilder.Entity<ProdutoImagem>()
+                .HasOne(pi => pi.Produto)
+                .WithMany(p => p.Imagens)
+                .HasForeignKey(pi => pi.ProdutoId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             // Índices para melhor performance
             modelBuilder.Entity<Tutor>()

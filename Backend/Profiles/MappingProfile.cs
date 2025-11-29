@@ -20,17 +20,18 @@ namespace SIGA_PET.Profiles
             CreateMap<Animal, AnimalDto>()
                 .ForMember(dest => dest.TutorNome, opt => opt.MapFrom(src => src.Tutor != null ? src.Tutor.Nome : null));
             CreateMap<CreateAnimalDto, Animal>();
-            CreateMap<UpdateAnimalDto, Animal>()
-                .ForMember(dest => dest.AnimalId, opt => opt.Ignore());
+            CreateMap<UpdateAnimalDto, Animal>();
 
-            // Produto mappings
+            // Produto Mappings
             CreateMap<Produto, ProdutoDto>()
-                .ForMember(dest => dest.FornecedorNome, opt => opt.MapFrom(src => src.Fornecedor != null ? src.Fornecedor.Nome : null));
+                .ForMember(dest => dest.NomeFornecedor, opt => opt.MapFrom(src => src.Fornecedor != null ? src.Fornecedor.Nome : null));
             CreateMap<CreateProdutoDto, Produto>();
-            CreateMap<UpdateProdutoDto, Produto>()
-                .ForMember(dest => dest.ProdutoId, opt => opt.Ignore());
+            CreateMap<UpdateProdutoDto, Produto>();
 
-            // Servico mappings
+            // ImagemProduto Mappings
+            CreateMap<ProdutoImagem, ProdutoImagemDto>();
+
+            // Servico Mappings
             CreateMap<Servico, ServicoDto>();
             CreateMap<CreateServicoDto, Servico>();
             CreateMap<UpdateServicoDto, Servico>()

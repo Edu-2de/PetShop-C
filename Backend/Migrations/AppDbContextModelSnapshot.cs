@@ -116,6 +116,10 @@ namespace SIGA_PET.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("FornecedorId"));
 
+                    b.Property<string>("Cnpj")
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
                     b.Property<string>("Contato")
                         .HasMaxLength(150)
                         .HasColumnType("nvarchar(150)");
@@ -130,6 +134,10 @@ namespace SIGA_PET.Migrations
 
                     b.Property<string>("Nome")
                         .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.Property<string>("RazaoSocial")
                         .HasMaxLength(150)
                         .HasColumnType("nvarchar(150)");
 
@@ -218,7 +226,7 @@ namespace SIGA_PET.Migrations
 
                     b.HasIndex("VendaId");
 
-                    b.ToTable("ItemVendas");
+                    b.ToTable("ItensVenda");
                 });
 
             modelBuilder.Entity("SIGA_PET.Models.Produto", b =>
@@ -254,6 +262,9 @@ namespace SIGA_PET.Migrations
                     b.Property<int>("Quantidade")
                         .HasColumnType("int");
 
+                    b.Property<int>("QuantidadeEstoque")
+                        .HasColumnType("int");
+
                     b.HasKey("ProdutoId");
 
                     b.HasIndex("CodigoBarras");
@@ -261,6 +272,29 @@ namespace SIGA_PET.Migrations
                     b.HasIndex("FornecedorId");
 
                     b.ToTable("Produtos");
+                });
+
+            modelBuilder.Entity("SIGA_PET.Models.ProdutoImagem", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("ProdutoId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Url")
+                        .IsRequired()
+                        .HasMaxLength(300)
+                        .HasColumnType("nvarchar(300)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProdutoId");
+
+                    b.ToTable("ProdutoImagens");
                 });
 
             modelBuilder.Entity("SIGA_PET.Models.RegistroProntuario", b =>
@@ -479,6 +513,17 @@ namespace SIGA_PET.Migrations
                     b.Navigation("Fornecedor");
                 });
 
+            modelBuilder.Entity("SIGA_PET.Models.ProdutoImagem", b =>
+                {
+                    b.HasOne("SIGA_PET.Models.Produto", "Produto")
+                        .WithMany("Imagens")
+                        .HasForeignKey("ProdutoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Produto");
+                });
+
             modelBuilder.Entity("SIGA_PET.Models.RegistroProntuario", b =>
                 {
                     b.HasOne("SIGA_PET.Models.Animal", "Animal")
@@ -537,6 +582,8 @@ namespace SIGA_PET.Migrations
 
             modelBuilder.Entity("SIGA_PET.Models.Produto", b =>
                 {
+                    b.Navigation("Imagens");
+
                     b.Navigation("ItemVendas");
                 });
 

@@ -39,6 +39,29 @@ namespace SIGA_PET.Controllers
             }
         }
 
+        // GET: api/Servico/search?name=...
+        [HttpGet("search")]
+        public async Task<ActionResult<IEnumerable<ServicoDto>>> SearchServicos([FromQuery] string name)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                return BadRequest("O nome para busca não pode ser vazio.");
+            }
+
+            var servicos = await _context.Servicos
+                .AsNoTracking()
+                .Where(s => s.Nome.Contains(name))
+                .ToListAsync();
+
+            if (!servicos.Any())
+            {
+                return NotFound("Nenhum serviço encontrado com o nome fornecido.");
+            }
+
+            var servicosDto = _mapper.Map<IEnumerable<ServicoDto>>(servicos);
+            return Ok(servicosDto);
+        }
+
         // GET: api/Servico/5
         [HttpGet("{id}")]
         public async Task<ActionResult<ServicoDto>> GetServico(int id)
