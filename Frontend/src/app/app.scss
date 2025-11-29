@@ -554,3 +554,40 @@ main {
     width: 100%;
   }
 }
+
+
+/* Animations */
+@keyframes slideDown {
+  from {
+    opacity: 0; /* AQUI PODE SER O PROBLEMA SE APLICADO ERRADO */
+    transform: translateY(-10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.dropdown-menu {
+  animation: slideDown 0.2s ease;
+}
+
+
+/* PROVÁVEL CAUSA DO PROBLEMA */
+.fade-in {
+  opacity: 0; /* <--- ISSO ESTÁ ESCONDENDO TUDO SE ESTIVER AQUI */
+  /* ... */
+}
+
+/* CORREÇÃO: Mude para opacity: 1 ou remova a classe do arquivo global */
+.fade-in {
+  opacity: 1 !important; /* Força a visibilidade */
+  transform: none !important;
+  animation: none !important;
+}
+
+/* Verifique também se o 'main' não está escondido */
+main {
+  opacity: 1 !important;
+}
