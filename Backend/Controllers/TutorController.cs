@@ -85,42 +85,45 @@ namespace SIGA_PET.Controllers
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
-            // Verifica se e-mail já existe
+            // 1. Validar se email já existe
             if (await _context.Usuarios.AnyAsync(u => u.Email == dto.Email))
-                return BadRequest("E-mail já cadastrado no sistema.");
+            {
+                return BadRequest("Este e-mail já está em uso.");
+            }
 
             using var transaction = await _context.Database.BeginTransactionAsync();
             try
             {
-                // 1. Criar o Usuário
+                // 2. Criar Usuario (Login)
                 var usuario = new Usuario
                 {
                     Email = dto.Email,
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Senha),
                     TipoUsuario = "Tutor",
-                    Ativo = true,
-                    PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Senha)
+                    Ativo = true
                 };
                 _context.Usuarios.Add(usuario);
-                await _context.SaveChangesAsync(); // Gera o UsuarioId
+                await _context.SaveChangesAsync();
 
-                // 2. Criar o Tutor vinculado
+                // 3. Criar Tutor vinculado
                 var tutor = new Tutor
                 {
                     Nome = dto.Nome,
                     Telefone = dto.Telefone,
                     Endereco = dto.Endereco,
-                    UsuarioId = usuario.UsuarioId // Vínculo Crucial
+                    UsuarioId = usuario.UsuarioId // Vínculo importante!
                 };
                 _context.Tutores.Add(tutor);
                 await _context.SaveChangesAsync();
 
                 await transaction.CommitAsync();
 
-                var retorno = _mapper.Map<TutorDto>(tutor);
-                // Preenche o email manualmente pois removemos do model Tutor
-                retorno.Email = usuario.Email;
+                // 4. Retornar DTO
+                var tutorDto = _mapper.Map<TutorDto>(tutor);
+                // Preenchemos o email manualmente no retorno pois ele vem de Usuario
+                tutorDto.Email = usuario.Email;
 
-                return CreatedAtAction(nameof(GetTutor), new { id = tutor.TutorId }, retorno);
+                return CreatedAtAction(nameof(GetTutor), new { id = tutor.TutorId }, tutorDto);
             }
             catch (Exception ex)
             {
