@@ -12,88 +12,76 @@ import { AuthService } from '../../service/auth/auth.service';
 })
 export class AdminDashboardComponent {
   
-  // KPI Cards (Estatísticas Rápidas) - SEM EMOJIS
+  dataAtual = new Date();
+
+  // CORREÇÃO: Adicionado a propriedade 'icon' que faltava
   statsCards = [
     { 
-      title: 'Agendamentos Hoje', 
-      value: '12', 
-      icon: 'bi-calendar-check', 
-      color: 'primary',
-      trend: '+2.5%',
-      trendUp: true
+      title: 'Receita Acumulada', 
+      value: 'R$ 14.500,00', 
+      description: 'Valor total faturado com vendas e serviços no mês vigente.',
+      icon: 'bi-currency-dollar'
     },
     { 
-      title: 'Faturamento Mensal', 
-      value: 'R$ 14.500', 
-      icon: 'bi-currency-dollar', 
-      color: 'success',
-      trend: '+12%',
-      trendUp: true 
+      title: 'Base de Clientes', 
+      value: '1.248', 
+      description: 'Total de tutores ativos cadastrados na plataforma.',
+      icon: 'bi-people'
     },
     { 
-      title: 'Novos Clientes', 
-      value: '28', 
-      icon: 'bi-people', 
-      color: 'info',
-      trend: '-1%',
-      trendUp: false
+      title: 'Atendimentos', 
+      value: '42', 
+      description: 'Agendamentos confirmados para a semana atual.',
+      icon: 'bi-calendar-check'
     },
     { 
-      title: 'Estoque Baixo', 
-      value: '5', 
-      icon: 'bi-box-seam', 
-      color: 'warning',
-      trend: 'Atenção',
-      trendUp: false
+      title: 'Inventário', 
+      value: '850 Itens', 
+      description: 'Quantidade total de produtos em estoque.',
+      icon: 'bi-box-seam'
     }
   ];
 
-  // Menu de Navegação Profissional
   menuCards = [
     {
       title: 'Gestão de Tutores',
-      icon: 'bi-person-vcard',
-      desc: 'Cadastrar, editar e visualizar base de clientes.',
-      link: '/tutores',
-      color: 'primary'
+      icon: 'bi-people',
+      desc: 'Acesse o banco de dados completo de clientes.',
+      link: '/tutores'
     },
     {
-      title: 'Controle de Pets',
-      icon: 'bi-gitlab', 
-      desc: 'Prontuários, histórico e fichas dos animais.',
-      link: '/pets',
-      color: 'danger'
+      title: 'Prontuário Animal',
+      icon: 'bi-folder2-open', 
+      desc: 'Controle detalhado das fichas dos pets.',
+      link: '/pets'
     },
     {
-      title: 'Agenda de Serviços',
+      title: 'Agenda e Horários',
       icon: 'bi-calendar3',
-      desc: 'Controle de horários de banho, tosa e veterinário.',
-      link: '/agenda',
-      color: 'success'
+      desc: 'Organização completa dos serviços.',
+      link: '/agenda'
     },
     {
       title: 'Catálogo de Produtos',
-      icon: 'bi-tags',
-      desc: 'Gerenciar estoque, preços e categorias.',
-      link: '/produtos',
-      color: 'warning'
+      icon: 'bi-box-seam',
+      desc: 'Gerenciamento de inventário.',
+      link: '/produtos'
     },
     {
       title: 'Serviços Oferecidos',
-      icon: 'bi-scissors',
-      desc: 'Configurar tipos de serviços e valores.',
-      link: '/servicos',
-      color: 'info'
+      icon: 'bi-list-check',
+      desc: 'Configuração do menu de serviços.',
+      link: '/servicos'
     },
     {
-      title: 'Fornecedores',
+      title: 'Rede de Fornecedores',
       icon: 'bi-truck',
-      desc: 'Gerenciamento de parceiros e compras.',
-      link: '/fornecedores',
-      color: 'secondary'
+      desc: 'Cadastro de parceiros comerciais.',
+      link: '/fornecedores'
     }
   ];
 
+  // CORREÇÃO: Sintaxe do construtor arrumada
   constructor(public authService: AuthService) {}
 
   get user() {
