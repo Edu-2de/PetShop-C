@@ -1,11 +1,11 @@
-// ... imports
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
 namespace SIGA_PET.Models
 {
-    public class Tutor
+    public class Funcionario
     {
-        public int TutorId { get; set; }
-
-        // NOVO: Chave estrangeira para Usuario (Login)
+        public int FuncionarioId { get; set; }
         public int UsuarioId { get; set; }
 
         [ForeignKey("UsuarioId")]
@@ -15,13 +15,16 @@ namespace SIGA_PET.Models
         [StringLength(120)]
         public string Nome { get; set; } = string.Empty;
 
-        // Email e Telefone podem continuar aqui para contato fácil, 
-        // ou você pode remover Email daqui e usar só o do Usuario.
-        // Vou manter para facilitar a migração.
-        public string? Telefone { get; set; }
-        public string? Endereco { get; set; }
+        [StringLength(80)]
+        public string? Cargo { get; set; }
 
-        public virtual ICollection<Animal> Animais { get; set; } = new List<Animal>();
-        // ... outras props
+        [StringLength(20)]
+        public string? Telefone { get; set; }
+
+        public DateTime DataContratacao { get; set; } = DateTime.UtcNow;
+
+        public virtual ICollection<Agendamento> Agendamentos { get; set; } = new List<Agendamento>();
+        public virtual ICollection<RegistroProntuario> Registros { get; set; } = new List<RegistroProntuario>();
+        public virtual ICollection<Venda> Vendas { get; set; } = new List<Venda>();
     }
 }

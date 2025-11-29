@@ -24,20 +24,15 @@ namespace SIGA_PET.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<TutorDto>>> GetTutores()
         {
-            try
-            {
-                var tutores = await _context.Tutores
-                    .AsNoTracking()
-                    .ToListAsync();
+            var tutores = await _context.Tutores
+                .Include(t => t.Usuario) // Importante: Incluir Usuario para pegar o email
+                .AsNoTracking()
+                .ToListAsync();
 
-                var tutoresDto = _mapper.Map<IEnumerable<TutorDto>>(tutores);
-                return Ok(tutoresDto);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Erro interno: {ex.Message}");
-            }
+            var dtos = _mapper.Map<IEnumerable<TutorDto>>(tutores);
+            return Ok(dtos);
         }
+        
 
         // GET: api/Tutor/search
         [HttpGet("search")]
@@ -86,26 +81,51 @@ namespace SIGA_PET.Controllers
 
         // POST: api/Tutor
         [HttpPost]
-        public async Task<ActionResult<TutorDto>> CreateTutor([FromBody] CreateTutorDto createTutorDto)
+        public async Task<ActionResult<TutorDto>> CreateTutor([FromBody] CreateTutorDto dto)
         {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+
+            // Verifica se e-mail já existe
+            if (await _context.Usuarios.AnyAsync(u => u.Email == dto.Email))
+                return BadRequest("E-mail já cadastrado no sistema.");
+
+            using var transaction = await _context.Database.BeginTransactionAsync();
             try
             {
-                if (!ModelState.IsValid)
+                // 1. Criar o Usuário
+                var usuario = new Usuario
                 {
-                    return BadRequest(ModelState);
-                }
+                    Email = dto.Email,
+                    TipoUsuario = "Tutor",
+                    Ativo = true,
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Senha)
+                };
+                _context.Usuarios.Add(usuario);
+                await _context.SaveChangesAsync(); // Gera o UsuarioId
 
-                var tutor = _mapper.Map<Tutor>(createTutorDto);
-
+                // 2. Criar o Tutor vinculado
+                var tutor = new Tutor
+                {
+                    Nome = dto.Nome,
+                    Telefone = dto.Telefone,
+                    Endereco = dto.Endereco,
+                    UsuarioId = usuario.UsuarioId // Vínculo Crucial
+                };
                 _context.Tutores.Add(tutor);
                 await _context.SaveChangesAsync();
 
-                var tutorDto = _mapper.Map<TutorDto>(tutor);
-                return CreatedAtAction(nameof(GetTutor), new { id = tutor.TutorId }, tutorDto);
+                await transaction.CommitAsync();
+
+                var retorno = _mapper.Map<TutorDto>(tutor);
+                // Preenche o email manualmente pois removemos do model Tutor
+                retorno.Email = usuario.Email;
+
+                return CreatedAtAction(nameof(GetTutor), new { id = tutor.TutorId }, retorno);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Erro interno: {ex.Message}");
+                await transaction.RollbackAsync();
+                return StatusCode(500, $"Erro ao criar tutor: {ex.Message}");
             }
         }
 

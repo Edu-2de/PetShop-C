@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SIGA_PET.Models
 {
@@ -6,20 +7,28 @@ namespace SIGA_PET.Models
     {
         public int FuncionarioId { get; set; }
 
-        // NOVO: Link com Usuario
+        // Vincula o Funcionário a um Login (Usuario)
         public int UsuarioId { get; set; }
 
         [ForeignKey("UsuarioId")]
         public virtual Usuario Usuario { get; set; } = null!;
 
-        [Required]
+        [Required(ErrorMessage = "Nome é obrigatório")]
+        [StringLength(120)]
         public string Nome { get; set; } = string.Empty;
 
+        [StringLength(80)]
         public string? Cargo { get; set; }
+
+        [StringLength(20)]
+        public string? Telefone { get; set; }
+
+        [EmailAddress]
+        [StringLength(150)]
+        public string? Email { get; set; }
 
         public DateTime DataContratacao { get; set; } = DateTime.UtcNow;
 
-        // Navigation Properties
         public virtual ICollection<Agendamento> Agendamentos { get; set; } = new List<Agendamento>();
         public virtual ICollection<RegistroProntuario> Registros { get; set; } = new List<RegistroProntuario>();
         public virtual ICollection<Venda> Vendas { get; set; } = new List<Venda>();
