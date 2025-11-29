@@ -6,7 +6,7 @@ import { Produto } from '../../../model/produto.model';
 import { ProdutoService } from '../../../service/produtos/produto.service';
 import { ProdutoImagemService } from '../../../service/produto-imagem/produto-imagem.service';
 import { Fornecedor } from '../../../model/fornecedor.model';
-// CORREÇÃO: Caminho aponta para 'fornecedor' (correto)
+// CORREÇÃO: Caminho correto do serviço (com 'e')
 import { FornecedorService } from '../../../service/fornecedor/fornecedor';
 import { Categoria } from '../../../model/categoria.model';
 import { CategoriaService } from '../../../service/categorias/categoria.service';
@@ -41,7 +41,6 @@ export class ProdutoFormComponent implements OnInit {
   uploading = false;
 
   ngOnInit(): void {
-    // Tipagem explícita para data
     this.fornecedorService.listar().subscribe((data: Fornecedor[]) => this.fornecedores = data);
     this.categoriaService.listar().subscribe((data: Categoria[]) => this.categorias = data);
 

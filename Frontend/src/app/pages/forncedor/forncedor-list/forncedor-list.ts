@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { Fornecedor } from '../../../model/fornecedor.model';
 import { FormsModule } from '@angular/forms';
-// CORREÇÃO: Caminho aponta para a pasta correta do serviço 'fornecedor'
+// CORREÇÃO: Caminho correto do serviço (com 'e')
 import { FornecedorService } from '../../../service/fornecedor/fornecedor';
 
 @Component({
