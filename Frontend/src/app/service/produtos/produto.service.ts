@@ -16,7 +16,6 @@ export class ProdutoService {
       map(produtos => produtos.map(p => ({
         ...p,
         id: p.produtoId,
-        // Garante compatibilidade com alias
         fornecedorid: p.fornecedorId
       })))
     );
@@ -47,7 +46,7 @@ export class ProdutoService {
   }
 
   create(produto: Partial<Produto>): Observable<Produto> {
-    // Casting seguro para evitar erro de propriedade inexistente
+    // CORREÇÃO: Uso de 'as any' para evitar erro de compilação na propriedade alias
     const pAny = produto as any;
     const fornecedorId = produto.fornecedorId || pAny.fornecedorid;
     const payload = { ...produto, fornecedorId };
