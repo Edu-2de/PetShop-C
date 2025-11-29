@@ -1,93 +1,96 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, signal, inject } from '@angular/core';
 import { Router } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../environments/environment';
+import { tap } from 'rxjs/operators';
+import { Observable } from 'rxjs';
 
 export interface User {
-  id: number;
+  funcionarioId: number;
   nome: string;
   email: string;
-  role: 'admin' | 'user';
+  cargo: string;
+}
+
+interface LoginResponse {
+  token: string;
+  usuario: User;
 }
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-  private currentUser = signal<User | null>(null);
-  private readonly STORAGE_KEY = 'sigapet_user';
+  private http = inject(HttpClient);
+  private router = inject(Router);
+  private apiUrl = `${environment.apiUrl}/Auth/login`;
 
-  constructor(private router: Router) {
-    // Recuperar usuário do localStorage ao inicializar
+  // Signals para estado reativo
+  private currentUserSignal = signal<User | null>(null);
+
+  private readonly USER_KEY = 'sigapet_user';
+  private readonly TOKEN_KEY = 'sigapet_token';
+
+  constructor() {
     this.loadUserFromStorage();
   }
 
+  // Método agora retorna um Observable para o componente tratar erro/sucesso
+  login(email: string, senha: string): Observable<LoginResponse> {
+    return this.http.post<LoginResponse>(this.apiUrl, { email, senha }).pipe(
+      tap(response => {
+        this.saveToken(response.token);
+        this.setCurrentUser(response.usuario);
+      })
+    );
+  }
+
+  logout(): void {
+    this.currentUserSignal.set(null);
+    localStorage.removeItem(this.USER_KEY);
+    localStorage.removeItem(this.TOKEN_KEY);
+    this.router.navigate(['/login']);
+  }
+
+  private setCurrentUser(user: User): void {
+    this.currentUserSignal.set(user);
+    localStorage.setItem(this.USER_KEY, JSON.stringify(user));
+  }
+
+  private saveToken(token: string): void {
+    localStorage.setItem(this.TOKEN_KEY, token);
+  }
+
   private loadUserFromStorage(): void {
-    const userJson = localStorage.getItem(this.STORAGE_KEY);
+    const userJson = localStorage.getItem(this.USER_KEY);
     if (userJson) {
       try {
-        const user = JSON.parse(userJson);
-        this.currentUser.set(user);
+        this.currentUserSignal.set(JSON.parse(userJson));
       } catch {
-        localStorage.removeItem(this.STORAGE_KEY);
+        this.logout();
       }
     }
   }
 
-  login(email: string, senha: string): boolean {
-    // Simulação de login - TEMPORÁRIO
-    // Em produção, isso faria uma chamada HTTP para o backend
-    
-    // Admin: admin@sigapet.com / admin123
-    // User: user@sigapet.com / user123
-    
-    if (email === 'admin@sigapet.com' && senha === 'admin123') {
-      const user: User = {
-        id: 1,
-        nome: 'Administrador',
-        email: 'admin@sigapet.com',
-        role: 'admin'
-      };
-      this.setCurrentUser(user);
-      return true;
-    }
-    
-    if (email === 'user@sigapet.com' && senha === 'user123') {
-      const user: User = {
-        id: 2,
-        nome: 'Usuário Comum',
-        email: 'user@sigapet.com',
-        role: 'user'
-      };
-      this.setCurrentUser(user);
-      return true;
-    }
-    
-    return false;
-  }
-
-  logout(): void {
-    this.currentUser.set(null);
-    localStorage.removeItem(this.STORAGE_KEY);
-    this.router.navigate(['/']);
-  }
-
-  private setCurrentUser(user: User): void {
-    this.currentUser.set(user);
-    localStorage.setItem(this.STORAGE_KEY, JSON.stringify(user));
-  }
-
   getCurrentUser() {
-    return this.currentUser.asReadonly();
+    return this.currentUserSignal.asReadonly();
+  }
+
+  getToken(): string | null {
+    return localStorage.getItem(this.TOKEN_KEY);
   }
 
   isAuthenticated(): boolean {
-    return this.currentUser() !== null;
+    return !!this.getToken(); // Verifica se tem token
   }
 
+  // Adaptar lógica de isAdmin baseada no Cargo que vem do banco
   isAdmin(): boolean {
-    return this.currentUser()?.role === 'admin';
+    const user = this.currentUserSignal();
+    return user?.cargo === 'Gerente' || user?.cargo === 'Administrador';
   }
 
   isUser(): boolean {
-    return this.currentUser()?.role === 'user';
+    return !!this.currentUserSignal();
   }
 }

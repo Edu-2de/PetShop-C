@@ -1,7 +1,7 @@
 {
   "name": "siga-pet",
   "version": "1.0.0",
-  "description": "Sistema Integrado de Gestão para PetShop",
+  "description": "Sistema Integrado de Gestï¿½o para PetShop",
   "scripts": {
     "start": "concurrently \"npm run start:backend\" \"npm run start:frontend\"",
     "start:backend": "cd Backend && dotnet run --launch-profile https",
