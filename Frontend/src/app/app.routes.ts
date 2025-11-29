@@ -13,17 +13,21 @@ import { AgendaListComponent } from './pages/agenda-list/agenda-list';
 import { AgendaFormComponent } from './pages/agenda-form/agenda-form';
 import { AdminDashboardComponent } from './pages/admin/admin-dashboard.component';
 import { authGuard } from './guards/auth.guard';
-
-// CORREÇÃO: Caminhos ajustados para 'forncedor' (conforme a pasta real)
 import { ForncedorListComponent } from './pages/forncedor/forncedor-list/forncedor-list';
 import { ForncedorFormComponent } from './pages/forncedor/forncedor-form/forncedor-form';
+
+// IMPORTS NOVOS (Você criará estes componentes nos próximos passos)
+import { FuncionarioListComponent } from './pages/funcionarios/funcionario-list/funcionario-list';
+import { FuncionarioFormComponent } from './pages/funcionarios/funcionario-form/funcionario-form';
+import { CategoriaListComponent } from './pages/categorias/categoria-list/categoria-list';
+import { CategoriaFormComponent } from './pages/categorias/categoria-form/categoria-form';
 
 export const routes: Routes = [
   { path: '', component: DashboardComponent },
   { path: 'home', redirectTo: '', pathMatch: 'full' },
   { path: 'login', component: LoginComponent },
 
-  // Rotas Protegidas (Admin)
+  // Admin Dashboard
   { path: 'admin', component: AdminDashboardComponent, canActivate: [authGuard] },
 
   // Produtos
@@ -55,6 +59,18 @@ export const routes: Routes = [
   { path: 'fornecedores', component: ForncedorListComponent, canActivate: [authGuard] },
   { path: 'fornecedores/novo', component: ForncedorFormComponent, canActivate: [authGuard] },
   { path: 'fornecedores/editar/:id', component: ForncedorFormComponent, canActivate: [authGuard] },
+
+  // --- NOVAS ROTAS ---
+
+  // Funcionários
+  { path: 'funcionarios', component: FuncionarioListComponent, canActivate: [authGuard] },
+  { path: 'funcionarios/novo', component: FuncionarioFormComponent, canActivate: [authGuard] },
+  { path: 'funcionarios/editar/:id', component: FuncionarioFormComponent, canActivate: [authGuard] },
+
+  // Categorias
+  { path: 'categorias', component: CategoriaListComponent, canActivate: [authGuard] },
+  { path: 'categorias/novo', component: CategoriaFormComponent, canActivate: [authGuard] },
+  // Categorias geralmente não precisam de edição complexa, mas se precisar, siga o padrão
 
   { path: '**', redirectTo: '' }
 ];
