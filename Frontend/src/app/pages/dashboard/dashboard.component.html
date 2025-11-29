@@ -1,8 +1,10 @@
 <section class="hero-section fade-in">
   <div class="hero-content">
     <h1 class="hero-title">SIGA-PET</h1>
-    <p class="hero-subtitle">Cuidamos do seu melhor amigo com produtos de qualidade e serviços especializados.</p>
-    <a routerLink="/produtos" class="btn-hero rounded-pill">Ver Produtos</a>
+    <p class="hero-subtitle">Cuidamos do seu melhor amigo com produtos de qualidade e serviços especializados. Tudo o que ele precisa, em um só lugar.</p>
+    <a routerLink="/produtos" class="btn-hero rounded-pill">
+      Confira Nossas Ofertas
+    </a>
   </div>
 </section>
 
@@ -11,7 +13,7 @@
     <h2 class="section-title">Categorias</h2>
     <div class="categories-grid">
       <div class="category-card" *ngFor="let cat of categories" (click)="navigate(cat.link)">
-        <div class="category-icon-wrapper mb-3">
+        <div class="category-icon-wrapper">
           <i class="bi" [ngClass]="cat.icon"></i>
         </div>
         <div class="category-title">{{ cat.title }}</div>
@@ -23,30 +25,27 @@
 
 <section class="products-section animate-on-scroll bg-white">
   <div class="container">
-    <div class="section-header d-flex justify-content-between align-items-center mb-4">
-      <h2 class="section-title mb-0">Destaques</h2>
-      <a routerLink="/produtos" class="view-all-link">Ver todos →</a>
+    <div class="section-header d-flex justify-content-between align-items-center mb-5">
+      <h2 class="section-title mb-0 text-start" style="text-align: left;">Destaques da Loja</h2>
+      <a routerLink="/produtos" class="view-all-link">Ver todos os produtos <i class="bi bi-arrow-right"></i></a>
     </div>
+
     <app-card-produtos></app-card-produtos>
+
   </div>
 </section>
 
 <section class="features-section animate-on-scroll">
   <div class="container">
-    <h2 class="section-title">Por que nos escolher?</h2>
+    <h2 class="section-title">Por que escolher a SIGA-PET?</h2>
     <div class="features-grid">
       <div class="feature-card slide-up" *ngFor="let f of features">
         <div class="feature-icon">
           <i class="bi" [ngClass]="f.icon"></i>
         </div>
-        <div class="feature-title mb-2 fw-bold text-primary">{{ f.title }}</div>
-        <div class="feature-desc text-muted">{{ f.desc }}</div>
+        <div class="feature-title">{{ f.title }}</div>
+        <div class="feature-desc">{{ f.desc }}</div>
       </div>
     </div>
   </div>
 </section>
-
-<footer class="main-footer animate-on-scroll">
-  <div class="footer-content"><div class="footer-grid"><div><div class="footer-brand"><div class="brand-name">SIGA-PET</div><div class="brand-tagline">Seu Pet Shop de Confiança</div></div><p class="company-description">Oferecemos produtos de qualidade e serviços especializados para o bem-estar do seu pet.</p><div class="social-links"><a href="#" class="social-link" aria-label="Facebook">Facebook</a><a href="#" class="social-link" aria-label="Instagram">Instagram</a><a href="#" class="social-link" aria-label="WhatsApp">WhatsApp</a></div></div><div><div class="footer-title">Navegação</div><ul class="footer-links"><li><a routerLink="/produtos">Produtos</a></li><li><a routerLink="/agenda/novo">Agendar Serviço</a></li><li><a href="#categorias">Categorias</a></li><li><a href="#sobre">Sobre Nós</a></li></ul></div><div><div class="footer-title">Atendimento</div><ul class="footer-links"><li><a href="#">Dúvidas Frequentes</a></li><li><a href="#">Política de Troca</a></li><li><a href="#">Formas de Pagamento</a></li><li><a href="#">Frete e Entrega</a></li></ul></div><div><div class="footer-title">Contato</div><div class="contact-item"><strong>Endereço</strong><span>Av. Paulista, 1000 - São Paulo - SP</span></div><div class="contact-item"><strong>Telefone</strong><span>(11) 3000-1234</span></div><div class="contact-item"><strong>E-mail</strong><span>contato@sigapet.com.br</span></div><div class="contact-item"><strong>Horário</strong><span>Seg–Sex: 8h às 18h / Sáb: 8h às 12h</span></div></div></div><div class="footer-bottom"><div class="copyright">© 2024 SIGA-PET. Todos os direitos reservados.</div></div></div>
-</footer>
-
