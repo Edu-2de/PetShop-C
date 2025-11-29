@@ -217,3 +217,30 @@
   opacity: 1;
   transform: translateY(0);
 }
+
+/* ... estilos anteriores mantidos ... */
+
+/* Animações de Entrada - CORREÇÃO DE SEGURANÇA */
+.animate-on-scroll, .fade-in, .slide-up {
+  opacity: 1; /* MUDANÇA CRÍTICA: Começa visível por segurança */
+  transform: translateY(0); /* Começa na posição final */
+  transition: opacity 0.8s ease, transform 0.8s ease;
+  will-change: opacity, transform; /* Otimização de performance */
+}
+
+/* A classe .in-view agora é opcional ou para efeitos extras, 
+   não para visibilidade básica */
+.in-view {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Se quiser manter a animação apenas se o JS carregar, 
+   podemos usar uma media query de preferência de movimento */
+@media (prefers-reduced-motion: no-preference) {
+  /* Apenas anima se o usuário não tiver preferência por reduzir movimento */
+  .animate-on-scroll.hidden-start {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+}
