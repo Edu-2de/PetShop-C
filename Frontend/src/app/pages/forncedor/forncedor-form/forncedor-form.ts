@@ -3,8 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Fornecedor } from '../../../model/fornecedor.model';
-// CORREÇÃO DE CAMINHO: 'forncedor'
-import { FornecedorService } from '../../../service/forncedor/forncedor';
+// CORREÇÃO: O serviço está na pasta 'fornecedor' e o arquivo é 'fornecedor.ts'
+import { FornecedorService } from '../../../service/fornecedor/fornecedor';
 
 @Component({
   selector: 'app-fornecedor-form',

@@ -3,8 +3,8 @@ import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { Fornecedor } from '../../../model/fornecedor.model';
 import { FormsModule } from '@angular/forms';
-// CORREÇÃO DE CAMINHO: 'forncedor'
-import { FornecedorService } from '../../../service/forncedor/forncedor';
+// CORREÇÃO: Caminho correto do serviço (com 'e')
+import { FornecedorService } from '../../../service/fornecedor/fornecedor';
 
 @Component({
   selector: 'app-fornecedor-list',

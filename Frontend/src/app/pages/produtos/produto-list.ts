@@ -4,8 +4,8 @@ import { RouterLink, Router } from '@angular/router';
 import { Produto } from '../../model/produto.model';
 import { ProdutoService } from '../../service/produtos/produto.service';
 import { Fornecedor } from '../../model/fornecedor.model';
-// CORREÇÃO DE CAMINHO: 'forncedor'
-import { FornecedorService } from '../../service/forncedor/forncedor';
+// CORREÇÃO: Caminho correto do serviço (com 'e')
+import { FornecedorService } from '../../service/fornecedor/fornecedor';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../service/auth/auth.service';
 

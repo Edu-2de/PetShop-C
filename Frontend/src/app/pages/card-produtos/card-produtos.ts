@@ -1,6 +1,7 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+// CORREÇÃO: Import do ProdutoService
 import { ProdutoService } from '../../service/produtos/produto.service';
 import { Produto } from '../../model/produto.model';
 
@@ -22,7 +23,7 @@ export class CardProdutosComponent implements OnInit {
   }
 
   carregarProdutos() {
-    // Tipagem explícita para evitar erro TS7006
+    // Tipagem explícita para evitar erros
     this.produtoService.listar().subscribe({
       next: (data: Produto[]) => {
         this.produtos = data.filter((p: Produto) => p.ativo).slice(0, 8);

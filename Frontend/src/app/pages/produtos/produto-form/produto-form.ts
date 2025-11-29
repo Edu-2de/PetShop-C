@@ -6,8 +6,8 @@ import { Produto } from '../../../model/produto.model';
 import { ProdutoService } from '../../../service/produtos/produto.service';
 import { ProdutoImagemService } from '../../../service/produto-imagem/produto-imagem.service';
 import { Fornecedor } from '../../../model/fornecedor.model';
-// CORREÇÃO DE CAMINHO: 'forncedor'
-import { FornecedorService } from '../../../service/forncedor/forncedor';
+// CORREÇÃO: Caminho correto do serviço (com 'e')
+import { FornecedorService } from '../../../service/fornecedor/fornecedor';
 import { Categoria } from '../../../model/categoria.model';
 import { CategoriaService } from '../../../service/categorias/categoria.service';
 
@@ -86,7 +86,6 @@ export class ProdutoFormComponent implements OnInit {
           }
           this.produto.imagens.push(imagem);
           uploadedCount++;
-
           if (uploadedCount === files.length) {
             this.uploading = false;
             event.target.value = '';
@@ -96,7 +95,6 @@ export class ProdutoFormComponent implements OnInit {
           console.error('Erro ao fazer upload:', error);
           alert(`Erro ao fazer upload da imagem ${file.name}`);
           uploadedCount++;
-
           if (uploadedCount === files.length) {
             this.uploading = false;
             event.target.value = '';
