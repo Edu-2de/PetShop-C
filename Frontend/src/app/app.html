@@ -68,7 +68,7 @@
         <div class="dropdown" *ngIf="authService.isAuthenticated()">
           <button class="btn btn-user dropdown-toggle" type="button" data-bs-toggle="dropdown" [class.btn-admin]="authService.isAdmin()">
             <i class="bi bi-person-circle me-1"></i>
-            {{ currentUser()?.nome?.split(' ')[0] }}
+            {{ (currentUser()?.nome || '').split(' ')[0] }}
           </button>
           <ul class="dropdown-menu dropdown-menu-end">
             <li><h6 class="dropdown-header">Olá, {{ currentUser()?.nome }}</h6></li>
