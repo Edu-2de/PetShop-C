@@ -4,8 +4,8 @@ import { RouterLink, Router } from '@angular/router';
 import { Produto } from '../../model/produto.model';
 import { ProdutoService } from '../../service/produtos/produto.service';
 import { Fornecedor } from '../../model/fornecedor.model';
-// CORREÇÃO: Caminho correto do serviço (com 'e')
-import { FornecedorService } from '../../service/fornecedor/fornecedor';
+// CORREÇÃO: Apontar para o arquivo real 'forncedor'
+import { FornecedorService } from '../../service/fornecedor/forncedor';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../service/auth/auth.service';
 
@@ -23,7 +23,7 @@ export class ProdutoListComponent implements OnInit {
   public authService = inject(AuthService);
   private router = inject(Router);
   private produtoService = inject(ProdutoService);
-  private fornecedorService = inject(FornecedorService);
+  private fornecedorService = inject(FornecedorService); // Injeção corrigida
 
   produtosFiltrados = computed(() => {
     const produtos = this.produtos();

@@ -3,8 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Fornecedor } from '../../../model/fornecedor.model';
-// CORREÇÃO: O serviço está na pasta 'fornecedor' e o arquivo é 'fornecedor.ts'
-import { FornecedorService } from '../../../service/fornecedor/fornecedor';
+// CORREÇÃO: Apontar para o arquivo real 'forncedor' (sem 'e')
+import { FornecedorService } from '../../../service/fornecedor/forncedor';
 
 @Component({
   selector: 'app-fornecedor-form',
@@ -27,6 +27,7 @@ export class ForncedorFormComponent implements OnInit {
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
       this.isEdit = true;
+      // Adicionada tipagem explícita para garantir
       this.fornecedorService.findById(Number(id)).subscribe((data: Fornecedor) => {
         this.fornecedor = data;
       });
