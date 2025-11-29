@@ -50,7 +50,8 @@ namespace SIGA_PET.Controllers
 
             var fornecedores = await _context.Fornecedores
                 .AsNoTracking()
-                .Where(f => f.Nome.Contains(name) || f.RazaoSocial.Contains(name))
+                // Correção: Verifica se RazaoSocial não é nulo antes de chamar Contains
+                .Where(f => f.Nome.Contains(name) || (f.RazaoSocial != null && f.RazaoSocial.Contains(name)))
                 .ToListAsync();
 
             if (!fornecedores.Any())
