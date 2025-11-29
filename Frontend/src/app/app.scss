@@ -261,9 +261,7 @@ main {
   display: flex !important;
   align-items: center !important;
   justify-content: space-between !important;
-  width: 100% !important;
   gap: 2rem !important;
-  margin: 0 !important;
   padding: 0 !important;
 }
 
@@ -494,5 +492,63 @@ main {
   .footer-grid {
     grid-template-columns: 1fr;
     gap: 32px;
+  }
+}
+
+
+.navbar-collapse[_ngcontent-ng-c1890628331] .d-flex[_ngcontent-ng-c1890628331] {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  width: 15% !important;
+  gap: 2rem !important;
+}
+
+
+/* App Component Styles */
+
+/* RESET CRÍTICO: Força o container da direita a se comportar */
+.navbar-collapse {
+  /* Garante que o flexbox não estique os itens absurdamente */
+  align-items: center;
+}
+
+/* Garante que o grupo da direita (Search + Profile) fique no canto */
+.ms-auto {
+  margin-left: auto !important;
+  display: flex;
+  align-items: center;
+  gap: 1rem; /* Espaçamento consistente */
+}
+
+/* Corrige o Avatar para ser um círculo perfeito e não uma elipse */
+.avatar-circle {
+  width: 40px !important;
+  height: 40px !important;
+  min-width: 40px !important; /* Impede esmagamento */
+  flex-shrink: 0 !important; /* Impede encolhimento no flex */
+  border-radius: 50% !important;
+  object-fit: cover;
+}
+
+/* Remove a seta padrão do Bootstrap nos dropdowns */
+.dropdown-toggle::after {
+  display: none !important;
+}
+
+/* Ajuste para telas pequenas (Mobile) */
+@media (max-width: 991px) {
+  .navbar-collapse {
+    background: white;
+    padding: 1rem;
+    border-radius: 0 0 15px 15px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+  }
+
+  .ms-auto {
+    margin-left: 0 !important;
+    margin-top: 1rem;
+    justify-content: space-between;
+    width: 100%;
   }
 }

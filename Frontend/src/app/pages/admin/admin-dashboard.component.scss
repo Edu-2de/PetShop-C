@@ -1,135 +1,61 @@
-/* Admin Dashboard - Professional Design */
+/* Admin Style - Apple Clean */
 
-.admin-wrapper {
-  background-color: #f8f9fa;
-  min-height: 100vh;
-  padding-bottom: 80px;
+.admin-container {
+  background-color: #f5f5f7;
+  min-height: 100%;
+  padding-bottom: 60px;
 }
 
-/* Header */
-.dashboard-header {
-  background-color: #ffffff;
-  border-bottom: 1px solid #eef2f6;
-  padding: 3rem 0;
+.display-6 {
+  font-size: 1.75rem;
+  letter-spacing: -0.5px;
 }
 
-.ls-1 {
-  letter-spacing: 1px;
-}
-
-.date-badge {
-  background: #ffffff;
-  border: 1px solid #e9ecef;
-  color: #64748b;
-  padding: 8px 20px;
-  border-radius: 50px;
-  font-size: 0.9rem;
-  font-weight: 500;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.02);
-  display: inline-flex;
-  align-items: center;
-}
-
-/* KPI Cards */
-.stat-card {
-  background: #ffffff;
-  border-radius: 16px;
-  transition: all 0.3s ease;
+/* Metric Cards */
+.metric-card {
+  border-color: rgba(0,0,0,0.04) !important;
+  transition: transform 0.2s ease;
 
   &:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 15px 30px rgba(0,0,0,0.05) !important;
-  }
-
-  .icon-square {
-    width: 48px;
-    height: 48px;
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.4rem;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.04) !important;
   }
 }
 
-/* Menu Cards */
-.card-link-wrapper {
-  display: block;
+/* Nav Cards */
+.nav-card.transition-hover {
+  border-color: rgba(0,0,0,0.04) !important;
+  transition: all 0.2s ease;
 
-  &:hover .menu-card {
-    transform: translateY(-5px);
-    box-shadow: 0 12px 24px rgba(0,0,0,0.06) !important;
-  }
+  &:hover {
+    transform: scale(1.005);
+    border-color: rgba(0,0,0,0.1) !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05) !important;
 
-  &:hover .arrow-indicator {
-    transform: translateX(5px);
-    color: #1abc9c !important; /* Cor primária */
-  }
-}
-
-.menu-card {
-  background: #ffffff;
-  border-radius: 16px;
-  transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
-  position: relative;
-  overflow: hidden;
-  border: 1px solid #f1f5f9 !important;
-
-  .menu-icon-wrapper {
-    font-size: 2rem;
-    background: #f8fafc;
-    width: 60px;
-    height: 60px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 12px;
-    transition: background 0.3s;
-  }
-
-  .arrow-indicator {
-    transition: all 0.3s ease;
-    font-size: 0.9rem;
-    margin-top: 4px;
-  }
-  /* Linha colorida na base do card */
-  .card-footer-line {
-    height: 4px;
-    width: 100%;
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    opacity: 0.7;
+    .icon-box {
+      background-color: #1d1d1f !important; /* Apple Black */
+      color: #fff !important;
+    }
   }
 }
 
-/* Animação de Entrada (Fade In) */
+.icon-box {
+  transition: all 0.2s ease;
+}
+
+/* Fade In Fix */
 .fade-in {
-  animation: fadeInUp 0.6s ease-out forwards;
-  opacity: 0;
+  animation: fadeIn 0.5s ease-out forwards;
 }
 
-@keyframes fadeInUp {
+@keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(10px);
   }
 
   to {
     opacity: 1;
     transform: translateY(0);
-  }
-}
-
-/* Responsivo */
-@media (max-width: 768px) {
-  .dashboard-header {
-    padding: 2rem 0;
-  }
-
-  .date-badge {
-    margin-top: 1rem;
-    width: 100%;
-    justify-content: center;
   }
 }
