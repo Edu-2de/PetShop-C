@@ -63,27 +63,53 @@ namespace SIGA_PET.Controllers
 
         // POST: api/Funcionario
         [HttpPost]
-        public async Task<ActionResult<FuncionarioDto>> CreateFuncionario([FromBody] CreateFuncionarioDto createFuncionarioDto)
+        public async Task<ActionResult<FuncionarioDto>> CreateFuncionario([FromBody] CreateFuncionarioDto dto)
         {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+
+            if (await _context.Usuarios.AnyAsync(u => u.Email == dto.Email))
+                return BadRequest("Este e-mail já está em uso.");
+
+            using var transaction = await _context.Database.BeginTransactionAsync();
             try
             {
-                if (!ModelState.IsValid)
+                // Define se é Admin ou Funcionario baseado no Cargo
+                var tipoUsuario = (dto.Cargo != null && dto.Cargo.Contains("Gerente", StringComparison.OrdinalIgnoreCase))
+                                  ? "Admin"
+                                  : "Funcionario";
+
+                var usuario = new Usuario
                 {
-                    return BadRequest(ModelState);
-                }
+                    Email = dto.Email,
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Senha),
+                    TipoUsuario = tipoUsuario,
+                    Ativo = true
+                };
+                _context.Usuarios.Add(usuario);
+                await _context.SaveChangesAsync();
 
-                var funcionario = _mapper.Map<Funcionario>(createFuncionarioDto);
-
-                // Se DataContratacao não for fornecida, o model define um default (UtcNow), mas você pode ajustar aqui.
+                var funcionario = new Funcionario
+                {
+                    Nome = dto.Nome,
+                    Cargo = dto.Cargo,
+                    Telefone = dto.Telefone,
+                    DataContratacao = dto.DataContratacao ?? DateTime.UtcNow,
+                    UsuarioId = usuario.UsuarioId
+                };
                 _context.Funcionarios.Add(funcionario);
                 await _context.SaveChangesAsync();
 
-                var funcionarioDto = _mapper.Map<FuncionarioDto>(funcionario);
-                return CreatedAtAction(nameof(GetFuncionario), new { id = funcionario.FuncionarioId }, funcionarioDto);
+                await transaction.CommitAsync();
+
+                var funcDto = _mapper.Map<FuncionarioDto>(funcionario);
+                funcDto.Email = usuario.Email;
+
+                return CreatedAtAction(nameof(GetFuncionario), new { id = funcionario.FuncionarioId }, funcDto);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Erro interno: {ex.Message}");
+                await transaction.RollbackAsync();
+                return StatusCode(500, $"Erro ao criar funcionário: {ex.Message}");
             }
         }
 

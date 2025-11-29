@@ -12,11 +12,10 @@ namespace SIGA_PET.Profiles
             CreateMap<Categoria, CategoriaDto>().ReverseMap();
             CreateMap<CreateCategoriaDto, Categoria>();
 
-            CreateMap<Tutor, TutorDto>()
-                .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.Usuario.Email)); // Mapeia email do usuário
-
             // --- Mapeamentos de Funcionario (ESSENCIAL PARA O LOGIN) ---
-            CreateMap<Funcionario, FuncionarioDto>().ReverseMap();
+            CreateMap<Funcionario, FuncionarioDto>()
+                .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.Usuario.Email)) // Pega email do Usuario
+                .ReverseMap();
 
             // --- Mapeamentos de Venda ---
             CreateMap<Venda, VendaDto>();
@@ -47,8 +46,9 @@ namespace SIGA_PET.Profiles
             CreateMap<CreateFornecedorDto, Fornecedor>();
             CreateMap<UpdateFornecedorDto, Fornecedor>();
 
-            CreateMap<Tutor, TutorDto>().ReverseMap();
-            CreateMap<CreateTutorDto, Tutor>();
+            CreateMap<Tutor, TutorDto>()
+                .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.Usuario.Email)) // Pega email do Usuario
+                .ReverseMap();
 
             CreateMap<Animal, AnimalDto>().ReverseMap();
 
