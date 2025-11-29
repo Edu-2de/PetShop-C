@@ -7,8 +7,9 @@
           <h6 class="text-uppercase text-muted small fw-bold mb-1">Visão Geral</h6>
           <h1 class="fw-bold text-dark mb-0">Painel Administrativo</h1>
         </div>
-        <div class="date-badge d-none d-md-block">
-          <i class="bi bi-calendar-event me-2"></i> {{ user()?.nome }}
+        <div class="date-badge d-none d-md-inline-flex">
+          <i class="bi bi-calendar-event me-2"></i>
+          <span class="fw-medium">Olá, {{ user()?.nome }}</span>
         </div>
       </div>
     </div>
@@ -37,7 +38,7 @@
       <div class="col-lg-4 col-md-6" *ngFor="let item of menuCards">
         <a [routerLink]="item.link" class="text-decoration-none">
           <div class="card menu-card h-100 border-0 shadow-sm">
-            <div class="card-body p-4 d-flex align-items-start">
+            <div class="card-body p-4 d-flex align-items-center">
               <div class="menu-icon me-3 text-secondary">
                 <i class="bi" [ngClass]="item.icon"></i>
               </div>
@@ -45,8 +46,8 @@
                 <h5 class="card-title fw-bold text-dark mb-1">{{ item.title }}</h5>
                 <p class="card-text text-muted small mb-0">{{ item.desc }}</p>
               </div>
-              <div class="ms-auto align-self-center opacity-0 arrow-icon">
-                <i class="bi bi-chevron-right text-primary"></i>
+              <div class="ms-auto opacity-0 arrow-icon">
+                <i class="bi bi-chevron-right"></i>
               </div>
             </div>
           </div>

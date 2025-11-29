@@ -1,127 +1,135 @@
-/* Dashboard Minimalista e Profissional */
+/* Admin Dashboard - Professional Design */
 
-.admin-container {
-  max-width: 1400px;
-  margin: 0 auto;
+.admin-wrapper {
+  background-color: #f8f9fa;
+  min-height: 100vh;
+  padding-bottom: 80px;
 }
 
-/* Cabeçalho Simples */
-.admin-header {
+/* Header */
+.dashboard-header {
   background-color: #ffffff;
   border-bottom: 1px solid #eef2f6;
-  padding: 2rem 0;
-  margin-bottom: 2.5rem;
-
-  h1 {
-    font-size: 1.75rem;
-    color: #1e293b;
-    font-weight: 700;
-    letter-spacing: -0.5px;
-  }
-
-  p {
-    color: #64748b;
-    font-size: 1rem;
-    margin: 0;
-  }
+  padding: 3rem 0;
 }
 
-/* Cards Profissionais */
-.admin-card {
+.ls-1 {
+  letter-spacing: 1px;
+}
+
+.date-badge {
   background: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
-  transition: all 0.2s ease-in-out;
-  position: relative;
-  overflow: hidden;
+  border: 1px solid #e9ecef;
+  color: #64748b;
+  padding: 8px 20px;
+  border-radius: 50px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+  display: inline-flex;
+  align-items: center;
+}
+
+/* KPI Cards */
+.stat-card {
+  background: #ffffff;
+  border-radius: 16px;
+  transition: all 0.3s ease;
 
   &:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 12px 24px -10px rgba(0, 0, 0, 0.08) !important;
-    border-color: #cbd5e1;
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px rgba(0,0,0,0.05) !important;
   }
 
-  .card-body {
-    padding: 1.75rem;
+  .icon-square {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
     display: flex;
-    flex-direction: column;
-    align-items: flex-start; /* Alinhamento à esquerda para ar mais sério */
-    height: 100%;
-  }
-  /* Ícone Minimalista (Sem fundo) */
-  .icon-box {
-    font-size: 2rem;
-    margin-bottom: 1rem;
-    transition: transform 0.2s;
-    /* Cores específicas para cada contexto */
-    &.text-primary {
-      color: #0f172a !important;
-    }
-    /* Tutores - Escuro */
-    &.text-danger {
-      color: #ef4444 !important;
-    }
-    /* Pets - Vermelho */
-    &.text-warning {
-      color: #f59e0b !important;
-    }
-    /* Produtos - Laranja */
-    &.text-info {
-      color: #3b82f6 !important;
-    }
-    /* Serviços - Azul */
-    &.text-success {
-      color: #10b981 !important;
-    }
-    /* Agenda - Verde */
-    &.text-secondary {
-      color: #64748b !important;
-    }
-    /* Fornecedores - Cinza */
-  }
-
-  .card-title {
-    font-size: 1.1rem;
-    font-weight: 600;
-    color: #334155;
-    margin-bottom: 0.5rem;
-  }
-
-  .card-text {
-    font-size: 0.9rem;
-    color: #94a3b8;
-    line-height: 1.5;
-    margin-bottom: 1.5rem;
-    flex-grow: 1;
-  }
-
-  .btn-link-custom {
-    color: #1abc9c; /* Sua cor primária */
-    font-weight: 600;
-    font-size: 0.9rem;
-    text-decoration: none;
-    display: inline-flex;
     align-items: center;
-    gap: 0.5rem;
-    transition: gap 0.2s;
-    padding: 0;
-
-    &:hover {
-      gap: 0.75rem;
-      color: #16a085;
-    }
+    justify-content: center;
+    font-size: 1.4rem;
   }
 }
 
-/* Info Box Clean */
-.info-box {
-  background-color: #f8fafc;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  padding: 1rem;
-  color: #64748b;
-  font-size: 0.9rem;
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
+/* Menu Cards */
+.card-link-wrapper {
+  display: block;
+
+  &:hover .menu-card {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 24px rgba(0,0,0,0.06) !important;
+  }
+
+  &:hover .arrow-indicator {
+    transform: translateX(5px);
+    color: #1abc9c !important; /* Cor primária */
+  }
+}
+
+.menu-card {
+  background: #ffffff;
+  border-radius: 16px;
+  transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+  position: relative;
+  overflow: hidden;
+  border: 1px solid #f1f5f9 !important;
+
+  .menu-icon-wrapper {
+    font-size: 2rem;
+    background: #f8fafc;
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    transition: background 0.3s;
+  }
+
+  .arrow-indicator {
+    transition: all 0.3s ease;
+    font-size: 0.9rem;
+    margin-top: 4px;
+  }
+  /* Linha colorida na base do card */
+  .card-footer-line {
+    height: 4px;
+    width: 100%;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    opacity: 0.7;
+  }
+}
+
+/* Animação de Entrada (Fade In) */
+.fade-in {
+  animation: fadeInUp 0.6s ease-out forwards;
+  opacity: 0;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsivo */
+@media (max-width: 768px) {
+  .dashboard-header {
+    padding: 2rem 0;
+  }
+
+  .date-badge {
+    margin-top: 1rem;
+    width: 100%;
+    justify-content: center;
+  }
 }

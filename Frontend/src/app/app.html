@@ -16,7 +16,7 @@
 
         <ng-container *ngIf="authService.isAdmin()">
           <li class="nav-item">
-            <a class="nav-link fw-medium px-3" routerLink="/admin" routerLinkActive="active">
+            <a class="nav-link px-3 fw-medium text-primary" routerLink="/admin" routerLinkActive="active">
               <i class="bi bi-speedometer2 me-1"></i> Painel
             </a>
           </li>
@@ -56,35 +56,35 @@
 
       <div class="d-flex align-items-center ms-auto">
 
-        <div class="input-group input-group-sm me-3 d-none d-lg-flex" style="width: 220px;" *ngIf="!authService.isAdmin()">
+        <div class="input-group input-group-sm me-4 d-none d-lg-flex" style="width: 240px;" *ngIf="!authService.isAdmin()">
           <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-muted"></i></span>
           <input type="text" class="form-control bg-light border-start-0 ps-0" placeholder="Buscar..." [(ngModel)]="searchQuery" (keyup.enter)="searchProducts()">
         </div>
 
-        <a *ngIf="!authService.isAuthenticated()" class="btn btn-sm btn-outline-primary rounded-pill px-4" routerLink="/login">
+        <a *ngIf="!authService.isAuthenticated()" class="btn btn-sm btn-primary rounded-pill px-4" routerLink="/login">
           Entrar
         </a>
 
         <div class="dropdown" *ngIf="authService.isAuthenticated()">
-          <button class="btn btn-link text-decoration-none text-dark dropdown-toggle d-flex align-items-center p-0" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+          <button class="btn btn-link text-decoration-none text-dark dropdown-toggle d-flex align-items-center p-0 border-0 bg-transparent" type="button" data-bs-toggle="dropdown" aria-expanded="false">
 
-            <div class="d-none d-md-block text-end me-2 lh-1">
-              <div class="fw-semibold" style="font-size: 0.9rem;">
+            <div class="d-none d-md-flex flex-column text-end me-3 lh-1">
+              <span class="fw-semibold text-dark text-nowrap" style="font-size: 0.9rem;">
                 {{ authService.isAdmin() ? 'Administrador' : (currentUser()?.nome || '').split(' ')[0] }}
-              </div>
+              </span>
               <small class="text-muted" style="font-size: 0.75rem;">
                 {{ authService.isAdmin() ? 'Gestão' : 'Cliente' }}
               </small>
             </div>
 
-            <div class="avatar-circle bg-primary text-white d-flex align-items-center justify-content-center rounded-circle shadow-sm" style="width: 40px; height: 40px; font-size: 1.1rem;">
+            <div class="avatar-circle bg-primary text-white d-flex align-items-center justify-content-center rounded-circle shadow-sm flex-shrink-0" style="width: 40px; height: 40px; font-size: 1.1rem;">
               {{ (currentUser()?.nome || 'U').charAt(0).toUpperCase() }}
             </div>
           </button>
 
-          <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 mt-3 p-2" style="min-width: 200px;">
-            <li class="px-3 py-2 border-bottom mb-2">
-              <span class="d-block text-muted small">Logado como</span>
+          <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 mt-3 p-2" style="min-width: 200px;">
+            <li class="px-3 py-2 bg-light rounded mb-2">
+              <span class="d-block text-muted small mb-1">Conta atual</span>
               <span class="fw-bold text-dark d-block text-truncate">{{ currentUser()?.email }}</span>
             </li>
 
@@ -94,8 +94,10 @@
               </a>
             </li>
 
+            <li><hr class="dropdown-divider"></li>
+
             <li>
-              <a class="dropdown-item rounded py-2 text-danger" href="#" (click)="logout($event)">
+              <a class="dropdown-item rounded py-2 text-danger d-flex align-items-center" href="#" (click)="logout($event)">
                 <i class="bi bi-box-arrow-right me-2"></i> Sair
               </a>
             </li>
@@ -107,45 +109,65 @@
   </div>
 </nav>
 
-<main style="padding-top: 74px;">
+<main style="padding-top: 76px; min-height: 80vh;">
   <router-outlet></router-outlet>
 </main>
 
-<footer class="main-footer animate-on-scroll">
+<footer class="main-footer">
   <div class="footer-content">
     <div class="footer-grid">
       <div>
         <div class="footer-brand">
           <div class="brand-name">SIGA-PET</div>
-          <div class="brand-tagline">Cuidado Profissional</div>
+          <div class="brand-tagline">Seu Pet Shop de Confiança</div>
         </div>
-        <p class="company-description text-secondary">Soluções completas para gestão veterinária e bem-estar animal.</p>
+        <p class="company-description">Oferecemos produtos de qualidade e serviços especializados para o bem-estar do seu pet.</p>
+        <div class="social-links">
+          <a href="#" class="social-link" aria-label="Facebook">Facebook</a>
+          <a href="#" class="social-link" aria-label="Instagram">Instagram</a>
+          <a href="#" class="social-link" aria-label="WhatsApp">WhatsApp</a>
+        </div>
       </div>
       <div>
-        <div class="footer-title">Links Rápidos</div>
+        <div class="footer-title">Navegação</div>
         <ul class="footer-links">
-          <li><a routerLink="/">Início</a></li>
           <li><a routerLink="/produtos">Produtos</a></li>
-          <li><a routerLink="/servicos">Serviços</a></li>
+          <li><a routerLink="/agenda/novo">Agendar Serviço</a></li>
+          <li><a href="#categorias">Categorias</a></li>
+          <li><a href="#sobre">Sobre Nós</a></li>
         </ul>
       </div>
       <div>
-        <div class="footer-title">Suporte</div>
+        <div class="footer-title">Atendimento</div>
         <ul class="footer-links">
-          <li><a href="#">Central de Ajuda</a></li>
-          <li><a href="#">Termos de Uso</a></li>
-          <li><a href="#">Privacidade</a></li>
+          <li><a href="#">Dúvidas Frequentes</a></li>
+          <li><a href="#">Política de Troca</a></li>
+          <li><a href="#">Formas de Pagamento</a></li>
+          <li><a href="#">Frete e Entrega</a></li>
         </ul>
       </div>
       <div>
         <div class="footer-title">Contato</div>
-        <div class="contact-item mb-2"><i class="bi bi-geo-alt me-2"></i> Av. Paulista, 1000 - SP</div>
-        <div class="contact-item mb-2"><i class="bi bi-telephone me-2"></i> (11) 3000-1234</div>
-        <div class="contact-item"><i class="bi bi-envelope me-2"></i> contato@sigapet.com</div>
+        <div class="contact-item">
+          <strong>Endereço</strong>
+          <span>Av. Paulista, 1000 - São Paulo - SP</span>
+        </div>
+        <div class="contact-item">
+          <strong>Telefone</strong>
+          <span>(11) 3000-1234</span>
+        </div>
+        <div class="contact-item">
+          <strong>E-mail</strong>
+          <span>contato@sigapet.com.br</span>
+        </div>
+        <div class="contact-item">
+          <strong>Horário</strong>
+          <span>Seg–Sex: 8h às 18h / Sáb: 8h às 12h</span>
+        </div>
       </div>
     </div>
-    <div class="footer-bottom mt-5 pt-3 border-top border-secondary text-center text-secondary small">
-      &copy; 2024 SIGA-PET. Todos os direitos reservados.
+    <div class="footer-bottom">
+      <div class="copyright">© 2024 SIGA-PET. Todos os direitos reservados.</div>
     </div>
   </div>
 </footer>
