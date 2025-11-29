@@ -8,7 +8,6 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using BCrypt.Net;
-using AutoMapper;
 
 namespace SIGA_PET.Controllers
 {
@@ -18,102 +17,107 @@ namespace SIGA_PET.Controllers
     {
         private readonly AppDbContext _context;
         private readonly IConfiguration _configuration;
-        private readonly IMapper _mapper;
 
-        public AuthController(AppDbContext context, IConfiguration configuration, IMapper mapper)
+        public AuthController(AppDbContext context, IConfiguration configuration)
         {
             _context = context;
             _configuration = configuration;
-            _mapper = mapper;
         }
 
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginDto loginDto)
         {
-            var user = await _context.Funcionarios.FirstOrDefaultAsync(f => f.Email == loginDto.Email);
+            // Busca na tabela USUARIOS agora
+            var user = await _context.Usuarios
+                .Include(u => u.Funcionario)
+                .Include(u => u.Tutor)
+                .FirstOrDefaultAsync(u => u.Email == loginDto.Email);
 
-            if (user == null || string.IsNullOrEmpty(user.PasswordHash) || !BCrypt.Net.BCrypt.Verify(loginDto.Senha, user.PasswordHash))
+            if (user == null || !BCrypt.Net.BCrypt.Verify(loginDto.Senha, user.PasswordHash))
                 return Unauthorized("Credenciais inválidas");
 
+            if (!user.Ativo)
+                return Unauthorized("Usuário inativo");
+
             var token = GenerateJwtToken(user);
-            
-            // Mapeia para DTO para não devolver senha/hash
-            var userDto = _mapper.Map<FuncionarioDto>(user);
-            
-            return Ok(new { token, usuario = userDto });
+
+            // Retorna dados básicos para o frontend saber quem é
+            var nome = user.Funcionario?.Nome ?? user.Tutor?.Nome ?? "Admin";
+            var idVinculo = user.Funcionario?.FuncionarioId ?? user.Tutor?.TutorId ?? 0;
+
+            return Ok(new
+            {
+                token,
+                usuario = new
+                {
+                    email = user.Email,
+                    nome = nome,
+                    cargo = user.TipoUsuario, // Admin, Funcionario ou Tutor
+                    id = idVinculo
+                }
+            });
         }
 
-        // ROTA NOVA: Execute isso no Swagger para criar os usuários iniciais
+        // Rota para criar o primeiro usuário (Seed)
         [HttpPost("seed")]
-        public async Task<IActionResult> SeedUsers()
+        public async Task<IActionResult> Seed()
         {
-            var msgs = new List<string>();
+            if (await _context.Usuarios.AnyAsync()) return Ok("Usuários já existem.");
 
-            // 1. Criar Admin
-            if (!await _context.Funcionarios.AnyAsync(f => f.Email == "admin@sigapet.com"))
+            // Criar Admin
+            var adminUser = new Usuario
             {
-                var admin = new Funcionario
-                {
-                    Nome = "Administrador",
-                    Email = "admin@sigapet.com",
-                    Login = "admin",
-                    Cargo = "Gerente", // Cargo define que é Admin no Frontend
-                    Telefone = "11999999999",
-                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("admin123"),
-                    DataContratacao = DateTime.UtcNow
-                };
-                _context.Funcionarios.Add(admin);
-                msgs.Add("Admin criado (admin@sigapet.com / admin123)");
-            }
-
-            // 2. Criar Usuário Padrão (Funcionario com cargo menor ou apenas um registro para teste)
-            if (!await _context.Funcionarios.AnyAsync(f => f.Email == "user@sigapet.com"))
-            {
-                var user = new Funcionario
-                {
-                    Nome = "Cliente Padrão",
-                    Email = "user@sigapet.com",
-                    Login = "user",
-                    Cargo = "Cliente", // Cargo diferente de Gerente
-                    Telefone = "11888888888",
-                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("user123"),
-                    DataContratacao = DateTime.UtcNow
-                };
-                _context.Funcionarios.Add(user);
-                msgs.Add("Usuário criado (user@sigapet.com / user123)");
-            }
-
+                Email = "admin@sigapet.com",
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword("admin123"),
+                TipoUsuario = "Admin",
+                Ativo = true
+            };
+            _context.Usuarios.Add(adminUser);
             await _context.SaveChangesAsync();
 
-            if (msgs.Count == 0) return Ok("Usuários já existiam.");
-            return Ok(msgs);
+            // Criar um Funcionario vinculado a um Usuario
+            var funcUser = new Usuario
+            {
+                Email = "func@sigapet.com",
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword("func123"),
+                TipoUsuario = "Funcionario",
+                Ativo = true
+            };
+            _context.Usuarios.Add(funcUser);
+            await _context.SaveChangesAsync();
+
+            var funcionario = new Funcionario
+            {
+                Nome = "João Funcionário",
+                Cargo = "Atendente",
+                UsuarioId = funcUser.UsuarioId, // Vínculo
+                Email = "func@sigapet.com"
+            };
+            _context.Funcionarios.Add(funcionario);
+
+            await _context.SaveChangesAsync();
+            return Ok("Seed realizado com sucesso!");
         }
 
-        private string GenerateJwtToken(Funcionario user)
+        private string GenerateJwtToken(Usuario user)
         {
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]!));
-            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-
-            // Definindo roles baseadas no cargo
-            var role = (user.Cargo == "Gerente" || user.Cargo == "Administrador") ? "admin" : "user";
-
+            var key = Encoding.ASCII.GetBytes(_configuration["Jwt:Key"] ?? "chave_super_secreta_padrao_123");
             var claims = new[]
             {
-                new Claim(JwtRegisteredClaimNames.Sub, user.Email ?? ""),
-                new Claim("id", user.FuncionarioId.ToString()),
-                new Claim("role", role),
-                new Claim("nome", user.Nome)
+                new Claim(JwtRegisteredClaimNames.Sub, user.Email),
+                new Claim("id", user.UsuarioId.ToString()),
+                new Claim("role", user.TipoUsuario)
             };
 
-            var token = new JwtSecurityToken(
-                issuer: _configuration["Jwt:Issuer"],
-                audience: _configuration["Jwt:Audience"],
-                claims: claims,
-                expires: DateTime.Now.AddHours(8),
-                signingCredentials: creds
-            );
-
-            return new JwtSecurityTokenHandler().WriteToken(token);
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(claims),
+                Expires = DateTime.UtcNow.AddHours(8),
+                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+            };
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var token = tokenHandler.CreateToken(tokenDescriptor);
+            return tokenHandler.WriteToken(token);
         }
     }
 }

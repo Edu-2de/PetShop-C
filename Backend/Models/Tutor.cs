@@ -1,29 +1,27 @@
-using System.ComponentModel.DataAnnotations;
-
+// ... imports
 namespace SIGA_PET.Models
 {
     public class Tutor
     {
         public int TutorId { get; set; }
 
-        [Required(ErrorMessage = "Nome é obrigatório")]
-        [StringLength(120, ErrorMessage = "Nome deve ter no máximo 120 caracteres")]
+        // NOVO: Chave estrangeira para Usuario (Login)
+        public int UsuarioId { get; set; }
+
+        [ForeignKey("UsuarioId")]
+        public virtual Usuario Usuario { get; set; } = null!;
+
+        [Required]
+        [StringLength(120)]
         public string Nome { get; set; } = string.Empty;
 
-        [StringLength(20, ErrorMessage = "Telefone deve ter no máximo 20 caracteres")]
+        // Email e Telefone podem continuar aqui para contato fácil, 
+        // ou você pode remover Email daqui e usar só o do Usuario.
+        // Vou manter para facilitar a migração.
         public string? Telefone { get; set; }
-
-        [EmailAddress(ErrorMessage = "Email deve ter formato válido")]
-        [StringLength(150, ErrorMessage = "Email deve ter no máximo 150 caracteres")]
-        public string? Email { get; set; }
-
-        [StringLength(250, ErrorMessage = "Endereço deve ter no máximo 250 caracteres")]
         public string? Endereco { get; set; }
 
-        public DateTime DataCadastro { get; set; } = DateTime.UtcNow;
-
-        // Navigation Properties
         public virtual ICollection<Animal> Animais { get; set; } = new List<Animal>();
-        public virtual ICollection<Venda> Vendas { get; set; } = new List<Venda>();
+        // ... outras props
     }
 }

@@ -10,6 +10,11 @@ namespace SIGA_PET.Data
         }
 
         // DbSets para todas as entidades
+        // Novas tabelas
+        public DbSet<Usuario> Usuarios { get; set; }
+        public DbSet<Categoria> Categorias { get; set; }
+
+        // Tabelas existentes
         public DbSet<Tutor> Tutores { get; set; }
         public DbSet<Animal> Animais { get; set; }
         public DbSet<Produto> Produtos { get; set; }
@@ -26,10 +31,37 @@ namespace SIGA_PET.Data
         {
             base.OnModelCreating(modelBuilder);
 
+            // =================================================================
+            // NOVAS CONFIGURAÇÕES (Refatoração)
+            // =================================================================
+
+            // Configuração Usuario -> Tutor (1:1)
+            modelBuilder.Entity<Tutor>()
+                .HasOne(t => t.Usuario)
+                .WithOne(u => u.Tutor)
+                .HasForeignKey<Tutor>(t => t.UsuarioId)
+                .OnDelete(DeleteBehavior.Cascade); // Se deletar usuario, deleta perfil de tutor
+
+            // Configuração Usuario -> Funcionario (1:1)
+            modelBuilder.Entity<Funcionario>()
+                .HasOne(f => f.Usuario)
+                .WithOne(u => u.Funcionario)
+                .HasForeignKey<Funcionario>(f => f.UsuarioId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Configuração Categoria -> Produto (1:N)
+            modelBuilder.Entity<Produto>()
+                .HasOne(p => p.Categoria)
+                .WithMany(c => c.Produtos)
+                .HasForeignKey(p => p.CategoriaId)
+                .OnDelete(DeleteBehavior.SetNull); // Se deletar categoria, produto fica sem categoria (opcional)
+
+            // =================================================================
+            // CONFIGURAÇÕES ORIGINAIS
+            // =================================================================
+
             // Mapear a entidade Tutor para a tabela "Tutores"
             modelBuilder.Entity<Tutor>().ToTable("Tutores");
-
-            // Configurações de relacionamentos e constraints
 
             // Tutor -> Animal (1:N)
             modelBuilder.Entity<Animal>()
@@ -126,8 +158,12 @@ namespace SIGA_PET.Data
             modelBuilder.Entity<Tutor>()
                 .HasIndex(t => t.Email);
 
-            modelBuilder.Entity<Funcionario>()
-                .HasIndex(f => f.Login)
+            // O Login agora estará na tabela Usuario, mas se manteve o campo em Funcionario para migração, pode deixar o index.
+            // Se removeu do modelo Funcionario, remova esta linha. Assumindo que a migração será completa:
+            // modelBuilder.Entity<Funcionario>().HasIndex(f => f.Login).IsUnique(); 
+            // Em vez disso, indexamos o email do usuário:
+            modelBuilder.Entity<Usuario>()
+                .HasIndex(u => u.Email)
                 .IsUnique();
 
             modelBuilder.Entity<Produto>()
