@@ -17,6 +17,8 @@ import { ForncedorFormComponent } from './pages/forncedor/forncedor-form/fornced
 import { AdminDashboardComponent } from './pages/admin/admin-dashboard.component';
 // Correção: authGuard (minúsculo) conforme exportado no arquivo
 import { authGuard } from './guards/auth.guard';
+import { FornecedorListComponent } from './pages/fornecedor/fornecedor-list/fornecedor-list';
+import { FornecedorFormComponent } from './pages/fornecedor/fornecedor-form/fornecedor-form';
 
 export const routes: Routes = [
   { path: '', component: DashboardComponent },
@@ -55,6 +57,8 @@ export const routes: Routes = [
   { path: 'fornecedores', component: ForncedorListComponent, canActivate: [authGuard] },
   { path: 'fornecedores/novo', component: ForncedorFormComponent, canActivate: [authGuard] },
   { path: 'fornecedores/editar/:id', component: ForncedorFormComponent, canActivate: [authGuard] },
+
+  { path: 'fornecedores', component: FornecedorListComponent, canActivate: [authGuard] },
 
   { path: '**', redirectTo: '' }
 ];

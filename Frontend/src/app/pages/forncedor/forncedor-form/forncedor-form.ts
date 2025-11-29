@@ -1,8 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Fornecedor } from '../../../model/fornecedor.model';
+// CORREÇÃO: Caminho aponta para a pasta correta do serviço 'fornecedor' (com 'e')
 import { FornecedorService } from '../../../service/fornecedor/fornecedor';
 
 @Component({
@@ -13,14 +14,14 @@ import { FornecedorService } from '../../../service/fornecedor/fornecedor';
   styleUrls: ['./forncedor-form.scss']
 })
 export class ForncedorFormComponent implements OnInit {
+  private fornecedorService = inject(FornecedorService);
+  private router = inject(Router);
+  private route = inject(ActivatedRoute);
+
   fornecedor: Partial<Fornecedor> = { nome: '', cnpj: '', telefone: '', email: '', endereco: '' };
   isEdit = false;
 
-  constructor(
-    private fornecedorService: FornecedorService,
-    private router: Router,
-    private route: ActivatedRoute
-  ) {}
+  constructor() { }
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');

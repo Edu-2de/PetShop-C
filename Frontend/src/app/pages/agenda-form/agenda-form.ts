@@ -2,12 +2,14 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { HttpErrorResponse } from '@angular/common/http';
 import { Agenda } from '../../model/agenda.model';
 import { AgendaService } from '../../service/agenda/agenda';
 import { Pet } from '../../model/pet.model';
 import { PetService } from '../../service/pets/pet.service';
 import { ServicoPet } from '../../model/servico-pet.model';
 import { ServicoPetService } from '../../service/servico-pet/servico-pet';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-agenda-form',
@@ -22,6 +24,7 @@ export class AgendaFormComponent implements OnInit {
   servicos: ServicoPet[] = [];
   isEdit = false;
   titulo = 'Novo Agendamento';
+  erroMsg: string = '';
 
   constructor(
     private agendaService: AgendaService,
@@ -29,7 +32,7 @@ export class AgendaFormComponent implements OnInit {
     private servicoPetService: ServicoPetService,
     private router: Router,
     private route: ActivatedRoute
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.petService.listar().subscribe((data: Pet[]) => this.pets = data);
@@ -46,14 +49,25 @@ export class AgendaFormComponent implements OnInit {
   }
 
   salvar(): void {
+    this.erroMsg = '';
+
+    // Usamos Observable<any> para aceitar tanto Agenda quanto void
+    let operation: Observable<any>;
+
     if (this.isEdit && this.agendamento.id) {
-      this.agendaService.atualizar(this.agendamento.id, this.agendamento).subscribe(() => {
-        this.router.navigate(['/agenda']);
-      });
+      operation = this.agendaService.atualizar(this.agendamento.id, this.agendamento as Agenda);
     } else {
-      this.agendaService.criar(this.agendamento).subscribe(() => {
-        this.router.navigate(['/agenda']);
-      });
+      operation = this.agendaService.criar(this.agendamento as Agenda);
     }
+
+    operation.subscribe({
+      next: () => {
+        this.router.navigate(['/agenda']);
+      },
+      error: (err: HttpErrorResponse) => {
+        console.error('Erro ao agendar:', err);
+        this.erroMsg = typeof err.error === 'string' ? err.error : 'Erro ao salvar agendamento. Verifique os dados.';
+      }
+    });
   }
 }

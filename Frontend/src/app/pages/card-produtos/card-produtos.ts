@@ -15,7 +15,6 @@ export class CardProdutosComponent implements OnInit {
   produtos: Produto[] = [];
   produtosCarregando = true;
 
-  // Injeção de dependência moderna
   private produtoService = inject(ProdutoService);
 
   ngOnInit() {
@@ -23,13 +22,13 @@ export class CardProdutosComponent implements OnInit {
   }
 
   carregarProdutos() {
+    // Tipagem explícita (data: Produto[])
     this.produtoService.listar().subscribe({
-      next: (data) => {
-        // Pega apenas produtos ativos e limita a 8 para a vitrine
-        this.produtos = data.filter(p => p.ativo).slice(0, 8);
+      next: (data: Produto[]) => {
+        this.produtos = data.filter((p: Produto) => p.ativo).slice(0, 8);
         this.produtosCarregando = false;
       },
-      error: (err) => {
+      error: (err: any) => {
         console.error('Erro ao carregar produtos', err);
         this.produtosCarregando = false;
       }
@@ -40,6 +39,6 @@ export class CardProdutosComponent implements OnInit {
     if (produto.imagens && produto.imagens.length > 0) {
       return produto.imagens[0].url;
     }
-    return 'assets/images/no-image.png'; // Placeholder
+    return 'assets/images/no-image.png';
   }
 }

@@ -11,12 +11,15 @@ export interface Produto {
   quantidadeEstoque: number;
   ativo: boolean;
   fornecedorId: number;
+
+  // Novos campos
+  categoriaId?: number;
   nomeFornecedor?: string;
   imagens?: ProdutoImagem[];
-  
-  // Aliases para compatibilidade com componentes antigos
+
+  // Aliases para compatibilidade (opcionais)
   id?: number;
-  categoria?: string;
+  categoria?: string;     // String para exibição
   fotoUrl?: string;
-  fornecedorid?: number;
+  fornecedorid?: number;  // Lowercase alias
 }

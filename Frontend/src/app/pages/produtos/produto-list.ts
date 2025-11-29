@@ -4,9 +4,10 @@ import { RouterLink, Router } from '@angular/router';
 import { Produto } from '../../model/produto.model';
 import { ProdutoService } from '../../service/produtos/produto.service';
 import { Fornecedor } from '../../model/fornecedor.model';
+// CORREÇÃO: Caminho aponta para 'fornecedor' (correto)
 import { FornecedorService } from '../../service/fornecedor/fornecedor';
 import { FormsModule } from '@angular/forms';
-import { AuthService } from '../../service/auth/auth.service'; // Importar AuthService
+import { AuthService } from '../../service/auth/auth.service';
 
 @Component({
   selector: 'app-produto-list',
@@ -17,12 +18,12 @@ import { AuthService } from '../../service/auth/auth.service'; // Importar AuthS
 })
 export class ProdutoListComponent implements OnInit {
   private produtos = signal<Produto[]>([]);
-  private fornecedorMap = new Map<number, string>();
   termoBusca = signal<string>('');
 
-  // Injetar AuthService
   public authService = inject(AuthService);
   private router = inject(Router);
+  private produtoService = inject(ProdutoService);
+  private fornecedorService = inject(FornecedorService);
 
   produtosFiltrados = computed(() => {
     const produtos = this.produtos();
@@ -36,27 +37,17 @@ export class ProdutoListComponent implements OnInit {
     );
   });
 
-  constructor(
-    private produtoService: ProdutoService,
-    private fornecedorService: FornecedorService
-  ) { }
+  constructor() { }
 
   ngOnInit(): void {
     this.carregarDados();
   }
 
   carregarDados(): void {
-    this.fornecedorService.listar().subscribe((fornecedores: Fornecedor[]) => {
-      this.fornecedorMap = new Map(fornecedores.map((f: Fornecedor) => [f.id!, f.nome]));
-      this.produtoService.listar().subscribe(produtos => {
-        this.produtos.set(produtos);
-      });
+    // Tipagem explícita (produtos: Produto[])
+    this.produtoService.listar().subscribe((produtos: Produto[]) => {
+      this.produtos.set(produtos);
     });
-  }
-
-  getFornecedorNome(id: number | undefined): string {
-    if (id === undefined) return 'N/A';
-    return this.fornecedorMap.get(id) || 'Desconhecido';
   }
 
   buscar(event: Event): void {
@@ -73,12 +64,11 @@ export class ProdutoListComponent implements OnInit {
     }
   }
 
-  // Método para simular compra
   comprar(produto: Produto): void {
     if (!this.authService.isAuthenticated()) {
       this.router.navigate(['/login']);
       return;
     }
-    alert(`Produto "${produto.nome}" adicionado ao carrinho! (Simulação)`);
+    alert(`Produto "${produto.nome}" adicionado ao carrinho!`);
   }
 }
