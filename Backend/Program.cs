@@ -1,11 +1,34 @@
 using Microsoft.EntityFrameworkCore;
 using SIGA_PET.Data;
 using SIGA_PET.Profiles;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllers();
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = builder.Configuration["Jwt:Issuer"],
+        ValidAudience = builder.Configuration["Jwt:Audience"],
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!))
+    };
+});
 
 // Configurar Entity Framework
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
@@ -49,7 +72,7 @@ if (app.Environment.IsDevelopment())
 
 // Habilitar CORS
 app.UseCors("AllowAngularApp");
-
+app.UseAuthentication(); 
 app.UseAuthorization();
 
 app.MapControllers();

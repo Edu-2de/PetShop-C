@@ -16,30 +16,39 @@ export class LoginComponent {
   senha: string = '';
   erro: string = '';
   mostrarSenha: boolean = false;
+  carregando: boolean = false; // Novo estado
 
   constructor(
     private authService: AuthService,
     private router: Router
-  ) {}
+  ) { }
 
   login(): void {
     this.erro = '';
-
     if (!this.email || !this.senha) {
-      this.erro = 'Por favor, preencha todos os campos.';
+      this.erro = 'Preencha todos os campos.';
       return;
     }
 
-    if (this.authService.login(this.email, this.senha)) {
-      const user = this.authService.getCurrentUser()();
-      if (user?.role === 'admin') {
-        this.router.navigate(['/admin']);
-      } else {
-        this.router.navigate(['/']);
+    this.carregando = true;
+
+    // Agora usamos subscribe no Observable real
+    this.authService.login(this.email, this.senha).subscribe({
+      next: () => {
+        this.carregando = false;
+        // O redirecionamento baseia-se no cargo agora
+        if (this.authService.isAdmin()) {
+          this.router.navigate(['/admin']);
+        } else {
+          this.router.navigate(['/']);
+        }
+      },
+      error: (err) => {
+        this.carregando = false;
+        console.error(err);
+        this.erro = 'Email ou senha inválidos.';
       }
-    } else {
-      this.erro = 'Email ou senha incorretos.';
-    }
+    });
   }
 
   toggleSenha(): void {
