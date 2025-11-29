@@ -51,6 +51,18 @@ namespace SIGA_PET.Profiles
             CreateMap<CreateFornecedorDto, Fornecedor>();
             CreateMap<UpdateFornecedorDto, Fornecedor>()
                 .ForMember(dest => dest.FornecedorId, opt => opt.Ignore());
+
+            CreateMap<Venda, VendaDto>();
+            CreateMap<ItemVenda, ItemVendaDto>()
+                .ForMember(dest => dest.ProdutoNome, opt => opt.MapFrom(src => src.Produto != null ? src.Produto.Nome : null))
+                .ForMember(dest => dest.ServicoNome, opt => opt.MapFrom(src => src.Servico != null ? src.Servico.Nome : null));
+
+            // Mapeamento de Criação
+            CreateMap<CreateVendaDto, Venda>()
+                .ForMember(dest => dest.DataVenda, opt => opt.Ignore()) // Definido no controller
+                .ForMember(dest => dest.ValorTotal, opt => opt.Ignore()); // Calculado no controller
+
+            CreateMap<CreateItemVendaDto, ItemVenda>();
         }
     }
 }
