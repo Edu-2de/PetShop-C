@@ -27,6 +27,12 @@ export class TutorService {
     );
   }
 
+  searchByName(name: string): Observable<Tutor[]> {
+    return this.http.get<Tutor[]>(`${this.apiUrl}/search?name=${name}`).pipe(
+      map(tutores => tutores.map(t => ({ ...t, id: t.tutorId })))
+    );
+  }
+
   criar(tutor: Omit<Tutor, 'tutorId' | 'id' | 'dataCadastro'>): Observable<Tutor> {
     return this.http.post<Tutor>(this.apiUrl, tutor).pipe(
       map(t => ({ ...t, id: t.tutorId }))

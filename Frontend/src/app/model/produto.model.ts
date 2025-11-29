@@ -1,3 +1,8 @@
+export interface ProdutoImagem {
+  id: number;
+  url: string;
+}
+
 export interface Produto {
   produtoId: number;
   nome: string;
@@ -6,7 +11,8 @@ export interface Produto {
   quantidadeEstoque: number;
   ativo: boolean;
   fornecedorId: number;
-  fornecedorNome?: string;
+  nomeFornecedor?: string;
+  imagens?: ProdutoImagem[];
   
   // Aliases para compatibilidade com componentes antigos
   id?: number;

@@ -35,6 +35,16 @@ export class PetService {
     );
   }
 
+  searchByName(name: string): Observable<Pet[]> {
+    return this.http.get<Pet[]>(`${this.apiUrl}/search?name=${name}`).pipe(
+      map(pets => pets.map(p => ({
+        ...p,
+        id: p.animalId,
+        nascimento: p.dataNascimento
+      })))
+    );
+  }
+
   criar(pet: Partial<Pet>): Observable<Pet> {
     const payload = { ...pet, dataNascimento: pet.dataNascimento || pet.nascimento };
     return this.http.post<Pet>(this.apiUrl, payload).pipe(

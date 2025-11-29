@@ -40,6 +40,30 @@ namespace SIGA_PET.Controllers
             }
         }
 
+        // GET: api/Animal/search?name=...
+        [HttpGet("search")]
+        public async Task<ActionResult<IEnumerable<AnimalDto>>> SearchAnimais([FromQuery] string name)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                return BadRequest("O nome para busca não pode ser vazio.");
+            }
+
+            var animais = await _context.Animais
+                .Include(a => a.Tutor)
+                .AsNoTracking()
+                .Where(a => a.Nome.Contains(name))
+                .ToListAsync();
+
+            if (!animais.Any())
+            {
+                return NotFound("Nenhum animal encontrado com o nome fornecido.");
+            }
+
+            var animaisDto = _mapper.Map<IEnumerable<AnimalDto>>(animais);
+            return Ok(animaisDto);
+        }
+
         // GET: api/Animal/5
         [HttpGet("{id}")]
         public async Task<ActionResult<AnimalDto>> GetAnimal(int id)

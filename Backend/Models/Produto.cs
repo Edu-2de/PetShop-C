@@ -20,17 +20,18 @@ namespace SIGA_PET.Models
         [Column(TypeName = "decimal(10,2)")]
         [Range(0, 99999.99, ErrorMessage = "Preço deve estar entre 0 e 99999,99")]
         public decimal Preco { get; set; }
-
+        public int QuantidadeEstoque { get; set; }
         public int? FornecedorId { get; set; }
-
+        
         [StringLength(80, ErrorMessage = "Código de barras deve ter no máximo 80 caracteres")]
         public string? CodigoBarras { get; set; }
-
+        
         public bool Ativo { get; set; } = true;
 
         // Navigation Properties
         [ForeignKey("FornecedorId")]
         public virtual Fornecedor? Fornecedor { get; set; }
         public virtual ICollection<ItemVenda> ItemVendas { get; set; } = new List<ItemVenda>();
+        public virtual ICollection<ProdutoImagem> Imagens { get; set; } = new List<ProdutoImagem>();
     }
 }

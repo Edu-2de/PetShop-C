@@ -35,6 +35,16 @@ export class FornecedorService {
     );
   }
 
+  searchByName(name: string): Observable<Fornecedor[]> {
+    return this.http.get<Fornecedor[]>(`${this.apiUrl}/search?name=${name}`).pipe(
+      map(fornecedores => fornecedores.map(f => ({
+        ...f,
+        id: f.fornecedorId,
+        contato: f.telefone
+      })))
+    );
+  }
+
   create(fornecedor: Partial<Fornecedor>): Observable<Fornecedor> {
     const payload = { ...fornecedor, telefone: fornecedor.telefone || fornecedor.contato };
     return this.http.post<Fornecedor>(this.apiUrl, payload).pipe(

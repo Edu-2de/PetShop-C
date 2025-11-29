@@ -15,6 +15,10 @@ body {
   min-height: 100vh; // Garante que o body ocupe no mínimo a altura total da tela.
   display: flex;
   flex-direction: column;
+  padding-top: 68px; /* Altura do header fixo */
+  margin: 0; /* Remove margem padrão */
+  padding-left: 0; /* Remove padding lateral */
+  padding-right: 0; /* Remove padding lateral */
 }
 
 /*
@@ -25,4 +29,66 @@ app-root {
   display: flex;
   flex-direction: column;
   flex: 1;
+}
+
+/* Header fixo */
+.sticky-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1040;
+  background: white !important;
+  transition: box-shadow 0.3s ease, background 0.3s ease;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.sticky-header.scrolled {
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+}
+
+/* Animações base */
+.animate-on-scroll {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+    transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.animate-on-scroll.in-view {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.fade-in {
+  opacity: 0;
+  transition: opacity 0.8s ease;
+}
+
+.fade-in.in-view {
+  opacity: 1;
+}
+
+.slide-up {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+
+.slide-up.in-view {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Remove espaços extras do container */
+.container,
+.container-fluid {
+  padding-left: 15px;
+  padding-right: 15px;
+}
+
+/* Ajuste do main para não ter espaço extra */
+main {
+  margin: 0;
+  padding: 0;
 }

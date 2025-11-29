@@ -142,15 +142,26 @@ namespace SIGA_PET.Controllers
                     return BadRequest($"Serviço com ID {createAgendamentoDto.ServicoId} não encontrado.");
                 }
 
-                // Verificar se o funcionário existe (se fornecido)
-                if (createAgendamentoDto.FuncionarioId.HasValue)
+                // 1. Verificar se o Funcionário já tem agendamento nesse horário
+                if (dto.FuncionarioId.HasValue)
                 {
-                    var funcionarioExists = await _context.Funcionarios.AnyAsync(f => f.FuncionarioId == createAgendamentoDto.FuncionarioId.Value);
-                    if (!funcionarioExists)
-                    {
-                        return BadRequest($"Funcionário com ID {createAgendamentoDto.FuncionarioId} não encontrado.");
-                    }
+                    var conflitoFuncionario = await _context.Agendamentos
+                        .AnyAsync(a => a.FuncionarioId == dto.FuncionarioId
+                                       && a.DataHora == dto.DataHora
+                                       && a.Status != "Cancelado");
+
+                    if (conflitoFuncionario)
+                        return BadRequest("Este funcionário já possui um agendamento neste horário.");
                 }
+
+                // 2. Verificar se o Animal já tem agendamento nesse horário
+                var conflitoPet = await _context.Agendamentos
+                    .AnyAsync(a => a.AnimalId == dto.AnimalId
+                                   && a.DataHora == dto.DataHora
+                                   && a.Status != "Cancelado");
+
+                if (conflitoPet)
+                    return BadRequest("Este pet já possui um agendamento neste horário.");
 
                 var agendamento = _mapper.Map<Agendamento>(createAgendamentoDto);
 

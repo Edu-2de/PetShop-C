@@ -1,0 +1,83 @@
+.admin-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 3rem;
+  border-radius: 1rem;
+  margin-bottom: 2rem;
+}
+
+.admin-card {
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.admin-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15) !important;
+}
+
+.icon-wrapper {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+}
+
+.icon-wrapper i {
+  font-size: 2rem;
+  color: white;
+}
+
+.bg-primary {
+  background-color: #1abc9c !important;
+}
+
+.bg-danger {
+  background-color: #e74c3c !important;
+}
+
+.bg-warning {
+  background-color: #f39c12 !important;
+}
+
+.bg-info {
+  background-color: #3498db !important;
+}
+
+.bg-success {
+  background-color: #2ecc71 !important;
+}
+
+.bg-secondary {
+  background-color: #95a5a6 !important;
+}
+
+.btn-primary {
+  background-color: #1abc9c;
+  border-color: #1abc9c;
+}
+
+.btn-primary:hover {
+  background-color: #16a085;
+  border-color: #16a085;
+}
+
+.btn-outline-primary {
+  color: #1abc9c;
+  border-color: #1abc9c;
+}
+
+.btn-outline-primary:hover {
+  background-color: #1abc9c;
+  border-color: #1abc9c;
+  color: white;
+}
+
+@media (max-width: 768px) {
+  .admin-header {
+    padding: 2rem;
+  }
+}
