@@ -143,11 +143,11 @@ namespace SIGA_PET.Controllers
                 }
 
                 // 1. Verificar se o Funcionário já tem agendamento nesse horário
-                if (dto.FuncionarioId.HasValue)
+                if (createAgendamentoDto.FuncionarioId.HasValue)
                 {
                     var conflitoFuncionario = await _context.Agendamentos
-                        .AnyAsync(a => a.FuncionarioId == dto.FuncionarioId
-                                       && a.DataHora == dto.DataHora
+                        .AnyAsync(a => a.FuncionarioId == createAgendamentoDto.FuncionarioId
+                                       && a.DataHora == createAgendamentoDto.DataHora
                                        && a.Status != "Cancelado");
 
                     if (conflitoFuncionario)
@@ -156,8 +156,8 @@ namespace SIGA_PET.Controllers
 
                 // 2. Verificar se o Animal já tem agendamento nesse horário
                 var conflitoPet = await _context.Agendamentos
-                    .AnyAsync(a => a.AnimalId == dto.AnimalId
-                                   && a.DataHora == dto.DataHora
+                    .AnyAsync(a => a.AnimalId == createAgendamentoDto.AnimalId
+                                   && a.DataHora == createAgendamentoDto.DataHora
                                    && a.Status != "Cancelado");
 
                 if (conflitoPet)
