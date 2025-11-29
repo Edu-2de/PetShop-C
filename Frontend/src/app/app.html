@@ -1,7 +1,7 @@
 <nav id="mainNav" class="navbar navbar-expand-lg navbar-light bg-white shadow-sm fixed-top">
   <div class="container-fluid px-4">
 
-    <a class="navbar-brand brand-logo d-flex align-items-center" routerLink="/">
+    <a class="navbar-brand brand-logo d-flex align-items-center me-4" routerLink="/">
       <i class="bi bi-heart-pulse-fill text-primary fs-4 me-2"></i>
       <span class="fw-bold text-dark">SIGA-PET</span>
     </a>
@@ -12,92 +12,93 @@
 
     <div class="collapse navbar-collapse" id="navbarNav">
 
-      <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-3">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
 
         <ng-container *ngIf="authService.isAdmin()">
           <li class="nav-item">
-            <a class="nav-link fw-medium" routerLink="/admin" routerLinkActive="active">
-              Painel
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
-              Home
+            <a class="nav-link px-3 fw-medium text-primary" routerLink="/admin" routerLinkActive="active">
+              <i class="bi bi-speedometer2 me-1"></i> Painel
             </a>
           </li>
           <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-              Gerenciar
+            <a class="nav-link dropdown-toggle px-3" href="#" role="button" data-bs-toggle="dropdown">
+              <i class="bi bi-gear me-1"></i> Gerenciar
             </a>
-            <ul class="dropdown-menu border-0 shadow">
+            <ul class="dropdown-menu border-0 shadow-sm mt-2">
+              <li><h6 class="dropdown-header text-uppercase small fw-bold">Cadastros</h6></li>
               <li><a class="dropdown-item" routerLink="/tutores">Tutores</a></li>
               <li><a class="dropdown-item" routerLink="/pets">Pets</a></li>
+              <li><a class="dropdown-item" routerLink="/fornecedores">Fornecedores</a></li>
               <li><hr class="dropdown-divider"></li>
+              <li><h6 class="dropdown-header text-uppercase small fw-bold">Loja & Serviços</h6></li>
               <li><a class="dropdown-item" routerLink="/produtos">Produtos</a></li>
               <li><a class="dropdown-item" routerLink="/servicos">Serviços</a></li>
-              <li><a class="dropdown-item" routerLink="/agenda">Agenda</a></li>
-              <li><a class="dropdown-item" routerLink="/fornecedores">Fornecedores</a></li>
+              <li><a class="dropdown-item" routerLink="/agenda">Agenda Geral</a></li>
             </ul>
           </li>
         </ng-container>
 
         <ng-container *ngIf="!authService.isAdmin()">
           <li class="nav-item">
-            <a class="nav-link" routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">Home</a>
+            <a class="nav-link px-3" routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">Home</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" routerLink="/produtos" routerLinkActive="active">Produtos</a>
+            <a class="nav-link px-3" routerLink="/produtos" routerLinkActive="active">Produtos</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" routerLink="/servicos" routerLinkActive="active">Serviços</a>
+            <a class="nav-link px-3" routerLink="/servicos" routerLinkActive="active">Serviços</a>
           </li>
           <li class="nav-item" *ngIf="authService.isAuthenticated()">
-            <a class="nav-link" routerLink="/agenda/novo" routerLinkActive="active">Agendar</a>
+            <a class="nav-link px-3" routerLink="/agenda/novo" routerLinkActive="active">Agendar</a>
           </li>
         </ng-container>
       </ul>
 
-      <div class="d-flex align-items-center gap-3">
+      <div class="d-flex align-items-center ms-auto">
 
-        <div class="input-group input-group-sm d-none d-lg-flex" style="width: 250px;" *ngIf="!authService.isAdmin()">
-          <input type="text" class="form-control bg-light border-0" placeholder="Buscar..." [(ngModel)]="searchQuery" (keyup.enter)="searchProducts()">
-          <button class="btn btn-light border-0" (click)="searchProducts()">
-            <i class="bi bi-search text-muted"></i>
-          </button>
+        <div class="input-group input-group-sm me-4 d-none d-lg-flex" style="width: 240px;" *ngIf="!authService.isAdmin()">
+          <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-muted"></i></span>
+          <input type="text" class="form-control bg-light border-start-0 ps-0" placeholder="Buscar..." [(ngModel)]="searchQuery" (keyup.enter)="searchProducts()">
         </div>
 
-        <a *ngIf="!authService.isAuthenticated()" class="btn btn-primary rounded-pill px-4 btn-sm" routerLink="/login">
+        <a *ngIf="!authService.isAuthenticated()" class="btn btn-sm btn-primary rounded-pill px-4" routerLink="/login">
           Entrar
         </a>
 
         <div class="dropdown" *ngIf="authService.isAuthenticated()">
-          <button class="btn btn-light bg-transparent border-0 dropdown-toggle d-flex align-items-center gap-2 p-1 pe-2 rounded-pill hover-bg" type="button" data-bs-toggle="dropdown">
-            <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center shadow-sm" style="width: 35px; height: 35px; font-size: 0.9rem;">
-              {{ (currentUser()?.nome || 'U').charAt(0).toUpperCase() }}
-            </div>
+          <button class="btn btn-link text-decoration-none text-dark dropdown-toggle d-flex align-items-center p-0 border-0 bg-transparent" type="button" data-bs-toggle="dropdown" aria-expanded="false">
 
-            <div class="d-none d-md-flex flex-column text-start lh-1">
-              <span class="fw-bold text-dark small">
+            <div class="d-none d-md-flex flex-column text-end me-3 lh-1">
+              <span class="fw-semibold text-dark text-nowrap" style="font-size: 0.9rem;">
                 {{ authService.isAdmin() ? 'Administrador' : (currentUser()?.nome || '').split(' ')[0] }}
               </span>
+              <small class="text-muted" style="font-size: 0.75rem;">
+                {{ authService.isAdmin() ? 'Gestão' : 'Cliente' }}
+              </small>
+            </div>
+
+            <div class="avatar-circle bg-primary text-white d-flex align-items-center justify-content-center rounded-circle shadow-sm flex-shrink-0" style="width: 40px; height: 40px; font-size: 1.1rem;">
+              {{ (currentUser()?.nome || 'U').charAt(0).toUpperCase() }}
             </div>
           </button>
 
-          <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 mt-2 p-2" style="width: 200px;">
-            <li class="px-3 py-2 border-bottom mb-2">
-              <small class="text-muted d-block">Logado como</small>
-              <span class="fw-bold text-truncate d-block">{{ currentUser()?.nome }}</span>
+          <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 mt-3 p-2" style="min-width: 200px;">
+            <li class="px-3 py-2 bg-light rounded mb-2">
+              <span class="d-block text-muted small mb-1">Conta atual</span>
+              <span class="fw-bold text-dark d-block text-truncate">{{ currentUser()?.email }}</span>
             </li>
 
             <li *ngIf="!authService.isAdmin()">
-              <a class="dropdown-item rounded" routerLink="/agenda/novo">
-                <i class="bi bi-calendar2-check me-2 text-primary"></i>Meus Agendamentos
+              <a class="dropdown-item rounded py-2" routerLink="/agenda/novo">
+                <i class="bi bi-calendar2-event me-2 text-secondary"></i> Meus Agendamentos
               </a>
             </li>
 
+            <li><hr class="dropdown-divider"></li>
+
             <li>
-              <a class="dropdown-item rounded text-danger" href="#" (click)="logout($event)">
-                <i class="bi bi-box-arrow-right me-2"></i>Sair
+              <a class="dropdown-item rounded py-2 text-danger d-flex align-items-center" href="#" (click)="logout($event)">
+                <i class="bi bi-box-arrow-right me-2"></i> Sair
               </a>
             </li>
           </ul>
@@ -108,15 +109,65 @@
   </div>
 </nav>
 
-<main>
-  <router-outlet></router-outlet>
-</main>
-<main>
+<main style="padding-top: 76px; min-height: 80vh;">
   <router-outlet></router-outlet>
 </main>
 
-<footer class="bg-white border-top py-4 mt-auto">
-  <div class="container text-center">
-    <p class="mb-0 text-muted small">&copy; 2024 SIGA-PET. Todos os direitos reservados.</p>
+<footer class="main-footer">
+  <div class="footer-content">
+    <div class="footer-grid">
+      <div>
+        <div class="footer-brand">
+          <div class="brand-name">SIGA-PET</div>
+          <div class="brand-tagline">Seu Pet Shop de Confiança</div>
+        </div>
+        <p class="company-description">Oferecemos produtos de qualidade e serviços especializados para o bem-estar do seu pet.</p>
+        <div class="social-links">
+          <a href="#" class="social-link" aria-label="Facebook">Facebook</a>
+          <a href="#" class="social-link" aria-label="Instagram">Instagram</a>
+          <a href="#" class="social-link" aria-label="WhatsApp">WhatsApp</a>
+        </div>
+      </div>
+      <div>
+        <div class="footer-title">Navegação</div>
+        <ul class="footer-links">
+          <li><a routerLink="/produtos">Produtos</a></li>
+          <li><a routerLink="/agenda/novo">Agendar Serviço</a></li>
+          <li><a href="#categorias">Categorias</a></li>
+          <li><a href="#sobre">Sobre Nós</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="footer-title">Atendimento</div>
+        <ul class="footer-links">
+          <li><a href="#">Dúvidas Frequentes</a></li>
+          <li><a href="#">Política de Troca</a></li>
+          <li><a href="#">Formas de Pagamento</a></li>
+          <li><a href="#">Frete e Entrega</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="footer-title">Contato</div>
+        <div class="contact-item">
+          <strong>Endereço</strong>
+          <span>Av. Paulista, 1000 - São Paulo - SP</span>
+        </div>
+        <div class="contact-item">
+          <strong>Telefone</strong>
+          <span>(11) 3000-1234</span>
+        </div>
+        <div class="contact-item">
+          <strong>E-mail</strong>
+          <span>contato@sigapet.com.br</span>
+        </div>
+        <div class="contact-item">
+          <strong>Horário</strong>
+          <span>Seg–Sex: 8h às 18h / Sáb: 8h às 12h</span>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="copyright">© 2024 SIGA-PET. Todos os direitos reservados.</div>
+    </div>
   </div>
 </footer>

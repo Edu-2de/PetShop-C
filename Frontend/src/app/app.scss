@@ -357,3 +357,142 @@ main {
 .dropdown-menu {
   animation: slideDown 0.2s ease;
 }
+
+/* Footer Styles Global */
+.main-footer {
+  background: #2b2b2b;
+  color: #fff;
+  padding: 70px 0 30px;
+  margin-top: auto; /* Empurra o footer para baixo se o conteudo for pequeno */
+}
+
+.footer-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.footer-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 2fr;
+  gap: 48px;
+  margin-bottom: 42px;
+}
+
+.footer-brand {
+  margin-bottom: 18px;
+}
+
+.brand-name {
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.brand-tagline {
+  font-size: .9rem;
+  color: #1abc9c;
+  font-weight: 600;
+}
+
+.company-description {
+  font-size: .9rem;
+  color: rgba(255,255,255,.75);
+  line-height: 1.6;
+  margin-bottom: 24px;
+}
+
+.social-links {
+  display: flex;
+  gap: 16px;
+}
+
+.social-link {
+  color: rgba(255,255,255,.75);
+  text-decoration: none;
+  font-size: .85rem;
+  transition: .3s;
+  padding: 8px 16px;
+  border: 1px solid rgba(255,255,255,.2);
+  border-radius: 20px;
+}
+
+.social-link:hover {
+  color: #1abc9c;
+  border-color: #1abc9c;
+  transform: translateY(-2px);
+}
+
+.footer-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #1abc9c;
+  margin-bottom: 18px;
+}
+
+.footer-links {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.footer-links li {
+  margin-bottom: 12px;
+}
+
+.footer-links a {
+  color: rgba(255,255,255,.75);
+  text-decoration: none;
+  font-size: .85rem;
+  transition: .3s;
+}
+
+.footer-links a:hover {
+  color: #1abc9c;
+  padding-left: 6px;
+}
+
+.contact-item {
+  margin-bottom: 18px;
+}
+
+.contact-item strong {
+  display: block;
+  font-size: .85rem;
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: #1abc9c;
+}
+
+.contact-item span {
+  font-size: .8rem;
+  color: rgba(255,255,255,.7);
+  line-height: 1.5;
+  display: block;
+}
+
+.footer-bottom {
+  border-top: 1px solid rgba(255,255,255,.15);
+  padding-top: 24px;
+  text-align: center;
+}
+
+.copyright {
+  font-size: .75rem;
+  color: rgba(255,255,255,.55);
+}
+
+/* Responsivo Footer */
+@media (max-width:992px) {
+  .footer-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 36px;
+  }
+}
+
+@media (max-width:768px) {
+  .footer-grid {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+}

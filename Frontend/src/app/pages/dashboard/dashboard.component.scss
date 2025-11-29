@@ -1,24 +1,21 @@
-/* Dashboard Clean */
+/* Dashboard Clean & Interactive */
 
 :host {
   display: block;
 }
 
-/* 1. Hero Banner (Grudado no Header) */
+/* 1. Hero Banner (Quadrado e Grudado) */
 .hero-section {
   background: linear-gradient(135deg, #1abc9c 0%, #16a085 100%);
   padding: 100px 0 80px;
   text-align: center;
   color: #fff;
-  border-radius: 0 0 50px 50px;
-  margin-bottom: 4rem;
-  /* Truque para grudar no header se houver padding no body */
-  margin-top: -1.5rem;
-  /* Caso o padding do body seja maior, ajuste esse valor negativo ou remova se estiver sobrepondo */
-
+  /* CORREÇÃO: Banner totalmente quadrado */
+  border-radius: 0;
+  margin-bottom: 5rem;
+  margin-top: -1.5rem; /* Grudar no header */
   position: relative;
   z-index: 1;
-  box-shadow: 0 4px 20px rgba(26, 188, 156, 0.2);
 }
 
 .hero-title {
@@ -34,7 +31,7 @@
   margin-bottom: 2.5rem;
   opacity: 0.95;
   font-weight: 300;
-  max-width: 600px;
+  max-width: 700px;
   margin-left: auto;
   margin-right: auto;
 }
@@ -60,41 +57,44 @@
 
 /* Categorias */
 .categories-section {
-  margin-bottom: 5rem;
+  margin-bottom: 6rem;
 }
 
 .section-title {
-  font-size: 2rem;
+  font-size: 2.2rem;
   font-weight: 700;
   color: #2b2b2b;
   text-align: center;
-  margin-bottom: 3rem;
+  margin-bottom: 3.5rem;
 }
 
 .categories-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   gap: 30px;
 }
 
 .category-card {
   background: #fff;
-  border: 1px solid #f0f0f0;
-  border-radius: 16px;
-  padding: 40px 20px;
+  border: 1px solid #e9ecef;
+  border-radius: 12px;
+  padding: 40px 30px;
   text-align: center;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
   cursor: pointer;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 
   &:hover {
-    border-color: #1abc9c;
-    transform: translateY(-10px);
-    box-shadow: 0 20px 40px rgba(0,0,0,0.05);
-
+    border-color: #dee2e6;
+    transform: translateY(-8px);
+    box-shadow: 0 15px 30px rgba(0,0,0,0.08);
+    /* Ícone fica levemente mais escuro no hover */
     .category-icon-wrapper {
-      background-color: #1abc9c;
-      color: white;
-      transform: scale(1.1);
+      color: #495057;
+      background-color: #e9ecef;
     }
   }
 }
@@ -102,213 +102,115 @@
 .category-icon-wrapper {
   width: 80px;
   height: 80px;
-  background-color: #e0f2f1;
-  color: #1abc9c;
+  /* CORREÇÃO: Ícones Cinzas (Clean) */
+  background-color: #f8f9fa;
+  color: #adb5bd;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 0 auto 1.5rem;
+  margin-bottom: 1.5rem;
   transition: all 0.3s ease;
+
+  i {
+    font-size: 2.5rem;
+  }
 }
 
 .category-title {
   font-weight: 700;
-  font-size: 1.2rem;
-  color: #333;
-  margin-bottom: 0.5rem;
+  font-size: 1.3rem;
+  color: #343a40;
+  margin-bottom: 1rem;
 }
 
 .category-desc {
-  color: #777;
-  font-size: 0.9rem;
+  color: #6c757d;
+  font-size: 0.95rem;
+  line-height: 1.6;
 }
 
 /* Products Section */
 .products-section {
-  padding: 2rem 0;
+  padding: 4rem 0;
 }
 
 .view-all-link {
   color: #1abc9c;
   text-decoration: none;
   font-weight: 600;
+  font-size: 1rem;
 
   &:hover {
     text-decoration: underline;
+    color: #16a085;
   }
 }
 
-/* Features */
+/* Features (Vantagens) - Com Interatividade Legal */
 .features-section {
-  padding: 80px 0;
+  padding: 80px 0 100px;
   background: #f8fcfb;
   margin-top: 5rem;
-  border-radius: 50px 50px 0 0;
+  border-top: 1px solid #eef2f6;
 }
 
 .features-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 40px;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 30px;
 }
 
 .feature-card {
-  padding: 30px;
-  text-align: center;
+  padding: 35px;
+  text-align: left;
   background: white;
   border-radius: 16px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.03);
-  transition: transform 0.3s ease;
-
+  border: 1px solid transparent; /* Preparado para hover */
+  box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Animação "bouncy" suave */
+  /* INTERATIVIDADE LEGAL */
   &:hover {
-    transform: translateY(-5px);
+    transform: translateY(-10px) scale(1.02); /* Levanta e cresce um pouco */
+    box-shadow: 0 20px 40px rgba(26, 188, 156, 0.15); /* Sombra colorida suave */
+    border-color: rgba(26, 188, 156, 0.3); /* Borda sutil */
+
+    .feature-icon i {
+      transform: scale(1.2) rotate(10deg); /* Ícone cresce e gira */
+      color: #16a085;
+    }
+  }
+
+  .feature-icon {
+    margin-bottom: 1.5rem;
+
+    i {
+      font-size: 2.5rem;
+      color: #1abc9c; /* Cor original */
+      transition: all 0.4s ease;
+      display: inline-block;
+    }
   }
 }
 
-/* Footer Styles (Mantido do original) */
-.main-footer {
-  background: #2b2b2b;
-  color: #fff;
-  padding: 70px 0 30px;
-}
-
-.footer-content {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 20px;
-}
-
-.footer-grid {
-  display: grid;
-  grid-template-columns: 2fr 1fr 1fr 2fr;
-  gap: 48px;
-  margin-bottom: 42px;
-}
-
-.footer-brand {
-  margin-bottom: 18px;
-}
-
-.brand-name {
-  font-size: 1.8rem;
+.feature-title {
+  font-size: 1.3rem;
   font-weight: 700;
-  margin-bottom: 4px;
+  color: #212529;
+  margin-bottom: 0.8rem;
 }
 
-.brand-tagline {
-  font-size: .9rem;
-  color: #1abc9c;
-  font-weight: 600;
-}
-
-.company-description {
-  font-size: .9rem;
-  color: rgba(255,255,255,.75);
+.feature-desc {
+  color: #6c757d;
+  font-size: 1rem;
   line-height: 1.6;
-  margin-bottom: 24px;
 }
 
-.social-links {
-  display: flex;
-  gap: 16px;
-}
-
-.social-link {
-  color: rgba(255,255,255,.75);
-  text-decoration: none;
-  font-size: .85rem;
-  transition: .3s;
-  padding: 8px 16px;
-  border: 1px solid rgba(255,255,255,.2);
-  border-radius: 20px;
-}
-
-.social-link:hover {
-  color: #1abc9c;
-  border-color: #1abc9c;
-  transform: translateY(-2px);
-}
-
-.footer-title {
-  font-size: 1.05rem;
-  font-weight: 700;
-  color: #1abc9c;
-  margin-bottom: 18px;
-}
-
-.footer-links {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-.footer-links li {
-  margin-bottom: 12px;
-}
-
-.footer-links a {
-  color: rgba(255,255,255,.75);
-  text-decoration: none;
-  font-size: .85rem;
-  transition: .3s;
-}
-
-.footer-links a:hover {
-  color: #1abc9c;
-  padding-left: 6px;
-}
-
-.contact-item {
-  margin-bottom: 18px;
-}
-
-.contact-item strong {
-  display: block;
-  font-size: .85rem;
-  font-weight: 600;
-  margin-bottom: 6px;
-  color: #1abc9c;
-}
-
-.contact-item span {
-  font-size: .8rem;
-  color: rgba(255,255,255,.7);
-  line-height: 1.5;
-  display: block;
-}
-
-.footer-bottom {
-  border-top: 1px solid rgba(255,255,255,.15);
-  padding-top: 24px;
-  text-align: center;
-}
-
-.copyright {
-  font-size: .75rem;
-  color: rgba(255,255,255,.55);
-}
-
-/* Responsivo Footer */
-@media (max-width:992px) {
-  .footer-grid {
-    grid-template-columns: 1fr 1fr;
-    gap: 36px;
-  }
-}
-
-@media (max-width:768px) {
-  .footer-grid {
-    grid-template-columns: 1fr;
-    gap: 32px;
-  }
-}
-
-/* Animações */
+/* Animações de Entrada */
 .animate-on-scroll, .fade-in, .slide-up {
   opacity: 0;
   transform: translateY(30px);
-  transition: opacity 0.6s ease, transform 0.6s ease;
+  transition: opacity 0.8s ease, transform 0.8s ease;
 }
 
 .in-view {
