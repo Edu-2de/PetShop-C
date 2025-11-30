@@ -11,7 +11,7 @@ import { PetService } from '../../service/pets/pet.service';
 import { ServicoPet } from '../../model/servico-pet.model';
 import { ServicoPetService } from '../../service/servico-pet/servico-pet';
 import { AuthService } from '../../service/auth/auth.service';
-import { switchMap, of, Observable } from 'rxjs'; // Importante para corrigir o erro de fluxo
+import { switchMap, of, Observable } from 'rxjs';
 
 @Component({
   selector: 'app-agenda-form',
@@ -44,16 +44,16 @@ export class AgendaFormComponent implements OnInit {
   ngOnInit(): void {
     this.carregarServicos();
 
-    // CORREÇÃO: Acessando o valor do Signal corretamente
     const userSignal = this.authService.getCurrentUser();
     const user = userSignal();
 
     this.isCliente = !this.authService.isAdmin();
 
     if (this.isCliente && user) {
-      this.tutorIdLogado = user.id || 0; // Agora 'id' existe na interface User
+      this.tutorIdLogado = user.id || 0;
       this.carregarPetsDoTutor(this.tutorIdLogado);
-      this.agendamento.status = 'Agendado';
+      // CORREÇÃO: "Agendado" não existe no Enum do Backend. Usar "Pendente".
+      this.agendamento.status = 'Pendente'; 
     } else {
       this.carregarTodosPets();
     }
@@ -88,7 +88,6 @@ export class AgendaFormComponent implements OnInit {
     this.petService.buscarPorTutor(tutorId).subscribe({
       next: (data) => {
         this.pets = data;
-        // LÓGICA DO REQUISITO: Se não tem pets, abre a tela de cadastro
         if (this.pets.length === 0) {
           this.precisaCadastrarPet = true;
         }
@@ -124,7 +123,6 @@ export class AgendaFormComponent implements OnInit {
 
     this.petService.criar(this.novoPet).pipe(
       switchMap((petCriado) => {
-        // Usa o ID do pet recém-criado
         this.agendamento.petid = petCriado.animalId || petCriado.id;
 
         if (this.isEdit && this.agendamento.id) {
@@ -142,7 +140,6 @@ export class AgendaFormComponent implements OnInit {
   }
 
   salvarAgendamento() {
-    // CORREÇÃO: Tipagem explícita para evitar erro de assinatura incompatível
     let operation: Observable<any>;
 
     if (this.isEdit && this.agendamento.id) {
@@ -165,7 +162,7 @@ export class AgendaFormComponent implements OnInit {
     if (err.error && typeof err.error === 'string') {
       this.erroMsg = err.error;
     } else {
-      this.erroMsg = 'Erro ao salvar. Verifique os dados.';
+      this.erroMsg = 'Erro ao salvar. Verifique se todos os campos estão preenchidos corretamente.';
     }
   }
 }
