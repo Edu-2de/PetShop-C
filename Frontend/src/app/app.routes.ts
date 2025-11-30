@@ -24,6 +24,7 @@ import { CategoriaFormComponent } from './pages/categorias/categoria-form/catego
 import { ProdutoDetailComponent } from './pages/produtos/produto-detail/produto-detail';
 import { RegisterComponent } from './pages/register/register.component'; // Importar
 
+
 export const routes: Routes = [
   // CORREÇÃO: pathMatch 'full' é obrigatório para rotas vazias
   { path: '', component: DashboardComponent, pathMatch: 'full' },
@@ -55,7 +56,7 @@ export const routes: Routes = [
   { path: 'pets/editar/:id', component: PetFormComponent, canActivate: [authGuard] },
 
   { path: 'agenda', component: AgendaListComponent, canActivate: [authGuard] },
-  { path: 'agenda/novo', component: AgendaFormComponent },
+  { path: 'agenda/novo', component: AgendaFormComponent, canActivate: [authGuard] },
   { path: 'agenda/editar/:id', component: AgendaFormComponent, canActivate: [authGuard] },
 
   { path: 'fornecedores', component: ForncedorListComponent, canActivate: [authGuard] },

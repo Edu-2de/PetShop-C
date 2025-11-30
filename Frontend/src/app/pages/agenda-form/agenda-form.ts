@@ -1,3 +1,4 @@
+// Frontend/src/app/pages/agenda-form/agenda-form.ts
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -10,7 +11,7 @@ import { PetService } from '../../service/pets/pet.service';
 import { ServicoPet } from '../../model/servico-pet.model';
 import { ServicoPetService } from '../../service/servico-pet/servico-pet';
 import { AuthService } from '../../service/auth/auth.service';
-import { switchMap, of } from 'rxjs';
+import { switchMap, of, Observable } from 'rxjs'; // Importante para corrigir o erro de fluxo
 
 @Component({
   selector: 'app-agenda-form',
@@ -20,49 +21,43 @@ import { switchMap, of } from 'rxjs';
   styleUrls: ['./agenda-form.scss']
 })
 export class AgendaFormComponent implements OnInit {
-  // Services
   private agendaService = inject(AgendaService);
   private petService = inject(PetService);
   private servicoPetService = inject(ServicoPetService);
-  public authService = inject(AuthService); // Public para usar no HTML
+  public authService = inject(AuthService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
 
-  // Dados do Agendamento
-  agendamento: Partial<Agenda> = { dataHora: new Date(), status: 'Agendado' };
-  
-  // Dados do Novo Pet (Caso precise cadastrar na hora)
-  novoPet: Partial<Pet> = { nome: '', especie: '', raca: '', sexo: 'Macho' };
-  
-  // Listas e Controles
+  agendamento: Partial<Agenda> = { dataHora: new Date(), status: 'Pendente' };
+  novoPet: Partial<Pet> = { nome: '', especie: 'Cão', raca: '', sexo: 'Macho' };
+
   pets: Pet[] = [];
   servicos: ServicoPet[] = [];
   isEdit = false;
   titulo = 'Novo Agendamento';
   erroMsg: string = '';
-  
-  // Controle de fluxo do Cliente
+
   isCliente = false;
-  precisaCadastrarPet = false; // Se true, mostra form de pet
+  precisaCadastrarPet = false;
   tutorIdLogado: number = 0;
 
   ngOnInit(): void {
     this.carregarServicos();
-    
-    const user = this.authService.getCurrentUser();
+
+    // CORREÇÃO: Acessando o valor do Signal corretamente
+    const userSignal = this.authService.getCurrentUser();
+    const user = userSignal();
+
     this.isCliente = !this.authService.isAdmin();
 
     if (this.isCliente && user) {
-      // === MODO CLIENTE ===
-      this.tutorIdLogado = user.id || 0; // O ID no token é o ID do Tutor
+      this.tutorIdLogado = user.id || 0; // Agora 'id' existe na interface User
       this.carregarPetsDoTutor(this.tutorIdLogado);
-      this.agendamento.status = 'Agendado'; // Força status
+      this.agendamento.status = 'Agendado';
     } else {
-      // === MODO ADMIN ===
       this.carregarTodosPets();
     }
 
-    // Verifica se é edição
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
       this.isEdit = true;
@@ -71,8 +66,7 @@ export class AgendaFormComponent implements OnInit {
         this.agendamento = data;
       });
     }
-    
-    // Verifica se veio um serviço pré-selecionado da loja
+
     this.route.queryParams.subscribe(params => {
       if (params['servicoId']) {
         this.agendamento.servicoId = Number(params['servicoId']);
@@ -81,8 +75,8 @@ export class AgendaFormComponent implements OnInit {
   }
 
   carregarServicos() {
-    this.servicoPetService.listar().subscribe(data => 
-      this.servicos = data.filter(s => s.ativo) // Só mostra ativos
+    this.servicoPetService.listar().subscribe(data =>
+      this.servicos = data.filter(s => s.ativo)
     );
   }
 
@@ -94,7 +88,7 @@ export class AgendaFormComponent implements OnInit {
     this.petService.buscarPorTutor(tutorId).subscribe({
       next: (data) => {
         this.pets = data;
-        // Se não tiver nenhum pet, ativa o modo de cadastro automático
+        // LÓGICA DO REQUISITO: Se não tem pets, abre a tela de cadastro
         if (this.pets.length === 0) {
           this.precisaCadastrarPet = true;
         }
@@ -103,10 +97,8 @@ export class AgendaFormComponent implements OnInit {
     });
   }
 
-  // Alterna entre selecionar existente ou criar novo
   toggleNovoPet() {
     this.precisaCadastrarPet = !this.precisaCadastrarPet;
-    // Limpa seleção se for criar novo
     if (this.precisaCadastrarPet) {
       this.agendamento.petid = undefined;
     }
@@ -115,48 +107,44 @@ export class AgendaFormComponent implements OnInit {
   salvar(): void {
     this.erroMsg = '';
 
-    // 1. Se for CLIENTE e precisar criar PET primeiro
     if (this.isCliente && this.precisaCadastrarPet) {
       this.salvarPetEAgendar();
     } else {
-      // 2. Fluxo normal (já tem pet ou é admin)
       this.salvarAgendamento();
     }
   }
 
-  // Fluxo Combinado: Cria Pet -> Pega ID -> Cria Agendamento
   salvarPetEAgendar() {
     if (!this.novoPet.nome || !this.novoPet.especie) {
       this.erroMsg = 'Preencha os dados do seu Pet para continuar.';
       return;
     }
 
-    // Vincula ao tutor logado
     this.novoPet.tutorId = this.tutorIdLogado;
 
     this.petService.criar(this.novoPet).pipe(
       switchMap((petCriado) => {
-        // Pet criado com sucesso! Agora usamos o ID dele
+        // Usa o ID do pet recém-criado
         this.agendamento.petid = petCriado.animalId || petCriado.id;
-        
-        // Prossegue para criar o agendamento
+
         if (this.isEdit && this.agendamento.id) {
-             return this.agendaService.atualizar(this.agendamento.id, this.agendamento as Agenda);
+          return this.agendaService.atualizar(this.agendamento.id, this.agendamento as Agenda);
         }
         return this.agendaService.criar(this.agendamento as Agenda);
       })
     ).subscribe({
       next: () => {
         alert('Pet cadastrado e consulta agendada com sucesso!');
-        this.router.navigate(['/agenda']); // Ou para perfil/meus-agendamentos
+        this.router.navigate(['/agenda']);
       },
-      error: (err) => this.tratarErro(err)
+      error: (err: any) => this.tratarErro(err)
     });
   }
 
-  // Fluxo Simples: Apenas Agendamento
   salvarAgendamento() {
-    let operation;
+    // CORREÇÃO: Tipagem explícita para evitar erro de assinatura incompatível
+    let operation: Observable<any>;
+
     if (this.isEdit && this.agendamento.id) {
       operation = this.agendaService.atualizar(this.agendamento.id, this.agendamento as Agenda);
     } else {
@@ -168,12 +156,16 @@ export class AgendaFormComponent implements OnInit {
         alert(this.isEdit ? 'Atualizado com sucesso!' : 'Agendamento realizado!');
         this.router.navigate(['/agenda']);
       },
-      error: (err) => this.tratarErro(err)
+      error: (err: any) => this.tratarErro(err)
     });
   }
 
-  tratarErro(err: HttpErrorResponse) {
+  tratarErro(err: any) {
     console.error('Erro:', err);
-    this.erroMsg = typeof err.error === 'string' ? err.error : 'Erro ao salvar. Verifique os dados.';
+    if (err.error && typeof err.error === 'string') {
+      this.erroMsg = err.error;
+    } else {
+      this.erroMsg = 'Erro ao salvar. Verifique os dados.';
+    }
   }
 }
