@@ -8,13 +8,12 @@ namespace SIGA_PET.Profiles
     {
         public MappingProfile()
         {
-
             CreateMap<Categoria, CategoriaDto>().ReverseMap();
             CreateMap<CreateCategoriaDto, Categoria>();
 
-            // --- Mapeamentos de Funcionario (ESSENCIAL PARA O LOGIN) ---
+            // --- Mapeamentos de Funcionario ---
             CreateMap<Funcionario, FuncionarioDto>()
-                .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.Usuario.Email)) // Pega email do Usuario
+                .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.Usuario.Email))
                 .ReverseMap();
 
             // --- Mapeamentos de Venda ---
@@ -38,16 +37,22 @@ namespace SIGA_PET.Profiles
             CreateMap<CreateAgendamentoDto, Agendamento>();
             CreateMap<UpdateAgendamentoDto, Agendamento>();
 
-            // --- Outros Mapeamentos ---
+            // --- Produtos ---
             CreateMap<Produto, ProdutoDto>().ReverseMap();
             CreateMap<CreateProdutoDto, Produto>();
 
+            // ====================================================================
+            // ADICIONE ESTA LINHA PARA CORRIGIR O ERRO DE UPLOAD
+            // ====================================================================
+            CreateMap<ProdutoImagem, ProdutoImagemDto>().ReverseMap();
+
+            // --- Outros ---
             CreateMap<Fornecedor, FornecedorDto>().ReverseMap();
             CreateMap<CreateFornecedorDto, Fornecedor>();
             CreateMap<UpdateFornecedorDto, Fornecedor>();
 
             CreateMap<Tutor, TutorDto>()
-                .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.Usuario.Email)) // Pega email do Usuario
+                .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.Usuario.Email))
                 .ReverseMap();
 
             CreateMap<Animal, AnimalDto>().ReverseMap();

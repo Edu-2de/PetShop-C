@@ -89,6 +89,18 @@ if (app.Environment.IsDevelopment())
 // Habilita o uso de arquivos estáticos (para conseguir ver as imagens depois de salvas)
 app.UseStaticFiles();
 
+var imagensPath = Path.Combine(builder.Environment.ContentRootPath, "wwwroot", "imagens");
+if (!Directory.Exists(imagensPath))
+{
+    Directory.CreateDirectory(imagensPath);
+}
+
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new Microsoft.Extensions.FileProviders.PhysicalFileProvider(imagensPath),
+    RequestPath = "/imagens"
+});
+
 app.UseCors("AllowAngularApp");
 
 app.UseAuthentication();
