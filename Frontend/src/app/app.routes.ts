@@ -21,6 +21,7 @@ import { FuncionarioListComponent } from './pages/funcionarios/funcionario-list/
 import { FuncionarioFormComponent } from './pages/funcionarios/funcionario-form/funcionario-form';
 import { CategoriaListComponent } from './pages/categorias/categoria-list/categoria-list';
 import { CategoriaFormComponent } from './pages/categorias/categoria-form/categoria-form';
+import { ProdutoDetailComponent } from './pages/produtos/produto-detail/produto-detail';
 
 export const routes: Routes = [
   // CORREÇÃO: pathMatch 'full' é obrigatório para rotas vazias
@@ -35,6 +36,9 @@ export const routes: Routes = [
   { path: 'produtos', component: ProdutoListComponent },
   { path: 'produtos/novo', component: ProdutoFormComponent, canActivate: [authGuard] },
   { path: 'produtos/editar/:id', component: ProdutoFormComponent, canActivate: [authGuard] },
+
+  // NOVA ROTA: Detalhes do Produto (Pública)
+  { path: 'produtos/:id', component: ProdutoDetailComponent },
 
   { path: 'servicos', component: ServicoPetListComponent },
   { path: 'servicos/novo', component: ServicoPetFormComponent, canActivate: [authGuard] },
