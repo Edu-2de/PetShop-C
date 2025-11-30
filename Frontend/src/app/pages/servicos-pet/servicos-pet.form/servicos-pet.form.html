@@ -5,67 +5,57 @@
     </div>
     <div class="card-body">
       <form (ngSubmit)="salvar()">
-        <!-- Nome do Serviço -->
         <div class="mb-3">
           <label for="nome" class="form-label">Nome do Serviço</label>
-          <input
-            type="text"
-            class="form-control"
-            id="nome"
-            name="nome"
-            [(ngModel)]="servico.nome"
-            required>
+          <input type="text"
+                 class="form-control"
+                 id="nome"
+                 name="nome"
+                 [(ngModel)]="servico.nome"
+                 required>
         </div>
 
         <div class="row">
-          <!-- Preço -->
           <div class="col-md-6 mb-3">
             <label for="preco" class="form-label">Preço</label>
             <div class="input-group">
               <span class="input-group-text">R$</span>
-              <input
-                type="number"
-                class="form-control"
-                id="preco"
-                name="preco"
-                [(ngModel)]="servico.preco"
-                required
-                step="0.01">
+              <input type="number"
+                     class="form-control"
+                     id="preco"
+                     name="preco"
+                     [(ngModel)]="servico.preco"
+                     required
+                     step="0.01">
             </div>
           </div>
-          <!-- Duração -->
           <div class="col-md-6 mb-3">
             <label for="duracao" class="form-label">Duração (minutos)</label>
-            <input
-              type="number"
-              class="form-control"
-              id="duracao"
-              name="duracao"
-              [(ngModel)]="servico.duracao"
-              required>
+            <input type="number"
+                   class="form-control"
+                   id="duracao"
+                   name="duracao"
+                   [(ngModel)]="servico.duracaoMinutos"
+                   required>
           </div>
         </div>
 
-        <!-- Descrição -->
         <div class="mb-3">
           <label for="descricao" class="form-label">Descrição</label>
-          <textarea
-            class="form-control"
-            id="descricao"
-            name="descricao"
-            rows="3"
-            [(ngModel)]="servico.descricao"></textarea>
+          <textarea class="form-control"
+                    id="descricao"
+                    name="descricao"
+                    rows="3"
+                    [(ngModel)]="servico.descricao"></textarea>
         </div>
 
-        <!-- Status -->
         <div class="form-check form-switch mb-3">
-          <input
-            class="form-check-input"
-            type="checkbox"
-            role="switch"
-            id="ativo"
-            name="ativo"
-            [(ngModel)]="servico.ativo">
+          <input class="form-check-input"
+                 type="checkbox"
+                 role="switch"
+                 id="ativo"
+                 name="ativo"
+                 [(ngModel)]="servico.ativo">
           <label class="form-check-label" for="ativo">Serviço Ativo</label>
         </div>
 

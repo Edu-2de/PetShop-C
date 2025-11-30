@@ -11,7 +11,7 @@ import { PetService } from '../../service/pets/pet.service';
 import { ServicoPet } from '../../model/servico-pet.model';
 import { ServicoPetService } from '../../service/servico-pet/servico-pet';
 import { AuthService } from '../../service/auth/auth.service';
-import { switchMap, of, Observable } from 'rxjs'; // Importante para corrigir o erro de fluxo
+import { switchMap, of, Observable } from 'rxjs';
 
 @Component({
   selector: 'app-agenda-form',
@@ -44,16 +44,16 @@ export class AgendaFormComponent implements OnInit {
   ngOnInit(): void {
     this.carregarServicos();
 
-    // CORREÇÃO: Acessando o valor do Signal corretamente
     const userSignal = this.authService.getCurrentUser();
     const user = userSignal();
 
     this.isCliente = !this.authService.isAdmin();
 
     if (this.isCliente && user) {
-      this.tutorIdLogado = user.id || 0; // Agora 'id' existe na interface User
+      this.tutorIdLogado = user.id || 0;
       this.carregarPetsDoTutor(this.tutorIdLogado);
-      this.agendamento.status = 'Agendado';
+      // CORREÇÃO: "Agendado" não existe no Enum do Backend. Usar "Pendente".
+      this.agendamento.status = 'Pendente'; 
     } else {
       this.carregarTodosPets();
     }
@@ -74,6 +74,32 @@ export class AgendaFormComponent implements OnInit {
     });
   }
 
+  formatarDataParaInput(data: Date | string | undefined): string {
+    if (!data) return '';
+
+    const d = new Date(data);
+
+    // Remove segundos e milissegundos forçando para 00
+    d.setSeconds(0, 0);
+
+    // Ajuste do fuso horário para o input datetime-local funcionar corretamente
+    // O datetime-local espera o formato "yyyy-MM-ddTHH:mm"
+    const offset = d.getTimezoneOffset() * 60000;
+    const adjustedDate = new Date(d.getTime() - offset);
+
+    // Retorna apenas os primeiros 16 caracteres (yyyy-MM-ddTHH:mm)
+    return adjustedDate.toISOString().slice(0, 16);
+  }
+
+  // 2. Adicione este método para capturar a mudança do input
+  atualizarData(valorInput: string) {
+    if (valorInput) {
+      this.agendamento.data = new Date(valorInput);
+      // Opcional: Garantir que ao salvar também zere os segundos
+      this.agendamento.data.setSeconds(0, 0);
+    }
+  }
+
   carregarServicos() {
     this.servicoPetService.listar().subscribe(data =>
       this.servicos = data.filter(s => s.ativo)
@@ -88,7 +114,6 @@ export class AgendaFormComponent implements OnInit {
     this.petService.buscarPorTutor(tutorId).subscribe({
       next: (data) => {
         this.pets = data;
-        // LÓGICA DO REQUISITO: Se não tem pets, abre a tela de cadastro
         if (this.pets.length === 0) {
           this.precisaCadastrarPet = true;
         }
@@ -124,7 +149,6 @@ export class AgendaFormComponent implements OnInit {
 
     this.petService.criar(this.novoPet).pipe(
       switchMap((petCriado) => {
-        // Usa o ID do pet recém-criado
         this.agendamento.petid = petCriado.animalId || petCriado.id;
 
         if (this.isEdit && this.agendamento.id) {
@@ -142,7 +166,6 @@ export class AgendaFormComponent implements OnInit {
   }
 
   salvarAgendamento() {
-    // CORREÇÃO: Tipagem explícita para evitar erro de assinatura incompatível
     let operation: Observable<any>;
 
     if (this.isEdit && this.agendamento.id) {
@@ -165,7 +188,7 @@ export class AgendaFormComponent implements OnInit {
     if (err.error && typeof err.error === 'string') {
       this.erroMsg = err.error;
     } else {
-      this.erroMsg = 'Erro ao salvar. Verifique os dados.';
+      this.erroMsg = 'Erro ao salvar. Verifique se todos os campos estão preenchidos corretamente.';
     }
   }
 }

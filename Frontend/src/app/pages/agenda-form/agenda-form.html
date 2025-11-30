@@ -80,7 +80,14 @@
 
             <div class="col-md-6">
               <label for="data" class="form-label">Data e Hora Preferida</label>
-              <input type="datetime-local" class="form-control" id="data" name="data" [(ngModel)]="agendamento.data" required>
+              <input type="datetime-local"
+                     class="form-control"
+                     id="data"
+                     name="data"
+                     [ngModel]="formatarDataParaInput(agendamento.data)"
+                     (ngModelChange)="atualizarData($event)"
+                     step="300"
+                     required>
             </div>
           </div>
         </div>
@@ -90,7 +97,6 @@
           <select id="status" name="status" class="form-select" [(ngModel)]="agendamento.status">
             <option value="Pendente">Pendente</option>
             <option value="Confirmado">Confirmado</option>
-            <option value="EmAndamento">Em Andamento</option>
             <option value="Concluido">Concluído</option>
             <option value="Cancelado">Cancelado</option>
           </select>
