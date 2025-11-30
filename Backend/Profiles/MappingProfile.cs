@@ -16,6 +16,13 @@ namespace SIGA_PET.Profiles
                 .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.Usuario.Email))
                 .ReverseMap();
 
+            CreateMap<CreateFuncionarioDto, Funcionario>();
+
+            // CORREÇÃO: Adicionado UpdateFuncionarioDto
+            // Ignoramos o Email aqui para tratar manualmente no Controller, pois envolve outra tabela (Usuario)
+            CreateMap<UpdateFuncionarioDto, Funcionario>()
+                .ForMember(dest => dest.Usuario, opt => opt.Ignore());
+
             // --- Mapeamentos de Venda ---
             CreateMap<Venda, VendaDto>();
             CreateMap<ItemVenda, ItemVendaDto>()
@@ -41,9 +48,9 @@ namespace SIGA_PET.Profiles
             CreateMap<Produto, ProdutoDto>().ReverseMap();
             CreateMap<CreateProdutoDto, Produto>();
 
-            // ====================================================================
-            // ADICIONE ESTA LINHA PARA CORRIGIR O ERRO DE UPLOAD
-            // ====================================================================
+            // CORREÇÃO: Adicionado UpdateProdutoDto
+            CreateMap<UpdateProdutoDto, Produto>();
+
             CreateMap<ProdutoImagem, ProdutoImagemDto>().ReverseMap();
 
             // --- Outros ---
@@ -55,12 +62,21 @@ namespace SIGA_PET.Profiles
                 .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.Usuario.Email))
                 .ReverseMap();
 
+            CreateMap<CreateTutorDto, Tutor>();
+
+            // CORREÇÃO: Adicionado UpdateTutorDto
+            CreateMap<UpdateTutorDto, Tutor>()
+                .ForMember(dest => dest.Usuario, opt => opt.Ignore());
+
             CreateMap<Animal, AnimalDto>().ReverseMap();
             CreateMap<CreateAnimalDto, Animal>();
             CreateMap<UpdateAnimalDto, Animal>();
 
             CreateMap<Servico, ServicoDto>().ReverseMap();
             CreateMap<CreateServicoDto, Servico>();
+
+            // CORREÇÃO: Adicionado UpdateServicoDto (Correção do Erro 500 ao editar serviço)
+            CreateMap<UpdateServicoDto, Servico>();
         }
     }
 }

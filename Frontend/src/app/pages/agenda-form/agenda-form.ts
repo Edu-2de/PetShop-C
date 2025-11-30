@@ -74,6 +74,32 @@ export class AgendaFormComponent implements OnInit {
     });
   }
 
+  formatarDataParaInput(data: Date | string | undefined): string {
+    if (!data) return '';
+
+    const d = new Date(data);
+
+    // Remove segundos e milissegundos forçando para 00
+    d.setSeconds(0, 0);
+
+    // Ajuste do fuso horário para o input datetime-local funcionar corretamente
+    // O datetime-local espera o formato "yyyy-MM-ddTHH:mm"
+    const offset = d.getTimezoneOffset() * 60000;
+    const adjustedDate = new Date(d.getTime() - offset);
+
+    // Retorna apenas os primeiros 16 caracteres (yyyy-MM-ddTHH:mm)
+    return adjustedDate.toISOString().slice(0, 16);
+  }
+
+  // 2. Adicione este método para capturar a mudança do input
+  atualizarData(valorInput: string) {
+    if (valorInput) {
+      this.agendamento.data = new Date(valorInput);
+      // Opcional: Garantir que ao salvar também zere os segundos
+      this.agendamento.data.setSeconds(0, 0);
+    }
+  }
+
   carregarServicos() {
     this.servicoPetService.listar().subscribe(data =>
       this.servicos = data.filter(s => s.ativo)

@@ -4,8 +4,10 @@ export interface ServicoPet {
   descricao: string;
   preco: number;
   ativo: boolean;
-  
-  // Aliases para compatibilidade com componentes antigos
+
+  // Correção: Usar o nome exato do DTO do backend
+  duracaoMinutos: number;
+
+  // Alias para compatibilidade (opcional, mas duracaoMinutos é o principal agora)
   id?: number;
-  duracao?: number;
 }

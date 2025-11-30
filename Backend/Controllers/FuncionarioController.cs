@@ -69,10 +69,29 @@ namespace SIGA_PET.Controllers
         public async Task<IActionResult> UpdateFuncionario(int id, [FromBody] UpdateFuncionarioDto dto)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
-            var func = await _context.Funcionarios.FindAsync(id);
+
+            // CORREÇÃO: Incluir Usuario para permitir editar o email
+            var func = await _context.Funcionarios
+                .Include(f => f.Usuario)
+                .FirstOrDefaultAsync(f => f.FuncionarioId == id);
+
             if (func == null) return NotFound("Funcionário não encontrado.");
 
+            // Atualiza dados do Funcionário (Nome, Cargo, Telefone)
             _mapper.Map(dto, func);
+
+            // Atualiza dados do Usuário (Email) manualmente se foi alterado
+            if (!string.IsNullOrEmpty(dto.Email) && func.Usuario != null)
+            {
+                // Verifica se o novo email já está em uso por OUTRO usuário
+                bool emailEmUso = await _context.Usuarios.AnyAsync(u => u.Email == dto.Email && u.UsuarioId != func.UsuarioId);
+                if (emailEmUso)
+                {
+                    return BadRequest("Este email já está em uso por outro usuário.");
+                }
+                func.Usuario.Email = dto.Email;
+            }
+
             _context.Entry(func).State = EntityState.Modified;
 
             try { await _context.SaveChangesAsync(); }

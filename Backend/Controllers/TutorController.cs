@@ -78,10 +78,27 @@ namespace SIGA_PET.Controllers
         public async Task<IActionResult> UpdateTutor(int id, [FromBody] UpdateTutorDto dto)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
-            var tutor = await _context.Tutores.FindAsync(id);
+
+            // CORREÇÃO: Incluir Usuario para editar email
+            var tutor = await _context.Tutores
+                .Include(t => t.Usuario)
+                .FirstOrDefaultAsync(t => t.TutorId == id);
+
             if (tutor == null) return NotFound("Tutor não encontrado.");
 
             _mapper.Map(dto, tutor);
+
+            // Atualiza Email se necessário
+            if (!string.IsNullOrEmpty(dto.Email) && tutor.Usuario != null)
+            {
+                bool emailEmUso = await _context.Usuarios.AnyAsync(u => u.Email == dto.Email && u.UsuarioId != tutor.UsuarioId);
+                if (emailEmUso)
+                {
+                    return BadRequest("Este email já está em uso.");
+                }
+                tutor.Usuario.Email = dto.Email;
+            }
+
             _context.Entry(tutor).State = EntityState.Modified;
 
             try { await _context.SaveChangesAsync(); }
