@@ -56,6 +56,8 @@ namespace SIGA_PET.Profiles
                 .ReverseMap();
 
             CreateMap<Animal, AnimalDto>().ReverseMap();
+            CreateMap<CreateAnimalDto, Animal>();
+            CreateMap<UpdateAnimalDto, Animal>();
 
             CreateMap<Servico, ServicoDto>().ReverseMap();
             CreateMap<CreateServicoDto, Servico>();

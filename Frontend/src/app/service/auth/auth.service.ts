@@ -6,10 +6,11 @@ import { tap } from 'rxjs/operators';
 import { Observable } from 'rxjs';
 
 export interface User {
-  funcionarioId: number;
+  id: number;       // ADICIONADO: O backend retorna 'id'
   nome: string;
   email: string;
   cargo: string;
+  funcionarioId?: number; // Mantido como opcional
 }
 
 interface LoginResponse {
@@ -35,7 +36,6 @@ export class AuthService {
     this.loadUserFromStorage();
   }
 
-  // Método agora retorna um Observable para o componente tratar erro/sucesso
   login(email: string, senha: string): Observable<LoginResponse> {
     return this.http.post<LoginResponse>(this.apiUrl, { email, senha }).pipe(
       tap(response => {
@@ -81,33 +81,24 @@ export class AuthService {
   }
 
   isAuthenticated(): boolean {
-    return !!this.getToken(); // Verifica se tem token
+    return !!this.getToken();
   }
 
-  // Adaptar lógica de isAdmin baseada no Cargo que vem do banco
   isAdmin(): boolean {
     const user = this.currentUserSignal();
-
-    // Se não tem usuário ou não tem cargo, é visitante ou cliente
     if (!user || !user.cargo) {
       return false;
     }
-
-    // Normaliza para minúsculo para evitar erros de digitação (ex: "Gerente" vs "gerente")
     const cargo = user.cargo.toLowerCase().trim();
-
-    // Lista de cargos que têm permissão de ver o menu "Gerenciar"
-    // Adicionei todos os cargos que vi no seu FuncionarioFormComponent
     const cargosAdministrativos = [
       'gerente',
       'administrador',
       'admin',
       'veterinário',
-      'veterinario', // sem acento por garantia
+      'veterinario',
       'atendente',
       'tosador'
     ];
-
     return cargosAdministrativos.includes(cargo);
   }
 
