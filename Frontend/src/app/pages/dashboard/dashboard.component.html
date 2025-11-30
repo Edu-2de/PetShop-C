@@ -54,11 +54,18 @@
 
     <div class="row g-4" *ngIf="produtosDestaque().length > 0">
       <div class="col-md-3 col-sm-6" *ngFor="let prod of produtosDestaque()">
-        <div class="card h-100 border-0 shadow-sm product-card hover-scale">
+
+        <div class="card h-100 border-0 shadow-sm product-card hover-scale"
+             [routerLink]="['/produtos', prod.id]"
+             style="cursor: pointer;">
+
           <div class="position-relative overflow-hidden bg-light rounded-top-3" style="aspect-ratio: 1/1;">
-            <img [src]="prod.imagens && prod.imagens.length > 0 ? prod.imagens[0].url : 'assets/images/no-image.png'"
+            <img [src]="prod.imagens && prod.imagens.length > 0
+                          ? (prod.imagens[0].url.startsWith('assets') ? prod.imagens[0].url : 'http://localhost:5000/' + prod.imagens[0].url)
+                          : 'assets/images/no-image.png'"
                  class="w-100 h-100 object-fit-cover"
                  alt="{{ prod.nome }}">
+
             <div class="position-absolute top-0 end-0 p-2">
               <span class="badge bg-white text-dark shadow-sm rounded-pill">Novo</span>
             </div>
@@ -76,6 +83,7 @@
             </div>
           </div>
         </div>
+
       </div>
     </div>
 

@@ -22,12 +22,14 @@ import { FuncionarioFormComponent } from './pages/funcionarios/funcionario-form/
 import { CategoriaListComponent } from './pages/categorias/categoria-list/categoria-list';
 import { CategoriaFormComponent } from './pages/categorias/categoria-form/categoria-form';
 import { ProdutoDetailComponent } from './pages/produtos/produto-detail/produto-detail';
+import { RegisterComponent } from './pages/register/register.component'; // Importar
 
 export const routes: Routes = [
   // CORREÇÃO: pathMatch 'full' é obrigatório para rotas vazias
   { path: '', component: DashboardComponent, pathMatch: 'full' },
   { path: 'home', redirectTo: '', pathMatch: 'full' },
   { path: 'login', component: LoginComponent },
+  { path: 'cadastrar', component: RegisterComponent }, 
 
   // Admin
   { path: 'admin', component: AdminDashboardComponent, canActivate: [authGuard] },

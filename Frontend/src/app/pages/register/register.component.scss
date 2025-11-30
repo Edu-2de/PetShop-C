@@ -1,0 +1,46 @@
+.register-page {
+  min-height: 90vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f8f9fa;
+  padding: 2rem 1rem;
+}
+
+.register-container {
+  width: 100%;
+  max-width: 420px;
+}
+
+.register-card {
+  background: white;
+  padding: 2.5rem;
+  border-radius: 1.5rem;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
+}
+
+.input-group-text {
+  border-color: #e5e7eb;
+}
+
+.form-control {
+  border-color: #e5e7eb;
+
+  &:focus {
+    box-shadow: none;
+    border-color: var(--primary-color);
+    background-color: #fff !important;
+  }
+  /* Remove o fundo cinza quando foca, se quiser manter cinza use bg-light */
+}
+
+/* Foca o grupo todo quando o input está focado (simulação visual avançada opcional) */
+.input-group:focus-within .input-group-text,
+.input-group:focus-within .form-control {
+  border-color: var(--primary-color);
+  background-color: #fff !important;
+}
+
+.cursor-pointer {
+  cursor: pointer;
+}
