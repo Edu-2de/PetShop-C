@@ -1,112 +1,116 @@
-# SIGA-PET - Sistema de Gest„o para PetShop
+Ôªø# SIGA-PET - Sistema de Gest√£o para PetShop
 
-O SIGA-PET È um sistema de gerenciamento para pet shops, construÌdo com **ASP.NET Core 8.0** para o backend e **Angular 17** para o frontend.
+O SIGA-PET √© um sistema de gerenciamento para pet shops, constru√≠do com **ASP.NET Core 8.0** para o backend e **Angular 17** para o frontend.
 
-## ? Funcionalidades
+## üöÄ Funcionalidades
 
-- **Gest„o de Clientes:** Cadastro e consulta de tutores de animais.
-- **Gest„o de Animais:** Registro de pets, associando-os aos seus tutores.
+- **Gest√£o de Clientes:** Cadastro e consulta de tutores de animais.
+- **Gest√£o de Animais:** Registro de pets, associando-os aos seus tutores.
 - **Controle de Estoque:** Cadastro e gerenciamento de produtos.
-- **ServiÁos:** DefiniÁ„o de serviÁos oferecidos, como banho e tosa.
-- **Agenda:** Agendamento de serviÁos para os pets.
+- **Servi√ßos:** Defini√ß√£o de servi√ßos oferecidos, como banho e tosa.
+- **Agenda:** Agendamento de servi√ßos para os pets com hor√°rios fixos.
 - **Fornecedores:** Cadastro de fornecedores de produtos.
+- **Painel Administrativo:** Dashboard com vis√£o geral do neg√≥cio.
 
-## Tecnologias
+---
+
+## üõ† Tecnologias
 
 | Categoria | Tecnologia |
 |-----------|------------|
 | Backend | ASP.NET Core 8.0, Entity Framework Core, AutoMapper |
 | Frontend | Angular 17, TypeScript, RxJS, Bootstrap 5 |
 | Banco de Dados | SQL Server (LocalDB) |
-| DocumentaÁ„o API | Swagger / OpenAPI |
+| Documenta√ß√£o API | Swagger / OpenAPI |
 
-## ComeÁando
+---
 
-### PrÈ-requisitos
+## üèó Arquitetura do Sistema
 
+### Vis√£o Geral da Estrutura
+
+           FRONTEND (Angular 17+)
+               http://localhost:4200
++-----------------------------------------------------+ | +----------+ +----------+ +----------+ | | | Models | | Services | | UI | | | | (Types) | | (HTTP) | | (Pages) | | | +----------+ +----------+ +----------+ | +-----------------------------------------------------+ | HTTP/REST API | JSON | +-----------------------------------------------------+ | BACKEND (ASP.NET Core 8.0) | | http://localhost:5000 | | | | +---------------+ +-----------------+ | | | Controllers | | DTOs | | | | (API Endp) | | (Data Transfer) | | | +---------------+ +-----------------+ | | | | | | +---------------+ +-----------------+ | | | AutoMapper | | Models | | | +---------------+ +-----------------+ | | | | | +--------------------+ | | | EF Core | | | | DbContext | | | +--------------------+ | +-----------------------------------------------------+ | ADO.NET | +------------------------+ | SQL Server LocalDB | | SIGAPetDb | +------------------------+
+
+
+### Camadas do Backend
+
+1.  **Controllers (`/Controllers`):**
+    * Endpoints RESTful (GET, POST, PUT, DELETE).
+    * Respons√°veis por receber requisi√ß√µes, validar via `ModelState` e chamar o banco de dados.
+    * Exemplo: `AgendamentoController`, `ProdutoController`.
+
+2.  **Models (`/Models`):**
+    * Representam as tabelas do banco de dados.
+    * Usam *Data Annotations* (`[Required]`, `[StringLength]`) para valida√ß√£o e configura√ß√£o do EF Core.
+    * Entidades: `Tutor`, `Animal`, `Produto`, `Servico`, `Agendamento`, etc.
+
+3.  **DTOs (`/DTOs`):**
+    * Objetos de Transfer√™ncia de Dados para desacoplar a API do banco.
+    * Padr√£o usado: `CreateDto` (entrada), `UpdateDto` (atualiza√ß√£o), `Dto` (leitura).
+
+4.  **Data (`/Data`):**
+    * `AppDbContext`: Gerencia a conex√£o com o SQL Server e as rela√ß√µes entre tabelas (Foreign Keys, One-to-Many).
+
+5.  **Profiles (`/Profiles`):**
+    * Configura√ß√µes do **AutoMapper** para converter automaticamente entre Models e DTOs.
+
+### Camadas do Frontend
+
+1.  **Services (`/service`):**
+    * Classes injet√°veis (`@Injectable`) que comunicam com a API via `HttpClient`.
+    * Gerenciam a l√≥gica de chamadas HTTP (CRUD).
+
+2.  **Pages/Components (`/pages`):**
+    * Componentes visuais (HTML/SCSS/TS).
+    * Organizados por funcionalidade: `agenda-form`, `produto-list`, etc.
+
+3.  **Models (`/model`):**
+    * Interfaces TypeScript que espelham os DTOs do backend para tipagem forte.
+
+---
+
+## üöÄ Como Rodar o Projeto
+
+### Pr√©-requisitos
 - [.NET 8.0 SDK](https://dotnet.microsoft.com/download)
 - [Node.js 20.x](https://nodejs.org/)
-- SQL Server (ou LocalDB, que j· vem com o Visual Studio)
+- SQL Server (ou LocalDB)
 
-### Passos para InstalaÁ„o
+### Passos
 
-1. **Clone o repositÛrio:**
-   ```bash
-   git clone https://github.com/Edu-2de/PetShop-C.git
-   cd PetShop-C
-   ```
-
-2. **Configure o banco de dados:**
-   O Entity Framework Core criar· o banco `SIGAPetDb` automaticamente.
+1. **Backend (API):**
    ```bash
    cd Backend
-   dotnet ef database update
-   cd ..
-   ```
+   dotnet ef database update  # Cria o banco de dados
+   dotnet run --launch-profile http
+Acesse o Swagger em: http://localhost:5000/swagger
 
-3. **Inicie a aplicaÁ„o (Backend e Frontend):**
-   Use o script para sua plataforma.
-   ```powershell
-   # No PowerShell
-   .\start-dev.ps1
-   ```
-   ```cmd
-   # No CMD
-   start-dev.bat
-   ```
+Frontend (Angular):
 
-4. **Acesse as aplicaÁıes:**
-   - **Frontend:** [http://localhost:4200](http://localhost:4200)
-   - **API (Swagger):** [http://localhost:5000/swagger](http://localhost:5000/swagger)
+Bash
 
-## Rotas do Frontend
+cd Frontend
+npm install
+npm start
+Acesse a aplica√ß√£o em: http://localhost:4200
 
-A aplicaÁ„o Angular possui as seguintes rotas principais:
+Scripts de Atalho
+Windows (PowerShell): Execute .\start-dev.ps1 na raiz.
 
-| Rota | DescriÁ„o |
-|------|-----------|
-| `/` | Dashboard (p·gina inicial) |
-| `/tutores` | Lista de tutores |
-| `/tutores/novo` | Formul·rio para criar novo tutor |
-| `/tutores/editar/:id` | Formul·rio para editar um tutor |
-| `/pets` | Lista de pets |
-| `/pets/novo` | Formul·rio para criar novo pet |
-| `/pets/editar/:id` | Formul·rio para editar um pet |
-| `/produtos` | Lista de produtos |
-| `/produtos/novo` | Formul·rio para criar novo produto |
-| `/produtos/editar/:id` | Formul·rio para editar um produto |
-| `/servicos` | Lista de serviÁos |
-| `/servicos/novo` | Formul·rio para criar novo serviÁo |
-| `/servicos/editar/:id` | Formul·rio para editar um serviÁo |
-| `/fornecedores` | Lista de fornecedores |
-| `/fornecedores/novo` | Formul·rio para criar novo fornecedor |
-| `/fornecedores/editar/:id` | Formul·rio para editar um fornecedor |
-| `/agenda` | VisualizaÁ„o da agenda |
-| `/agenda/novo` | Formul·rio para criar novo agendamento |
-| `/agenda/editar/:id` | Formul·rio para editar um agendamento |
+Windows (CMD): Execute start-dev.bat na raiz.
 
-## Endpoints da API
+---
 
-A API segue o padr„o REST. A documentaÁ„o completa est· disponÌvel via Swagger.
+## üîê Seguran√ßa e Padr√µes
 
-| Entidade | Endpoints |
-|------------|-----------|
-| **Tutor** | `GET`, `GET/{id}`, `GET/search?name={name}`, `POST`, `PUT/{id}`, `DELETE/{id}` |
-| **Animal** | `GET`, `GET/{id}`, `GET/tutor/{tutorId}`, `GET/search?name={name}`, `POST`, `PUT/{id}`, `DELETE/{id}` |
-| **Produto** | `GET`, `GET/{id}`, `GET/ativos`, `GET/search?name={name}`, `POST`, `PUT/{id}`, `DELETE/{id}` |
-| **ServiÁo** | `GET`, `GET/{id}`, `GET/ativos`, `GET/search?name={name}`, `POST`, `PUT/{id}`, `DELETE/{id}` |
-| **Fornecedor**| `GET`, `GET/{id}`, `GET/search?name={name}`, `POST`, `PUT/{id}`, `DELETE/{id}` |
-| **Agendamento**| `GET`, `GET/{id}`, `GET/animal/{animalId}`, `GET/data/{data}`, `POST`, `PUT/{id}`, `DELETE/{id}` |
+JWT (JSON Web Tokens): Utilizado para autentica√ß√£o de usu√°rios.
 
-## ContribuiÁ„o
+CORS: Configurado para permitir requisi√ß√µes apenas da origem do frontend (http://localhost:4200).
 
-ContribuiÁıes s„o bem-vindas! Siga os passos:
-1. FaÁa um **Fork** do projeto.
-2. Crie uma nova branch (`git checkout -b feature/sua-feature`).
-3. FaÁa commit das suas alteraÁıes (`git commit -m 'Adiciona nova feature'`).
-4. Envie para a sua branch (`git push origin feature/sua-feature`).
-5. Abra um **Pull Request**.
+Entity Framework: Uso de Migrations para versionamento do banco de dados.
 
-## LicenÁa
+Inje√ß√£o de Depend√™ncia: Nativa do .NET Core e do Angular.
 
-Este projeto est· sob a licenÁa MIT.
+Vers√£o: 1.0.0 Licen√ßa: MIT

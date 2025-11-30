@@ -76,27 +76,40 @@ export class AgendaFormComponent implements OnInit {
 
   formatarDataParaInput(data: Date | string | undefined): string {
     if (!data) return '';
-
     const d = new Date(data);
+    d.setSeconds(0, 0); // Remove segundos/ms visuais
 
-    // Remove segundos e milissegundos forçando para 00
-    d.setSeconds(0, 0);
-
-    // Ajuste do fuso horário para o input datetime-local funcionar corretamente
-    // O datetime-local espera o formato "yyyy-MM-ddTHH:mm"
     const offset = d.getTimezoneOffset() * 60000;
     const adjustedDate = new Date(d.getTime() - offset);
-
-    // Retorna apenas os primeiros 16 caracteres (yyyy-MM-ddTHH:mm)
     return adjustedDate.toISOString().slice(0, 16);
   }
 
-  // 2. Adicione este método para capturar a mudança do input
+  // Método que recebe a mudança do input
   atualizarData(valorInput: string) {
     if (valorInput) {
-      this.agendamento.data = new Date(valorInput);
-      // Opcional: Garantir que ao salvar também zere os segundos
-      this.agendamento.data.setSeconds(0, 0);
+      const dataSelecionada = new Date(valorInput);
+
+      // LÓGICA DE ARREDONDAMENTO (SNAP) PARA 30 MINUTOS
+      const minutos = dataSelecionada.getMinutes();
+
+      if (minutos !== 0 && minutos !== 30) {
+        // Se não for 00 ou 30, arredonda
+        if (minutos < 15) {
+          dataSelecionada.setMinutes(0);
+        } else if (minutos >= 15 && minutos < 45) {
+          dataSelecionada.setMinutes(30);
+        } else {
+          // Se for 45+, joga para a próxima hora cheia
+          dataSelecionada.setMinutes(0);
+          dataSelecionada.setHours(dataSelecionada.getHours() + 1);
+        }
+      }
+
+      // Garante segundos zerados
+      dataSelecionada.setSeconds(0, 0);
+
+      // Atualiza o modelo
+      this.agendamento.data = dataSelecionada;
     }
   }
 
