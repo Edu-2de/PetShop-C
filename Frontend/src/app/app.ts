@@ -1,37 +1,35 @@
 import { Component, inject } from '@angular/core';
-import { RouterModule, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+// CORREÇÃO: Adicionado 'RouterLinkActive' aos imports
+import { Router, RouterLink, RouterOutlet, RouterLinkActive } from '@angular/router';
 import { AuthService } from './service/auth/auth.service';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule],
+  // CORREÇÃO: Adicionado 'RouterLinkActive' na lista de imports do componente
+  imports: [CommonModule, RouterLink, RouterOutlet, RouterLinkActive, FormsModule],
   templateUrl: './app.html',
-  styleUrl: './app.scss'
+  styleUrls: ['./app.scss']
 })
 export class AppComponent {
   title = 'SIGA-PET';
-  searchQuery: string = '';
-  
-  // Injeção de dependência correta
-  public authService = inject(AuthService);
+  authService = inject(AuthService);
   private router = inject(Router);
 
-  // CORREÇÃO CRÍTICA: Atribuir o Signal a uma propriedade
   currentUser = this.authService.getCurrentUser();
+  searchQuery: string = '';
 
-  searchProducts(): void {
-    if (this.searchQuery.trim()) {
-      this.router.navigate(['/produtos'], { 
-        queryParams: { search: this.searchQuery } 
-      });
-    }
-  }
-
-  logout(event: Event): void {
+  logout(event: Event) {
     event.preventDefault();
     this.authService.logout();
+    this.router.navigate(['/login']);
+  }
+
+  searchProducts() {
+    if (this.searchQuery.trim()) {
+      this.router.navigate(['/produtos'], { queryParams: { busca: this.searchQuery } });
+    }
   }
 }
