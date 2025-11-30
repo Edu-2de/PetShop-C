@@ -1,7 +1,6 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-// CORREÇÃO: Import do ProdutoService
 import { ProdutoService } from '../../service/produtos/produto.service';
 import { Produto } from '../../model/produto.model';
 
@@ -23,7 +22,6 @@ export class CardProdutosComponent implements OnInit {
   }
 
   carregarProdutos() {
-    // Tipagem explícita para evitar erros
     this.produtoService.listar().subscribe({
       next: (data: Produto[]) => {
         this.produtos = data.filter((p: Produto) => p.ativo).slice(0, 8);
@@ -39,9 +37,13 @@ export class CardProdutosComponent implements OnInit {
   getImagem(produto: Produto): string {
     if (produto.imagens && produto.imagens.length > 0) {
       const url = produto.imagens[0].url;
-      // Se for imagem local (seed), usa assets. Se for upload, usa API.
       return url.startsWith('assets') ? url : `http://localhost:5000/${url}`;
     }
     return 'assets/images/no-image.png';
+  }
+
+  // --- MÉTODO QUE FALTAVA ---
+  codificarId(id: number | undefined): string {
+    return id ? btoa(id.toString()) : '';
   }
 }

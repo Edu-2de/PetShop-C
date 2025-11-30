@@ -16,30 +16,26 @@ import { Categoria } from '../../model/categoria.model';
   styleUrls: ['./produto-list.scss']
 })
 export class ProdutoListComponent implements OnInit {
-  // Services
   public authService = inject(AuthService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private produtoService = inject(ProdutoService);
   private categoriaService = inject(CategoriaService);
 
-  // Signals de Dados
   produtos = signal<Produto[]>([]);
   categorias = signal<Categoria[]>([]);
 
-  // Signals de Filtro
   termoBusca = signal<string>('');
-  categoriaSelecionada = signal<string>(''); // Vazio = Todas
-  filtroPrecoMax = signal<number>(1000); // Slider de preço
+  categoriaSelecionada = signal<string>('');
+  filtroPrecoMax = signal<number>(1000);
 
-  // Lógica Reativa de Filtragem
   produtosFiltrados = computed(() => {
     let lista = this.produtos();
     const termo = this.termoBusca().toLowerCase();
-    const catId = this.categoriaSelecionada();
+    const catNome = this.categoriaSelecionada();
     const precoMax = this.filtroPrecoMax();
 
-    // 1. Filtro por Busca Texto
+    // Filtro Busca
     if (termo) {
       lista = lista.filter(p =>
         p.nome.toLowerCase().includes(termo) ||
@@ -47,12 +43,12 @@ export class ProdutoListComponent implements OnInit {
       );
     }
 
-    // 2. Filtro por Categoria
-    if (catId) {
-      lista = lista.filter(p => p.categoria === catId || p.categoriaId?.toString() === catId);
+    // Filtro Categoria (Compara o NOME da categoria recuperado)
+    if (catNome) {
+      lista = lista.filter(p => this.getNomeCategoria(p.categoriaId) === catNome);
     }
 
-    // 3. Filtro por Preço
+    // Filtro Preço
     lista = lista.filter(p => p.preco <= precoMax);
 
     return lista;
@@ -61,24 +57,29 @@ export class ProdutoListComponent implements OnInit {
   ngOnInit(): void {
     this.carregarDados();
 
-    // Verifica se veio busca da home
+    // ATUALIZAÇÃO: Ler parâmetros da URL (Busca OU Categoria)
     this.route.queryParams.subscribe(params => {
+      // Se veio busca por texto
       if (params['busca']) {
         this.termoBusca.set(params['busca']);
+      }
+
+      // Se veio clique na categoria da Home
+      if (params['categoria']) {
+        this.categoriaSelecionada.set(params['categoria']);
       }
     });
   }
 
   carregarDados(): void {
-    // Carrega Produtos com tratamento de erro
+    // Carrega Produtos
     this.produtoService.listar().subscribe({
       next: (data) => {
         const prods = this.authService.isAdmin() ? data : data.filter(p => p.ativo);
         this.produtos.set(prods);
       },
       error: (err) => {
-        console.error('Erro crítico na API:', err);
-        // Define lista vazia para evitar travamento da tela
+        console.error(err);
         this.produtos.set([]);
       }
     });
@@ -89,7 +90,36 @@ export class ProdutoListComponent implements OnInit {
     });
   }
 
-  // --- Ações (Métodos da Classe) ---
+  // --- CORREÇÕES E UTILITÁRIOS ---
+
+  // Converte o ID da categoria em Nome
+  getNomeCategoria(id: number | undefined): string {
+    if (!id) return 'Geral';
+    const cat = this.categorias().find(c => c.id === id);
+    return cat ? cat.nome : 'Geral';
+  }
+
+  // Corrige URL da imagem
+  getImagemUrl(produto: Produto): string {
+    if (!produto.imagens || produto.imagens.length === 0) {
+      return 'assets/images/no-image.png';
+    }
+    const url = produto.imagens[0].url;
+    if (url.startsWith('http') || url.startsWith('assets')) {
+      return url;
+    }
+    return `http://localhost:5000/${url}`;
+  }
+
+  codificarId(id: number | undefined): string {
+    return id ? btoa(id.toString()) : '';
+  }
+
+  handleImageError(event: any) {
+    event.target.src = 'assets/images/no-image.png';
+  }
+
+  // --- AÇÕES ---
 
   selecionarCategoria(catNome: string) {
     this.categoriaSelecionada.set(catNome);
@@ -107,9 +137,9 @@ export class ProdutoListComponent implements OnInit {
 
   excluir(id: number | undefined): void {
     if (!id) return;
-    if (confirm('Deseja excluir este produto?')) {
+    if (confirm('Deseja excluir?')) {
       this.produtoService.delete(id).subscribe(() => {
-        this.produtos.update(current => current.filter(p => p.id !== id));
+        this.produtos.update(curr => curr.filter(p => p.id !== id));
       });
     }
   }
@@ -119,10 +149,6 @@ export class ProdutoListComponent implements OnInit {
       this.router.navigate(['/login']);
       return;
     }
-    alert(`"${produto.nome}" adicionado ao carrinho!`);
-  }
-
-  handleImageError(event: any) {
-    event.target.src = 'assets/images/no-image.png';
+    alert(`Adicionado ao carrinho!`);
   }
 }
