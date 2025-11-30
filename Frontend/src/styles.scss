@@ -85,3 +85,29 @@ body {
   color: #000;
   text-decoration: underline;
 }
+
+/* FORÇAR VISIBILIDADE - CORREÇÃO DE TELA BRANCA */
+app-root, main, .login-page, .admin-container, .container {
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+/* Desativar animações que começam invisíveis se elas estiverem travadas */
+.fade-in, .animate-on-scroll {
+  opacity: 1 !important;
+  transform: none !important;
+}
+
+
+/* FORÇAR VISIBILIDADE - Correção de Tela Branca */
+app-root, main, .login-page, .admin-container, .container {
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+/* Desativar animações que começam invisíveis */
+.fade-in, .animate-on-scroll, .slide-up {
+  opacity: 1 !important;
+  transform: none !important;
+  animation: none !important;
+}
