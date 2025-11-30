@@ -26,10 +26,13 @@
               <td class="ps-4">
                 <div class="d-flex align-items-center">
                   <img [src]="produto.imagens?.[0]?.url
-                          ? (produto.imagens![0].url.startsWith('assets') ? produto.imagens![0].url : 'assets/images/' + produto.imagens![0].url)
+                          ? (produto.imagens![0].url.startsWith('http') ? produto.imagens![0].url : 'assets/images/' + produto.imagens![0].url)
                           : 'assets/images/no-image.png'"
+                       (error)="handleImageError($event)"
                        class="rounded-3 shadow-sm border"
-                       style="width: 48px; height: 48px; object-fit: cover;">
+                       style="width: 48px; height: 48px; object-fit: cover;"
+                       alt="Produto">
+
                   <div class="ms-3">
                     <h6 class="mb-0 text-sm fw-bold text-dark">{{ produto.nome }}</h6>
                   </div>
@@ -116,11 +119,20 @@
           <div class="col" *ngFor="let prod of produtosFiltrados()">
             <div class="card h-100 border-0 shadow-sm hover-scale product-card">
               <div class="position-relative bg-light rounded-top-3 overflow-hidden" style="aspect-ratio: 1/1;">
-                <img [src]="produto.imagens?.[0]?.url
-                        ? (produto.imagens![0].url.startsWith('assets') ? produto.imagens![0].url : 'assets/images/' + produto.imagens![0].url)
+
+                <img [src]="prod.imagens?.[0]?.url
+                        ? (prod.imagens![0].url.startsWith('http') ? prod.imagens![0].url : 'assets/images/' + prod.imagens![0].url)
                         : 'assets/images/no-image.png'"
+                     (error)="handleImageError($event)"
                      class="rounded-3 shadow-sm border"
-                     style="width: 48px; height: 48px; object-fit: cover;">
+                     style="width: 48px; height: 48px; object-fit: cover;"> <img [src]="prod.imagens?.[0]?.url
+                        ? (prod.imagens![0].url.startsWith('http') ? prod.imagens![0].url : 'assets/images/' + prod.imagens![0].url)
+                        : 'assets/images/no-image.png'"
+                                                                                 (error)="handleImageError($event)"
+                                                                                 class="w-100 h-100 object-fit-cover"
+                                                                                 style="position: absolute; top:0; left:0;"
+                                                                                 [alt]="prod.nome">
+
                 <button class="btn btn-light btn-sm rounded-circle position-absolute top-0 end-0 m-2 shadow-sm" title="Favoritar">
                   <i class="bi bi-heart text-danger"></i>
                 </button>

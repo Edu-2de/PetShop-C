@@ -4,21 +4,30 @@ using Microsoft.IdentityModel.Tokens;
 using SIGA_PET.Data;
 using SIGA_PET.Profiles;
 using System.Text;
+using System.Text.Json.Serialization; // IMPORTANTE: Necessário para o IgnoreCycles
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-builder.Services.AddControllers();
+// ==============================================================================
+// 1. CORREÇÃO DO ERRO DE LISTAGEM (JSON INFINITO)
+// ==============================================================================
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        // Esta linha impede que a API trave ao tentar converter
+        // relacionamentos circulares (Produto -> Fornecedor -> Produto...)
+        options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+    });
 
-// 1. Configuração do Banco de Dados
+// 2. Configuração do Banco de Dados
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(connectionString));
 
-// 2. Configuração do AutoMapper
+// 3. Configuração do AutoMapper
 builder.Services.AddAutoMapper(typeof(MappingProfile));
 
-// 3. Configuração de Autenticação e JWT (APENAS UMA VEZ)
+// 4. Configuração de Autenticação e JWT
 var jwtKey = builder.Configuration["Jwt:Key"] ?? "MinhaChaveSecretaSuperSegura123!";
 var key = Encoding.ASCII.GetBytes(jwtKey);
 
@@ -35,12 +44,12 @@ builder.Services.AddAuthentication(options =>
     {
         ValidateIssuerSigningKey = true,
         IssuerSigningKey = new SymmetricSecurityKey(key),
-        ValidateIssuer = false, // Em produção, configure para true e defina o Issuer
-        ValidateAudience = false // Em produção, configure para true e defina o Audience
+        ValidateIssuer = false,
+        ValidateAudience = false
     };
 });
 
-// 4. Configuração do CORS
+// 5. Configuração do CORS
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAngularApp",
@@ -53,11 +62,22 @@ builder.Services.AddCors(options =>
         });
 });
 
-// 5. Swagger
+// 6. Swagger
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
+
+// ==============================================================================
+// 2. CORREÇÃO DO ERRO DE UPLOAD (CRIAR PASTA AUTOMATICAMENTE)
+// ==============================================================================
+// Isso garante que a pasta de imagens exista antes de qualquer upload
+var uploadPath = Path.Combine(app.Environment.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot"), "imagens");
+if (!Directory.Exists(uploadPath))
+{
+    Directory.CreateDirectory(uploadPath);
+    Console.WriteLine($"[SISTEMA] Pasta de uploads criada com sucesso: {uploadPath}");
+}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -66,11 +86,11 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-// app.UseHttpsRedirection(); // Mantenha comentado em dev se não tiver certificado configurado
+// Habilita o uso de arquivos estáticos (para conseguir ver as imagens depois de salvas)
+app.UseStaticFiles();
 
 app.UseCors("AllowAngularApp");
 
-// A ordem aqui é importante: Autenticação -> Autorização
 app.UseAuthentication();
 app.UseAuthorization();
 
