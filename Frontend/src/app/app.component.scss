@@ -1,0 +1,55 @@
+/* Ajustes do Menu Clean */
+.navbar {
+  height: var(--header-height);
+  box-shadow: 0 1px 0 rgba(0,0,0,0.03); /* Linha muito sutil embaixo */
+}
+
+/* Links do menu */
+.nav-link {
+  color: var(--text-body);
+  font-size: 0.95rem;
+  transition: color 0.2s;
+
+  &:hover {
+    color: var(--primary-color);
+  }
+}
+
+.active-link {
+  color: var(--primary-color) !important;
+  font-weight: 600;
+}
+
+/* Dropdowns com animação suave */
+.dropdown-menu {
+  min-width: 220px;
+  animation: fadeUp 0.2s ease-out forwards;
+  transform-origin: top right;
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(-10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+main {
+  padding-top: var(--header-height);
+}
+
+
+/* Footer Links Hover */
+.hover-white:hover {
+  color: #ffffff !important;
+  text-decoration: underline !important;
+}
+
+.text-white-50 {
+  color: rgba(255, 255, 255, 0.6) !important;
+}

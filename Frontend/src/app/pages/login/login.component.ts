@@ -36,18 +36,14 @@ export class LoginComponent {
     this.authService.login(this.email, this.senha).subscribe({
       next: () => {
         this.carregando = false;
-        // O redirecionamento baseia-se no cargo agora
+
+        // A verificação agora usa a nova lista de cargos
         if (this.authService.isAdmin()) {
           this.router.navigate(['/admin']);
         } else {
-          this.router.navigate(['/']);
+          this.router.navigate(['/']); // Clientes vão para home
         }
       },
-      error: (err) => {
-        this.carregando = false;
-        console.error(err);
-        this.erro = 'Email ou senha inválidos.';
-      }
     });
   }
 

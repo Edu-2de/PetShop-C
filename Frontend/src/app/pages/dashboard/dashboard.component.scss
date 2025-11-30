@@ -1,338 +1,64 @@
-/* Dashboard Clean & Interactive */
-
-:host {
-  display: block;
+/* Hero Section Melhorada */
+.hero-section {
+  /* Degradê sutil usando a cor base #18b294 indo para um tom levemente mais escuro */
+  background: linear-gradient(135deg, #18b294 0%, #138f76 100%);
+  min-height: 550px;
+  padding: 4rem 0;
+  position: relative;
+  overflow: hidden;
 }
 
-/* 1. Hero Banner (Quadrado e Grudado) */
-.hero-section {
-  background: linear-gradient(135deg, #1abc9c 0%, #16a085 100%);
-  padding: 100px 0 80px;
-  text-align: center;
-  color: #fff;
-  /* CORREÇÃO: Banner totalmente quadrado */
-  border-radius: 0;
-  margin-bottom: 5rem;
-  margin-top: -1.5rem; /* Grudar no header */
-  position: relative;
-  z-index: 1;
+/* Efeito sutil de textura (opcional) */
+.hero-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: radial-gradient(circle at 20% 50%, rgba(255,255,255,0.05) 0%, transparent 50%);
+  pointer-events: none;
 }
 
 .hero-title {
-  font-size: 3.5rem;
-  font-weight: 800;
-  margin-bottom: 1rem;
-  text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
   letter-spacing: -1px;
+  line-height: 1.1;
 }
 
-.hero-subtitle {
-  font-size: 1.25rem;
-  margin-bottom: 2.5rem;
-  opacity: 0.95;
-  font-weight: 300;
-  max-width: 700px;
-  margin-left: auto;
-  margin-right: auto;
+/* Badge translúcido */
+.glass-badge {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(4px);
 }
 
-.btn-hero {
+/* Cards de Produto Clean */
+.product-card {
+  transition: all 0.2s ease;
   background: #fff;
-  color: #1abc9c;
-  padding: 14px 40px;
-  font-size: 1.1rem;
-  font-weight: 700;
-  text-decoration: none;
-  display: inline-block;
-  transition: all 0.3s ease;
-  box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-  border: none;
+
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.08) !important;
+  }
+}
+
+.object-fit-cover {
+  object-fit: cover;
+}
+
+/* Cards de Features */
+.feature-card {
+  transition: transform 0.2s;
 
   &:hover {
     transform: translateY(-3px);
-    box-shadow: 0 15px 30px rgba(0,0,0,0.2);
-    background-color: #f8f9fa;
   }
 }
 
-/* Categorias */
-.categories-section {
-  margin-bottom: 6rem;
+.bg-primary-subtle {
+  background-color: rgba(24, 178, 148, 0.1) !important;
 }
 
-.section-title {
-  font-size: 2.2rem;
-  font-weight: 700;
-  color: #2b2b2b;
-  text-align: center;
-  margin-bottom: 3.5rem;
-}
-
-.categories-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 30px;
-}
-
-.category-card {
-  background: #fff;
-  border: 1px solid #e9ecef;
-  border-radius: 12px;
-  padding: 40px 30px;
-  text-align: center;
-  transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
-  cursor: pointer;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-
-  &:hover {
-    border-color: #dee2e6;
-    transform: translateY(-8px);
-    box-shadow: 0 15px 30px rgba(0,0,0,0.08);
-    /* Ícone fica levemente mais escuro no hover */
-    .category-icon-wrapper {
-      color: #495057;
-      background-color: #e9ecef;
-    }
-  }
-}
-
-.category-icon-wrapper {
-  width: 80px;
-  height: 80px;
-  /* CORREÇÃO: Ícones Cinzas (Clean) */
-  background-color: #f8f9fa;
-  color: #adb5bd;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 1.5rem;
-  transition: all 0.3s ease;
-
-  i {
-    font-size: 2.5rem;
-  }
-}
-
-.category-title {
-  font-weight: 700;
-  font-size: 1.3rem;
-  color: #343a40;
-  margin-bottom: 1rem;
-}
-
-.category-desc {
-  color: #6c757d;
-  font-size: 0.95rem;
-  line-height: 1.6;
-}
-
-/* Products Section */
-.products-section {
-  padding: 4rem 0;
-}
-
-.view-all-link {
-  color: #1abc9c;
-  text-decoration: none;
-  font-weight: 600;
-  font-size: 1rem;
-
-  &:hover {
-    text-decoration: underline;
-    color: #16a085;
-  }
-}
-
-/* Features (Vantagens) - Com Interatividade Legal */
-.features-section {
-  padding: 80px 0 100px;
-  background: #f8fcfb;
-  margin-top: 5rem;
-  border-top: 1px solid #eef2f6;
-}
-
-.features-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-  gap: 30px;
-}
-
-.feature-card {
-  padding: 35px;
-  text-align: left;
-  background: white;
-  border-radius: 16px;
-  border: 1px solid transparent; /* Preparado para hover */
-  box-shadow: 0 4px 6px rgba(0,0,0,0.02);
-  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Animação "bouncy" suave */
-  /* INTERATIVIDADE LEGAL */
-  &:hover {
-    transform: translateY(-10px) scale(1.02); /* Levanta e cresce um pouco */
-    box-shadow: 0 20px 40px rgba(26, 188, 156, 0.15); /* Sombra colorida suave */
-    border-color: rgba(26, 188, 156, 0.3); /* Borda sutil */
-
-    .feature-icon i {
-      transform: scale(1.2) rotate(10deg); /* Ícone cresce e gira */
-      color: #16a085;
-    }
-  }
-
-  .feature-icon {
-    margin-bottom: 1.5rem;
-
-    i {
-      font-size: 2.5rem;
-      color: #1abc9c; /* Cor original */
-      transition: all 0.4s ease;
-      display: inline-block;
-    }
-  }
-}
-
-.feature-title {
-  font-size: 1.3rem;
-  font-weight: 700;
-  color: #212529;
-  margin-bottom: 0.8rem;
-}
-
-.feature-desc {
-  color: #6c757d;
-  font-size: 1rem;
-  line-height: 1.6;
-}
-
-/* Animações de Entrada */
-.animate-on-scroll, .fade-in, .slide-up {
-  opacity: 0;
-  transform: translateY(30px);
-  transition: opacity 0.8s ease, transform 0.8s ease;
-}
-
-.in-view {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-/* ... estilos anteriores mantidos ... */
-
-/* Animações de Entrada - CORREÇÃO DE SEGURANÇA */
-.animate-on-scroll, .fade-in, .slide-up {
-  opacity: 1; /* MUDANÇA CRÍTICA: Começa visível por segurança */
-  transform: translateY(0); /* Começa na posição final */
-  transition: opacity 0.8s ease, transform 0.8s ease;
-  will-change: opacity, transform; /* Otimização de performance */
-}
-
-/* A classe .in-view agora é opcional ou para efeitos extras, 
-   não para visibilidade básica */
-.in-view {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-/* Se quiser manter a animação apenas se o JS carregar, 
-   podemos usar uma media query de preferência de movimento */
-@media (prefers-reduced-motion: no-preference) {
-  /* Apenas anima se o usuário não tiver preferência por reduzir movimento */
-  .animate-on-scroll.hidden-start {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-}
-
-
-:host {
-  display: block;
-  width: 100%;
-}
-
-/* Hero Section */
-.hero-section {
-  background: linear-gradient(135deg, #1abc9c 0%, #16a085 100%);
-  padding: 80px 0;
-  text-align: center;
-  color: #fff;
-  border-radius: 0 0 20px 20px;
-  margin-bottom: 4rem;
-  /* Removemos margem negativa problemática */
-  margin-top: 0;
-  opacity: 1 !important;
-}
-
-.hero-title {
-  font-size: 3rem;
-  font-weight: 800;
-  margin-bottom: 1rem;
-}
-
-.hero-subtitle {
-  font-size: 1.2rem;
-  margin-bottom: 2rem;
-  opacity: 0.9;
-}
-
-.btn-hero {
-  background: #fff;
-  color: #1abc9c;
-  padding: 12px 35px;
-  font-weight: 700;
-  text-decoration: none;
-  border-radius: 50px;
-  transition: transform 0.2s;
-  border: none;
-  display: inline-block;
-}
-
-.btn-hero:hover {
-  transform: scale(1.05);
-  background-color: #f8f9fa;
-}
-
-/* Seções Gerais */
-.section-title {
-  font-size: 2rem;
-  font-weight: 700;
-  color: #2b2b2b;
-  text-align: center;
-  margin-bottom: 3rem;
-}
-
-.categories-section, .products-section, .features-section {
-  padding: 2rem 0;
-  opacity: 1 !important;
-}
-
-/* Cards */
-.category-card, .feature-card, .product-card {
-  background: #fff;
-  border: 1px solid #eee;
-  border-radius: 12px;
-  padding: 2rem;
-  height: 100%;
-  transition: all 0.3s;
-  opacity: 1 !important; /* Garante visibilidade */
-}
-
-.category-card:hover, .feature-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 10px 20px rgba(0,0,0,0.05);
-}
-
-.categories-grid, .features-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 25px;
-}
-
-/* Ícones */
-.bi {
-  font-size: 2rem;
-  margin-bottom: 1rem;
-  display: block;
-  color: #1abc9c;
+/* Botões */
+.lift-hover:hover {
+  transform: translateY(-2px);
 }

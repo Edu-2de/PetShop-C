@@ -1,61 +1,75 @@
-<!-- Container principal para centralizar e adicionar espaçamento -->
-<div class="container mt-4">
-  <!-- Card para agrupar o conteúdo da lista -->
+<div class="container fade-in">
   <div class="card shadow-sm">
-    <!-- Cabeçalho do Card com título e botões/busca -->
-    <div class="card-header bg-light py-3">
-      <div class="d-flex justify-content-between align-items-center">
-        <h2 class="mb-0">Gerenciamento de Pets</h2>
-        <div class="d-flex">
-          <!-- Campo de busca -->
-          <div class="input-group me-2">
-            <input
-              type="text"
-              class="form-control"
-              placeholder="Buscar por nome do pet ou tutor..."
-              [value]="termoBusca()"
-              (input)="buscar($event)">
-          </div>
-          <!-- Botão para novo pet -->
-          <a routerLink="/pets/novo" class="btn btn-primary text-nowrap">
-            <i class="bi bi-plus-circle me-1"></i> <!-- Ícone opcional -->
-            Novo Pet
-          </a>
+
+    <div class="card-header bg-white d-flex justify-content-between align-items-center py-3">
+      <div>
+        <h5 class="mb-0 fw-bold text-dark">Pets Cadastrados</h5>
+        <p class="text-muted small mb-0">Gerencie os animais da clínica</p>
+      </div>
+
+      <div class="d-flex gap-2">
+        <div class="input-group" style="width: 250px;">
+          <span class="input-group-text bg-light border-end-0"><i class="bi bi-search"></i></span>
+          <input type="text" class="form-control bg-light border-start-0"
+                 placeholder="Buscar pet..." [value]="termoBusca()" (input)="buscar($event)">
         </div>
+        <a routerLink="/pets/novo" class="btn btn-primary d-flex align-items-center">
+          <i class="bi bi-plus-lg me-2"></i> Novo Pet
+        </a>
       </div>
     </div>
-    <!-- Corpo do Card com a tabela -->
-    <div class="card-body">
-      <!-- Div para tornar a tabela responsiva em telas pequenas -->
-      <div class="table-responsive">
-        <table class="table table-hover align-middle">
-          <thead class="table-light">
-            <tr>
-              <th scope="col">#</th>
-              <th scope="col">Nome</th>
-              <th scope="col">Espécie</th>
-              <th scope="col">Raça</th>
-              <th scope="col">Nascimento</th>
-              <th scope="col">Tutor</th>
-              <th scope="col" class="text-end">Ações</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let pet of petsFiltrados()">
-              <th scope="row">{{ pet.id }}</th>
-              <td>{{ pet.nome }}</td>
-              <td>{{ pet.especie }}</td>
-              <td>{{ pet.raca }}</td>
-              <td>{{ pet.nascimento | date:'dd/MM/yyyy' }}</td>
-              <td>{{ pet.tutor?.nome }}</td>
-              <td class="text-end">
-                <a routerLink="/pets/editar/{{pet.id}}" class="btn btn-sm btn-outline-info me-2">Editar</a>
-                <button class="btn btn-sm btn-outline-danger" (click)="excluir(pet.id)">Excluir</button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+
+    <div class="table-responsive">
+      <table class="table align-middle">
+        <thead>
+          <tr>
+            <th class="ps-4">Nome</th>
+            <th>Espécie/Raça</th>
+            <th>Tutor</th>
+            <th>Nascimento</th>
+            <th class="text-end pe-4">Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngIf="petsFiltrados().length === 0">
+            <td colspan="5" class="text-center py-5">
+              <div class="text-muted">
+                <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                Nenhum pet encontrado.
+              </div>
+            </td>
+          </tr>
+
+          <tr *ngFor="let pet of petsFiltrados()">
+            <td class="ps-4">
+              <div class="d-flex align-items-center">
+                <div class="avatar-sm bg-light rounded-circle d-flex align-items-center justify-content-center text-primary fw-bold me-3" style="width: 40px; height: 40px;">
+                  {{ pet.nome.charAt(0) }}
+                </div>
+                <span class="fw-semibold text-dark">{{ pet.nome }}</span>
+              </div>
+            </td>
+            <td>
+              <span class="badge bg-light text-dark border">{{ pet.especie }}</span>
+              <small class="text-muted ms-2">{{ pet.raca }}</small>
+            </td>
+            <td>
+              <a [routerLink]="['/tutores']" class="text-decoration-none text-primary fw-medium">
+                {{ pet.tutor?.nome || 'Sem tutor' }}
+              </a>
+            </td>
+            <td class="text-muted">{{ pet.nascimento | date:'dd/MM/yyyy' }}</td>
+            <td class="text-end pe-4">
+              <a [routerLink]="['/pets/editar', pet.id]" class="btn btn-sm btn-light text-primary me-2" title="Editar">
+                <i class="bi bi-pencil"></i>
+              </a>
+              <button (click)="excluir(pet.id)" class="btn btn-sm btn-light text-danger" title="Excluir">
+                <i class="bi bi-trash"></i>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   </div>
 </div>
