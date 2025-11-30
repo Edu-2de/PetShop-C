@@ -22,9 +22,23 @@ export class ProdutoDetailComponent implements OnInit {
   public authService = inject(AuthService);
 
   ngOnInit() {
-    const id = this.route.snapshot.paramMap.get('id');
-    if (id) {
-      this.carregarProduto(Number(id));
+    // 1. Pega o ID "codificado" da URL
+    const idCodificado = this.route.snapshot.paramMap.get('id');
+
+    if (idCodificado) {
+      try {
+        // 2. Decodifica para número (atob converte Base64 para texto)
+        const idReal = Number(atob(idCodificado));
+
+        if (!isNaN(idReal)) {
+          this.carregarProduto(idReal);
+        } else {
+          // Se alguém tentar digitar um ID inválido manual
+          this.router.navigate(['/produtos']);
+        }
+      } catch (e) {
+        this.router.navigate(['/produtos']);
+      }
     }
   }
 
@@ -43,10 +57,18 @@ export class ProdutoDetailComponent implements OnInit {
     });
   }
 
+  // --- CORREÇÃO DA IMAGEM ---
   setImagemPrincipal(url: string) {
-    // Lógica para corrigir URL se vier do backend
-    const fullUrl = url.startsWith('http') ? url : `http://localhost:5000/${url}`;
-    this.imagemPrincipal.set(fullUrl);
+    if (url.startsWith('http')) {
+      // Se já é um link completo (externo)
+      this.imagemPrincipal.set(url);
+    } else if (url.startsWith('assets')) {
+      // Se é uma imagem local do projeto
+      this.imagemPrincipal.set(url);
+    } else {
+      // Se veio do backend (caminho relativo), adiciona o servidor
+      this.imagemPrincipal.set(`http://localhost:5000/${url}`);
+    }
   }
 
   inc() { this.quantidade.update(q => q + 1); }
