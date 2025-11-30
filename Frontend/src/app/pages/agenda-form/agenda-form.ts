@@ -28,7 +28,7 @@ export class AgendaFormComponent implements OnInit {
   private router = inject(Router);
   private route = inject(ActivatedRoute);
 
-  agendamento: Partial<Agenda> = { dataHora: new Date(), status: 'Agendado' };
+  agendamento: Partial<Agenda> = { dataHora: new Date(), status: 'Pendente' };
   novoPet: Partial<Pet> = { nome: '', especie: 'Cão', raca: '', sexo: 'Macho' };
 
   pets: Pet[] = [];
