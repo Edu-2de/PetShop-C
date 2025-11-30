@@ -25,36 +25,34 @@ namespace SIGA_PET.Controllers
         [HttpPost("{produtoId}/upload")]
         public async Task<ActionResult<ProdutoImagemDto>> UploadImagem(int produtoId, IFormFile file)
         {
-            var produto = await _context.Produtos.FindAsync(produtoId);
-            if (produto == null)
+            // ... (verificações iniciais de produto e file null mantêm iguais)
+
+            // 1. Define o caminho físico onde vai salvar (na pasta da API)
+            var folderName = Path.Combine("wwwroot", "imagens");
+            var pathToSave = Path.Combine(Directory.GetCurrentDirectory(), folderName);
+
+            if (!Directory.Exists(pathToSave))
             {
-                return NotFound("Produto não encontrado.");
+                Directory.CreateDirectory(pathToSave);
             }
 
-            if (file == null || file.Length == 0)
-            {
-                return BadRequest("Nenhum arquivo foi enviado.");
-            }
+            // 2. Gera nome único
+            var fileName = $"{Guid.NewGuid()}{Path.GetExtension(file.FileName)}";
+            var fullPath = Path.Combine(pathToSave, fileName);
 
-            var uploadsFolderPath = Path.Combine(_hostingEnvironment.ContentRootPath, "..", "Frontend", "src", "assets", "images", "products");
-            if (!Directory.Exists(uploadsFolderPath))
-            {
-                Directory.CreateDirectory(uploadsFolderPath);
-            }
-
-            var fileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
-            var filePath = Path.Combine(uploadsFolderPath, fileName);
-
-            using (var stream = new FileStream(filePath, FileMode.Create))
+            // 3. Salva o arquivo
+            using (var stream = new FileStream(fullPath, FileMode.Create))
             {
                 await file.CopyToAsync(stream);
             }
 
-            var imageUrl = $"assets/images/products/{fileName}";
+            // 4. Cria a URL pública (IMPORTANTE: Caminho relativo para o frontend usar com a URL da API)
+            // O frontend vai montar: http://localhost:5000/imagens/nome-do-arquivo.jpg
+            var dbPath = $"imagens/{fileName}";
 
             var produtoImagem = new ProdutoImagem
             {
-                Url = imageUrl,
+                Url = dbPath, // Salva apenas o caminho relativo
                 ProdutoId = produtoId
             };
 

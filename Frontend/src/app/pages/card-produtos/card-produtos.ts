@@ -38,7 +38,9 @@ export class CardProdutosComponent implements OnInit {
 
   getImagem(produto: Produto): string {
     if (produto.imagens && produto.imagens.length > 0) {
-      return produto.imagens[0].url;
+      const url = produto.imagens[0].url;
+      // Se for imagem local (seed), usa assets. Se for upload, usa API.
+      return url.startsWith('assets') ? url : `http://localhost:5000/${url}`;
     }
     return 'assets/images/no-image.png';
   }
