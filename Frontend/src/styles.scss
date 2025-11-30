@@ -2,112 +2,35 @@
 @use "bootstrap/scss/bootstrap" with ( $primary: #1d1d1f );
 @import "bootstrap-icons/font/bootstrap-icons.css";
 
-body {
+/* RESET DE SEGURANÇA - CORREÇÃO DE TELA BRANCA */
+html, body {
+  height: 100%;
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   background-color: #f5f5f7;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  color: #1d1d1f;
-}
-
-/* --- CORREÇÃO DO HEADER --- */
-.avatar-circle {
-  width: 38px !important;
-  height: 38px !important;
-  min-width: 38px !important; /* CRÍTICO: Impede deformação */
-  flex-shrink: 0 !important;
-  object-fit: cover;
-}
-
-.navbar-collapse {
-  flex-grow: 1; /* Ocupa espaço disponível */
-}
-
-.ms-auto {
-  margin-left: auto !important; /* Força alinhamento à direita */
-}
-
-.no-caret::after {
-  display: none !important;
-}
-
-/* Footer */
-.main-footer {
-  background: #fff;
-  border-top: 1px solid #e5e5e5;
-  padding: 80px 0 40px;
-  margin-top: auto;
-}
-
-.footer-content {
-  max-width: 1000px;
-  margin: 0 auto;
-  padding: 0 20px;
-}
-
-.footer-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  gap: 40px;
-}
-
-.footer-brand .brand-name {
-  font-size: 1.2rem;
-  font-weight: 700;
-  color: #1d1d1f;
-  letter-spacing: -0.5px;
-}
-
-.footer-title {
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: #86868b;
-  margin-bottom: 1rem;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.footer-links {
-  list-style: none;
-  padding: 0;
-}
-
-.footer-links li {
-  margin-bottom: 10px;
-}
-
-.footer-links a {
-  color: #424245;
-  text-decoration: none;
-  font-size: 0.85rem;
-  transition: color 0.2s;
-}
-
-.footer-links a:hover {
-  color: #000;
-  text-decoration: underline;
-}
-
-/* FORÇAR VISIBILIDADE - CORREÇÃO DE TELA BRANCA */
-app-root, main, .login-page, .admin-container, .container {
+  /* Garante que o corpo da página seja visível */
   opacity: 1 !important;
   visibility: visible !important;
 }
 
-/* Desativar animações que começam invisíveis se elas estiverem travadas */
-.fade-in, .animate-on-scroll {
-  opacity: 1 !important;
-  transform: none !important;
+/* Garante que o container da app ocupe espaço */
+app-root {
+  display: block;
+  min-height: 100vh;
 }
 
-
-/* FORÇAR VISIBILIDADE - Correção de Tela Branca */
-app-root, main, .login-page, .admin-container, .container {
-  opacity: 1 !important;
-  visibility: visible !important;
-}
-
-/* Desativar animações que começam invisíveis */
+/* Remove qualquer animação que comece invisível se o JS falhar */
 .fade-in, .animate-on-scroll, .slide-up {
   opacity: 1 !important;
   transform: none !important;
   animation: none !important;
+  transition: none !important;
+}
+
+/* Garante que o conteúdo principal não fique escondido atrás do header */
+main {
+  display: block !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  padding-top: 80px; /* Espaço para o header fixo */
 }
