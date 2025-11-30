@@ -591,3 +591,106 @@ main {
 main {
   opacity: 1 !important;
 }
+
+
+/* Header Styles */
+.sticky-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1040;
+  background-color: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid #e0e0e0;
+  height: 70px;
+}
+
+/* Ajuste do Navbar */
+.navbar {
+  height: 70px;
+  padding: 0;
+}
+
+.navbar-brand {
+  font-weight: 700;
+  font-size: 1.25rem;
+  color: #1d1d1f;
+  display: flex;
+  align-items: center;
+}
+
+/* Correção do Avatar */
+.avatar-circle {
+  width: 38px;
+  height: 38px;
+  min-width: 38px;
+  border-radius: 50%;
+  object-fit: cover;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #e9ecef;
+}
+
+/* Remove setas de dropdown */
+.no-caret::after {
+  display: none !important;
+}
+
+/* Main Content - ESPAÇAMENTO CORRETO */
+main {
+  /* O header tem 70px, então o main precisa de padding-top */
+  padding-top: 80px !important;
+  min-height: calc(100vh - 200px); /* Altura mínima descontando header/footer */
+  width: 100%;
+  display: block;
+}
+
+/* Footer */
+.main-footer {
+  background: #fff;
+  border-top: 1px solid #e5e5e5;
+  padding: 60px 0 30px;
+  margin-top: auto; /* Empurra para o final da página */
+}
+
+.footer-links {
+  list-style: none;
+  padding: 0;
+}
+
+.footer-links li {
+  margin-bottom: 8px;
+}
+
+.footer-links a {
+  color: #6c757d;
+  text-decoration: none;
+  font-size: 0.9rem;
+}
+
+.footer-links a:hover {
+  color: #1d1d1f;
+  text-decoration: underline;
+}
+
+/* Ajuste Mobile */
+@media (max-width: 991px) {
+  .navbar-collapse {
+    background: white;
+    padding: 1rem;
+    border-bottom: 1px solid #eee;
+    position: absolute;
+    top: 70px;
+    left: 0;
+    right: 0;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+  }
+
+  .d-flex.align-items-center.ms-auto {
+    margin-top: 1rem;
+    justify-content: space-between;
+    width: 100%;
+  }
+}

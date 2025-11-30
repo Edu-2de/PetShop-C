@@ -244,3 +244,95 @@
     transform: translateY(30px);
   }
 }
+
+
+:host {
+  display: block;
+  width: 100%;
+}
+
+/* Hero Section */
+.hero-section {
+  background: linear-gradient(135deg, #1abc9c 0%, #16a085 100%);
+  padding: 80px 0;
+  text-align: center;
+  color: #fff;
+  border-radius: 0 0 20px 20px;
+  margin-bottom: 4rem;
+  /* Removemos margem negativa problemática */
+  margin-top: 0;
+  opacity: 1 !important;
+}
+
+.hero-title {
+  font-size: 3rem;
+  font-weight: 800;
+  margin-bottom: 1rem;
+}
+
+.hero-subtitle {
+  font-size: 1.2rem;
+  margin-bottom: 2rem;
+  opacity: 0.9;
+}
+
+.btn-hero {
+  background: #fff;
+  color: #1abc9c;
+  padding: 12px 35px;
+  font-weight: 700;
+  text-decoration: none;
+  border-radius: 50px;
+  transition: transform 0.2s;
+  border: none;
+  display: inline-block;
+}
+
+.btn-hero:hover {
+  transform: scale(1.05);
+  background-color: #f8f9fa;
+}
+
+/* Seções Gerais */
+.section-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #2b2b2b;
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.categories-section, .products-section, .features-section {
+  padding: 2rem 0;
+  opacity: 1 !important;
+}
+
+/* Cards */
+.category-card, .feature-card, .product-card {
+  background: #fff;
+  border: 1px solid #eee;
+  border-radius: 12px;
+  padding: 2rem;
+  height: 100%;
+  transition: all 0.3s;
+  opacity: 1 !important; /* Garante visibilidade */
+}
+
+.category-card:hover, .feature-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+}
+
+.categories-grid, .features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 25px;
+}
+
+/* Ícones */
+.bi {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+  display: block;
+  color: #1abc9c;
+}
