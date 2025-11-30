@@ -75,7 +75,7 @@
             </div>
           </a>
           <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 mt-3 rounded-3">
-            <li *ngIf="!authService.isAdmin()"><a class="dropdown-item" routerLink="/agenda/novo">Meus Agendamentos</a></li>
+            <li *ngIf="!authService.isAdmin()"><a class="dropdown-item" routerLink="/agenda">Meus Agendamentos</a></li>
             <li><a class="dropdown-item" routerLink="/perfil">Meu Perfil</a></li>
             <li><hr class="dropdown-divider"></li>
             <li><a class="dropdown-item text-danger" href="#" (click)="logout($event)">Sair</a></li>

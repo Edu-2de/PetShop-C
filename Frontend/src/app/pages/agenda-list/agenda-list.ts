@@ -24,76 +24,82 @@ interface AgendamentoCompleto extends Agenda {
   styleUrls: ['./agenda-list.scss']
 })
 export class AgendaListComponent implements OnInit {
-  private agendamentos = signal<AgendamentoCompleto[]>([]);
+  // Tornamos público para o HTML acessar
+  agendamentos = signal<AgendamentoCompleto[]>([]);
   termoBusca = signal<string>('');
 
   public authService = inject(AuthService);
   private router = inject(Router);
+  private agendaService = inject(AgendaService);
+  private petService = inject(PetService);
+  private servicoPetService = inject(ServicoPetService);
 
   agendamentosFiltrados = computed(() => {
-    const agendamentos = this.agendamentos();
+    const lista = this.agendamentos();
     const termo = this.termoBusca().toLowerCase();
+    if (!termo) return lista;
 
-    if (!termo) {
-      return agendamentos;
-    }
-
-    return agendamentos.filter(ag =>
+    return lista.filter(ag =>
       (ag.pet && ag.pet.nome.toLowerCase().includes(termo)) ||
-      (ag.servico && ag.servico.nome.toLowerCase().includes(termo))
+      (ag.servico && ag.servico.nome.toLowerCase().includes(termo)) ||
+      (ag.status.toLowerCase().includes(termo))
     );
   });
 
-  constructor(
-    private agendaService: AgendaService,
-    private petService: PetService,
-    private servicoPetService: ServicoPetService
-  ) { }
-
   ngOnInit(): void {
-    // Lógica de Redirecionamento:
-    // Se NÃO for Admin, vai direto para "Agendar Novo" em vez de ver a lista
-    if (!this.authService.isAdmin()) {
-      this.router.navigate(['/agenda/novo']);
-      return;
-    }
-
-    this.carregarAgendamentos();
+    // Removemos qualquer redirecionamento forçado aqui
+    this.carregarDados();
   }
 
-  carregarAgendamentos(): void {
-    // ... (código existente)
+  carregarDados(): void {
+    const user = this.authService.getCurrentUser()();
+    let obsAgendamentos;
+
+    // LÓGICA PRINCIPAL:
+    if (this.authService.isAdmin()) {
+      // Admin vê tudo
+      obsAgendamentos = this.agendaService.listar();
+    } else {
+      // Tutor vê apenas os seus
+      obsAgendamentos = this.agendaService.buscarPorTutor(user?.id || 0);
+    }
+
     forkJoin({
-      agendamentos: this.agendaService.listar(),
+      agendamentos: obsAgendamentos,
       pets: this.petService.listar(),
       servicos: this.servicoPetService.listar()
     }).subscribe(({ agendamentos, pets, servicos }) => {
-      const petsMap = new Map(pets.map((p: Pet) => [p.id, p]));
-      const servicosMap = new Map(servicos.map((s: ServicoPet) => [s.id, s]));
+      const petsMap = new Map(pets.map(p => [p.id, p]));
+      const servicosMap = new Map(servicos.map(s => [s.id, s]));
 
-      const agendamentosCompletos: AgendamentoCompleto[] = agendamentos.map((agenda: Agenda) => ({
+      const completos = agendamentos.map(agenda => ({
         ...agenda,
         pet: petsMap.get(agenda.animalId),
         servico: servicosMap.get(agenda.servicoId)
       }));
 
-      this.agendamentos.set(agendamentosCompletos);
+      this.agendamentos.set(completos);
     });
   }
 
-  // ... (restante dos métodos: buscar, excluir)
   buscar(event: Event): void {
     const target = event.target as HTMLInputElement;
     this.termoBusca.set(target.value);
   }
 
-  excluir(id: number | undefined): void {
-    if (id === undefined) return;
+  cancelar(agenda: AgendamentoCompleto) {
+    if (!confirm('Deseja realmente cancelar este agendamento?')) return;
 
-    if (confirm('Deseja realmente excluir este agendamento?')) {
-      this.agendaService.deletar(id).subscribe(() => {
-        this.agendamentos.update(agendamentosAtuais => agendamentosAtuais.filter(a => a.id !== id));
-      });
-    }
+    // Atualiza status para Cancelado
+    const agendaAtualizada = { ...agenda, status: 'Cancelado' };
+
+    // Usa o update para mudar o status (não deleta o registro histórico)
+    this.agendaService.atualizar(agenda.id!, agendaAtualizada).subscribe({
+      next: () => {
+        alert('Agendamento cancelado.');
+        this.carregarDados();
+      },
+      error: () => alert('Erro ao cancelar.')
+    });
   }
 }

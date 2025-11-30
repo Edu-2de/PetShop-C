@@ -37,6 +37,17 @@ export class AgendaService {
     );
   }
 
+  buscarPorTutor(tutorId: number): Observable<Agenda[]> {
+    return this.http.get<Agenda[]>(`${this.apiUrl}/tutor/${tutorId}`).pipe(
+      map(agendas => agendas.map(a => ({
+        ...a,
+        id: a.agendamentoId,
+        petid: a.animalId,
+        data: a.dataHora
+      })))
+    );
+  }
+
   criar(agenda: Partial<Agenda>): Observable<Agenda> {
     const payload = { 
       ...agenda, 
@@ -63,6 +74,13 @@ export class AgendaService {
   }
 
   deletar(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${id}`);
+  }
+
+  cancelar(id: number): Observable<void> {
+    // Você pode criar um endpoint específico PATCH ou usar o PUT atualizando o status
+    // Aqui assumindo que vamos carregar, mudar status e salvar via PUT
+    // O ideal seria um endpoint PATCH /cancelar, mas vamos usar a lógica do componente por enquanto
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
 }

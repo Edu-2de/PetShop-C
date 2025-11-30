@@ -1,56 +1,77 @@
-<div class="container mt-4">
-  <div class="card shadow-sm">
-    <div class="card-header bg-light py-3">
-      <div class="d-flex justify-content-between align-items-center">
-        <h2 class="mb-0">Agenda de Serviços</h2>
-        <div class="d-flex">
-          <div class="input-group me-2">
-            <input
-              type="text"
-              class="form-control"
-              placeholder="Buscar por pet, serviço ou status..."
-              [value]="termoBusca()"
-              (input)="buscar($event)">
-          </div>
-          <a routerLink="/agenda/novo" class="btn btn-primary text-nowrap">
-            <i class="bi bi-plus-circle me-1"></i>
-            Novo Agendamento
-          </a>
-        </div>
+<div class="container mt-4 mb-5 fade-in-up">
+  <div class="card shadow-sm border-0">
+
+    <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+      <div>
+        <h2 class="h5 mb-0 fw-bold text-dark">
+          {{ authService.isAdmin() ? 'Agenda Geral' : 'Meus Agendamentos' }}
+        </h2>
+        <p class="text-muted small mb-0" *ngIf="!authService.isAdmin()">
+          Gerencie suas consultas ou marque uma nova.
+        </p>
       </div>
+
+      <a routerLink="/agenda/novo" class="btn btn-primary rounded-pill px-4 fw-bold shadow-sm">
+        <i class="bi bi-calendar-plus me-2"></i>
+        {{ authService.isAdmin() ? 'Novo Agendamento' : 'Marcar Consulta' }}
+      </a>
     </div>
-    <div class="card-body">
-      <div class="table-responsive">
-        <table class="table table-hover align-middle">
-          <thead class="table-light">
+
+    <div class="card-body p-0">
+
+      <div *ngIf="agendamentosFiltrados().length === 0" class="text-center py-5">
+        <i class="bi bi-calendar-x fs-1 text-muted d-block mb-3"></i>
+        <p class="text-muted">Nenhum agendamento encontrado.</p>
+        <button routerLink="/agenda/novo" class="btn btn-outline-primary btn-sm rounded-pill">
+          Agendar Agora
+        </button>
+      </div>
+
+      <div class="table-responsive" *ngIf="agendamentosFiltrados().length > 0">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="bg-light text-secondary text-uppercase text-xs fw-bold">
             <tr>
-              <th scope="col">Pet</th>
-              <th scope="col">Serviço</th>
-              <th scope="col">Data e Hora</th>
-              <th scope="col">Status</th>
-              <th scope="col" class="text-end">Ações</th>
+              <th class="ps-4">Data</th>
+              <th>Pet</th>
+              <th>Serviço</th>
+              <th>Status</th>
+              <th class="text-end pe-4">Ações</th>
             </tr>
           </thead>
           <tbody>
-            <tr *ngIf="agendamentosFiltrados().length === 0">
-              <td colspan="5" class="text-center py-4">Nenhum agendamento encontrado.</td>
-            </tr>
-            <tr *ngFor="let agenda of agendamentosFiltrados()">
-              <td>{{ agenda.pet?.nome }}</td>
-              <td>{{ agenda.servico?.nome }}</td>
-              <td>{{ agenda.data | date:'dd/MM/yyyy HH:mm' }}</td>
+            <tr *ngFor="let item of agendamentosFiltrados()">
+              <td class="ps-4 fw-bold text-dark">
+                {{ item.data | date:'dd/MM/yyyy HH:mm' }}
+              </td>
+              <td>{{ item.pet?.nome }}</td>
+              <td>{{ item.servico?.nome }}</td>
               <td>
-                <span class="badge" 
-                  [class.text-bg-primary]="agenda.status === 'Agendado'"
-                  [class.text-bg-success]="agenda.status === 'Concluído'"
-                  [class.text-bg-danger]="agenda.status === 'Cancelado'"
-                >
-                  {{ agenda.status }}
+                <span class="badge rounded-pill"
+                      [class.bg-warning-subtle]="item.status === 'Pendente'"
+                      [class.text-warning-emphasis]="item.status === 'Pendente'"
+                      [class.bg-success-subtle]="item.status === 'Concluido' || item.status === 'Confirmado'"
+                      [class.text-success]="item.status === 'Concluido' || item.status === 'Confirmado'"
+                      [class.bg-danger-subtle]="item.status === 'Cancelado'"
+                      [class.text-danger]="item.status === 'Cancelado'">
+                  {{ item.status }}
                 </span>
               </td>
-              <td class="text-end">
-                <a routerLink="/agenda/editar/{{agenda.id}}" class="btn btn-sm btn-outline-info me-2">Editar</a>
-                <button class="btn btn-sm btn-outline-danger" (click)="excluir(agenda.id)">Excluir</button>
+              <td class="text-end pe-4">
+                <div class="btn-group">
+                  <a [routerLink]="['/agenda/editar', item.id]"
+                     class="btn btn-sm btn-outline-secondary"
+                     *ngIf="item.status !== 'Cancelado' && item.status !== 'Concluido'"
+                     title="Remarcar">
+                    <i class="bi bi-pencil"></i>
+                  </a>
+
+                  <button class="btn btn-sm btn-outline-danger ms-1"
+                          (click)="cancelar(item)"
+                          *ngIf="item.status !== 'Cancelado' && item.status !== 'Concluido'"
+                          title="Cancelar">
+                    <i class="bi bi-x-lg"></i>
+                  </button>
+                </div>
               </td>
             </tr>
           </tbody>

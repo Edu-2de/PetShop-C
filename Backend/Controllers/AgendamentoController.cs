@@ -43,6 +43,30 @@ namespace SIGA_PET.Controllers
             }
         }
 
+        // GET: api/Agendamento/tutor/5
+        [HttpGet("tutor/{tutorId}")]
+        public async Task<ActionResult<IEnumerable<AgendamentoDto>>> GetAgendamentosByTutor(int tutorId)
+        {
+            try
+            {
+                var agendamentos = await _context.Agendamentos
+                    .Include(a => a.Animal)
+                    .Include(a => a.Servico)
+                    .Include(a => a.Funcionario)
+                    .Where(a => a.Animal.TutorId == tutorId) // Filtra pelos animais do tutor
+                    .OrderByDescending(a => a.DataHora)      // Mais recentes primeiro
+                    .AsNoTracking()
+                    .ToListAsync();
+
+                var agendamentosDto = _mapper.Map<IEnumerable<AgendamentoDto>>(agendamentos);
+                return Ok(agendamentosDto);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Erro interno: {ex.Message}");
+            }
+        }
+
         // GET: api/Agendamento/5
         [HttpGet("{id}")]
         public async Task<ActionResult<AgendamentoDto>> GetAgendamento(int id)
