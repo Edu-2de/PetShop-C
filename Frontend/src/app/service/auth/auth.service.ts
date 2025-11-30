@@ -87,7 +87,28 @@ export class AuthService {
   // Adaptar lógica de isAdmin baseada no Cargo que vem do banco
   isAdmin(): boolean {
     const user = this.currentUserSignal();
-    return user?.cargo === 'Gerente' || user?.cargo === 'Administrador';
+
+    // Se não tem usuário ou não tem cargo, é visitante ou cliente
+    if (!user || !user.cargo) {
+      return false;
+    }
+
+    // Normaliza para minúsculo para evitar erros de digitação (ex: "Gerente" vs "gerente")
+    const cargo = user.cargo.toLowerCase().trim();
+
+    // Lista de cargos que têm permissão de ver o menu "Gerenciar"
+    // Adicionei todos os cargos que vi no seu FuncionarioFormComponent
+    const cargosAdministrativos = [
+      'gerente',
+      'administrador',
+      'admin',
+      'veterinário',
+      'veterinario', // sem acento por garantia
+      'atendente',
+      'tosador'
+    ];
+
+    return cargosAdministrativos.includes(cargo);
   }
 
   isUser(): boolean {
