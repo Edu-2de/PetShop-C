@@ -9,7 +9,7 @@ using SIGA_PET.Models;
 namespace SIGA_PET.Controllers
 {
     /// <summary>
-    /// Controller responsável pelo gerenciamento de produtos do e-commerce.
+    /// Controller responsï¿½vel pelo gerenciamento de produtos do e-commerce.
     /// Permite CRUD completo de produtos, buscas e filtros.
     /// </summary>
     [ApiController]
@@ -27,21 +27,21 @@ namespace SIGA_PET.Controllers
         }
 
         /// <summary>
-        /// Obtém a lista de todos os produtos cadastrados.
+        /// Obtï¿½m a lista de todos os produtos cadastrados.
         /// </summary>
         /// <remarks>
-        /// Retorna todos os produtos com suas informações completas (fornecedor, categoria, imagens).
+        /// Retorna todos os produtos com suas informaï¿½ï¿½es completas (fornecedor, categoria, imagens).
         /// 
         /// Exemplo de resposta:
         /// ```json
         /// [
         ///   {
         ///     "produtoId": 1,
-        ///     "nome": "Ração Premium",
-        ///     "descricao": "Ração de alta qualidade",
+        ///     "nome": "Raï¿½ï¿½o Premium",
+        ///     "descricao": "Raï¿½ï¿½o de alta qualidade",
         ///     "preco": 189.90,
         ///     "quantidadeEstoque": 150,
-        ///     "nomeCategoria": "Alimentação",
+        ///     "nomeCategoria": "Alimentaï¿½ï¿½o",
         ///     "nomeFornecedor": "Pet Foods Brasil",
         ///     "ativo": true,
         ///     "imagens": []
@@ -76,7 +76,7 @@ namespace SIGA_PET.Controllers
         }
 
         /// <summary>
-        /// Obtém um produto específico pelo ID.
+        /// Obtï¿½m um produto especï¿½fico pelo ID.
         /// </summary>
         /// <remarks>
         /// Retorna os detalhes completos do produto incluindo fornecedor, categoria e imagens.
@@ -84,7 +84,7 @@ namespace SIGA_PET.Controllers
         /// <param name="id">ID do produto (ex: 1)</param>
         /// <returns>Dados do produto solicitado</returns>
         /// <response code="200">Produto encontrado com sucesso</response>
-        /// <response code="404">Produto não encontrado</response>
+        /// <response code="404">Produto nï¿½o encontrado</response>
         /// <response code="500">Erro interno do servidor</response>
         [HttpGet("{id}")]
         [ProducesResponseType(typeof(ProdutoDto), StatusCodes.Status200OK)]
@@ -102,7 +102,7 @@ namespace SIGA_PET.Controllers
 
                 if (produto == null)
                 {
-                    return NotFound(new { mensagem = $"Produto com ID {id} não encontrado" });
+                    return NotFound(new { mensagem = $"Produto com ID {id} nï¿½o encontrado" });
                 }
 
                 var produtoDto = _mapper.Map<ProdutoDto>(produto);
@@ -115,11 +115,11 @@ namespace SIGA_PET.Controllers
         }
 
         /// <summary>
-        /// Obtém apenas os produtos ativos (disponíveis para venda).
+        /// Obtï¿½m apenas os produtos ativos (disponï¿½veis para venda).
         /// </summary>
         /// <remarks>
-        /// Filtro específico para produtos com status ativo = true.
-        /// Útil para a página de produtos no cliente.
+        /// Filtro especï¿½fico para produtos com status ativo = true.
+        /// ï¿½til para a pï¿½gina de produtos no cliente.
         /// </remarks>
         /// <returns>Lista de produtos ativos</returns>
         /// <response code="200">Lista obtida com sucesso</response>
@@ -155,13 +155,13 @@ namespace SIGA_PET.Controllers
         /// Realiza uma busca case-insensitive pelo nome do produto.
         /// 
         /// Exemplos de busca:
-        /// - `/api/produto/search?name=ração` ? Retorna todos os produtos com "ração" no nome
-        /// - `/api/produto/search?name=coleira` ? Retorna todos os acessórios com "coleira"
+        /// - `/api/produto/search?name=raï¿½ï¿½o` ? Retorna todos os produtos com "raï¿½ï¿½o" no nome
+        /// - `/api/produto/search?name=coleira` ? Retorna todos os acessï¿½rios com "coleira"
         /// </remarks>
-        /// <param name="name">Nome ou parte do nome do produto a buscar (mínimo 1 caractere)</param>
+        /// <param name="name">Nome ou parte do nome do produto a buscar (mï¿½nimo 1 caractere)</param>
         /// <returns>Lista de produtos correspondentes</returns>
         /// <response code="200">Busca realizada com sucesso</response>
-        /// <response code="400">Nome de busca não fornecido</response>
+        /// <response code="400">Nome de busca nï¿½o fornecido</response>
         /// <response code="404">Nenhum produto encontrado</response>
         /// <response code="500">Erro interno do servidor</response>
         [HttpGet("search")]
@@ -173,7 +173,7 @@ namespace SIGA_PET.Controllers
         {
             if (string.IsNullOrWhiteSpace(name))
             {
-                return BadRequest(new { mensagem = "O nome para busca não pode ser vazio" });
+                return BadRequest(new { mensagem = "O nome para busca nï¿½o pode ser vazio" });
             }
 
             var produtos = await _context.Produtos
@@ -197,13 +197,13 @@ namespace SIGA_PET.Controllers
         /// Cria um novo produto no sistema.
         /// </summary>
         /// <remarks>
-        /// Requer autenticação de admin. Cria um novo produto com as informações fornecidas.
+        /// Requer autenticaï¿½ï¿½o de admin. Cria um novo produto com as informaï¿½ï¿½es fornecidas.
         /// 
-        /// Corpo da requisição exemplo:
+        /// Corpo da requisiï¿½ï¿½o exemplo:
         /// ```json
         /// {
-        ///   "nome": "Ração Premium Golden Retriever",
-        ///   "descricao": "Ração completa e balanceada especialmente formulada para Golden Retrievers",
+        ///   "nome": "Raï¿½ï¿½o Premium Golden Retriever",
+        ///   "descricao": "Raï¿½ï¿½o completa e balanceada especialmente formulada para Golden Retrievers",
         ///   "preco": 189.90,
         ///   "quantidadeEstoque": 150,
         ///   "categoriaId": 1,
@@ -215,9 +215,9 @@ namespace SIGA_PET.Controllers
         /// <param name="createProdutoDto">Dados do novo produto</param>
         /// <returns>Produto criado com ID gerado</returns>
         /// <response code="201">Produto criado com sucesso</response>
-        /// <response code="400">Dados inválidos ou referências não encontradas</response>
-        /// <response code="401">Não autenticado</response>
-        /// <response code="403">Sem permissão (requer admin)</response>
+        /// <response code="400">Dados invï¿½lidos ou referï¿½ncias nï¿½o encontradas</response>
+        /// <response code="401">Nï¿½o autenticado</response>
+        /// <response code="403">Sem permissï¿½o (requer admin)</response>
         /// <response code="500">Erro interno do servidor</response>
         [HttpPost]
         [Authorize]
@@ -240,7 +240,7 @@ namespace SIGA_PET.Controllers
                     var fornecedorExists = await _context.Fornecedores.AnyAsync(f => f.FornecedorId == createProdutoDto.FornecedorId.Value);
                     if (!fornecedorExists)
                     {
-                        return BadRequest(new { mensagem = $"Fornecedor com ID {createProdutoDto.FornecedorId} não encontrado" });
+                        return BadRequest(new { mensagem = $"Fornecedor com ID {createProdutoDto.FornecedorId} nï¿½o encontrado" });
                     }
                 }
 
@@ -250,7 +250,7 @@ namespace SIGA_PET.Controllers
                     var categoriaExists = await _context.Categorias.AnyAsync(c => c.CategoriaId == createProdutoDto.CategoriaId.Value);
                     if (!categoriaExists)
                     {
-                        return BadRequest(new { mensagem = $"Categoria com ID {createProdutoDto.CategoriaId} não encontrada" });
+                        return BadRequest(new { mensagem = $"Categoria com ID {createProdutoDto.CategoriaId} nï¿½o encontrada" });
                     }
                 }
 
@@ -282,13 +282,13 @@ namespace SIGA_PET.Controllers
         /// Atualiza um produto existente.
         /// </summary>
         /// <remarks>
-        /// Requer autenticação de admin. Permite atualizar qualquer campo do produto.
+        /// Requer autenticaï¿½ï¿½o de admin. Permite atualizar qualquer campo do produto.
         /// 
-        /// Corpo da requisição exemplo:
+        /// Corpo da requisiï¿½ï¿½o exemplo:
         /// ```json
         /// {
-        ///   "nome": "Ração Premium Golden - Nova Fórmula",
-        ///   "descricao": "Ração de alta qualidade atualizada",
+        ///   "nome": "Raï¿½ï¿½o Premium Golden - Nova Fï¿½rmula",
+        ///   "descricao": "Raï¿½ï¿½o de alta qualidade atualizada",
         ///   "preco": 199.90,
         ///   "quantidadeEstoque": 200,
         ///   "categoriaId": 1,
@@ -299,11 +299,11 @@ namespace SIGA_PET.Controllers
         /// </remarks>
         /// <param name="id">ID do produto a atualizar</param>
         /// <param name="updateProdutoDto">Dados atualizados do produto</param>
-        /// <returns>Sem conteúdo (204)</returns>
+        /// <returns>Sem conteï¿½do (204)</returns>
         /// <response code="204">Produto atualizado com sucesso</response>
-        /// <response code="400">Dados inválidos</response>
-        /// <response code="404">Produto não encontrado</response>
-        /// <response code="409">Erro de concorrência</response>
+        /// <response code="400">Dados invï¿½lidos</response>
+        /// <response code="404">Produto nï¿½o encontrado</response>
+        /// <response code="409">Erro de concorrï¿½ncia</response>
         /// <response code="500">Erro interno do servidor</response>
         [HttpPut("{id}")]
         [Authorize]
@@ -324,16 +324,16 @@ namespace SIGA_PET.Controllers
                 var produto = await _context.Produtos.FindAsync(id);
                 if (produto == null)
                 {
-                    return NotFound(new { mensagem = $"Produto com ID {id} não encontrado" });
+                    return NotFound(new { mensagem = $"Produto com ID {id} nï¿½o encontrado" });
                 }
 
-                // Verificações de referências
+                // Verificaï¿½ï¿½es de referï¿½ncias
                 if (updateProdutoDto.FornecedorId.HasValue)
                 {
                     var fornecedorExists = await _context.Fornecedores.AnyAsync(f => f.FornecedorId == updateProdutoDto.FornecedorId.Value);
                     if (!fornecedorExists)
                     {
-                        return BadRequest(new { mensagem = $"Fornecedor com ID {updateProdutoDto.FornecedorId} não encontrado" });
+                        return BadRequest(new { mensagem = $"Fornecedor com ID {updateProdutoDto.FornecedorId} nï¿½o encontrado" });
                     }
                 }
 
@@ -342,7 +342,7 @@ namespace SIGA_PET.Controllers
                     var categoriaExists = await _context.Categorias.AnyAsync(c => c.CategoriaId == updateProdutoDto.CategoriaId.Value);
                     if (!categoriaExists)
                     {
-                        return BadRequest(new { mensagem = $"Categoria com ID {updateProdutoDto.CategoriaId} não encontrada" });
+                        return BadRequest(new { mensagem = $"Categoria com ID {updateProdutoDto.CategoriaId} nï¿½o encontrada" });
                     }
                 }
 
@@ -355,7 +355,7 @@ namespace SIGA_PET.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                return Conflict(new { mensagem = "Erro de concorrência. O registro foi modificado por outro usuário" });
+                return Conflict(new { mensagem = "Erro de concorrï¿½ncia. O registro foi modificado por outro usuï¿½rio" });
             }
             catch (Exception ex)
             {
@@ -367,12 +367,12 @@ namespace SIGA_PET.Controllers
         /// Deleta um produto do sistema.
         /// </summary>
         /// <remarks>
-        /// Requer autenticação de admin. Não permite deletar produtos que estão associados a vendas.
+        /// Requer autenticaï¿½ï¿½o de admin. Nï¿½o permite deletar produtos que estï¿½o associados a vendas.
         /// </remarks>
         /// <param name="id">ID do produto a deletar</param>
-        /// <returns>Sem conteúdo (204)</returns>
+        /// <returns>Sem conteï¿½do (204)</returns>
         /// <response code="204">Produto deletado com sucesso</response>
-        /// <response code="404">Produto não encontrado</response>
+        /// <response code="404">Produto nï¿½o encontrado</response>
         /// <response code="500">Erro ao deletar (produto com vendas associadas)</response>
         [HttpDelete("{id}")]
         [Authorize]
@@ -383,10 +383,26 @@ namespace SIGA_PET.Controllers
         {
             try
             {
-                var produto = await _context.Produtos.FindAsync(id);
+                var produto = await _context.Produtos
+                    .Include(p => p.ItemVendas)
+                    .Include(p => p.Imagens)
+                    .FirstOrDefaultAsync(p => p.ProdutoId == id);
+
                 if (produto == null)
                 {
-                    return NotFound(new { mensagem = $"Produto com ID {id} não encontrado" });
+                    return NotFound(new { mensagem = $"Produto com ID {id} nÃ£o encontrado" });
+                }
+
+                // Verificar se hÃ¡ vendas associadas (nÃ£o pode deletar)
+                if (produto.ItemVendas != null && produto.ItemVendas.Any())
+                {
+                    return BadRequest(new { mensagem = $"NÃ£o Ã© possÃ­vel excluir o produto pois existem {produto.ItemVendas.Count} venda(s) associada(s)." });
+                }
+
+                // Deletar imagens associadas primeiro (cascade jÃ¡ configurado)
+                if (produto.Imagens != null && produto.Imagens.Any())
+                {
+                    _context.ProdutoImagens.RemoveRange(produto.Imagens);
                 }
 
                 _context.Produtos.Remove(produto);
@@ -396,7 +412,7 @@ namespace SIGA_PET.Controllers
             }
             catch (DbUpdateException ex)
             {
-                return StatusCode(500, new { mensagem = "Erro ao deletar: O produto pode estar associado a outros registros (ex: vendas)", erro = ex.InnerException?.Message });
+                return StatusCode(500, new { mensagem = "Erro ao deletar produto", erro = ex.InnerException?.Message ?? ex.Message });
             }
             catch (Exception ex)
             {

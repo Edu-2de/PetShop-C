@@ -21,10 +21,9 @@ interface AgendamentoCompleto extends Agenda {
   standalone: true,
   imports: [CommonModule, RouterLink, FormsModule, DatePipe],
   templateUrl: './agenda-list.html',
-  styleUrls: ['./agenda-list.scss']
+  styleUrls: ['./agenda-list.scss'],
 })
 export class AgendaListComponent implements OnInit {
-  // Tornamos público para o HTML acessar
   agendamentos = signal<AgendamentoCompleto[]>([]);
   termoBusca = signal<string>('');
   carregando = signal<boolean>(true);
@@ -41,10 +40,11 @@ export class AgendaListComponent implements OnInit {
     const termo = this.termoBusca().toLowerCase();
     if (!termo) return lista;
 
-    return lista.filter(ag =>
-      (ag.pet && ag.pet.nome.toLowerCase().includes(termo)) ||
-      (ag.servico && ag.servico.nome.toLowerCase().includes(termo)) ||
-      (ag.status.toLowerCase().includes(termo))
+    return lista.filter(
+      (ag) =>
+        (ag.pet && ag.pet.nome.toLowerCase().includes(termo)) ||
+        (ag.servico && ag.servico.nome.toLowerCase().includes(termo)) ||
+        ag.status.toLowerCase().includes(termo)
     );
   });
 
@@ -63,36 +63,34 @@ export class AgendaListComponent implements OnInit {
       return;
     }
 
-    // Se for admin ou funcionário, busca todos. Senão, busca por usuário.
-    const agendamentos$ = (this.authService.isAdmin() || this.authService.isFuncionario())
-      ? this.agendaService.listar()
-      : this.agendaService.buscarPorUsuario(user.usuarioId);
+    const agendamentos$ =
+      this.authService.isAdmin() || this.authService.isFuncionario()
+        ? this.agendaService.listar()
+        : this.agendaService.buscarPorUsuario(user.usuarioId);
 
     forkJoin({
       agendamentos: agendamentos$,
-      // Carregar todos os pets e serviços para mapeamento, independentemente do usuário.
-      // O filtro principal já foi feito no backend.
       pets: this.petService.listar(),
-      servicos: this.servicoPetService.listar()
+      servicos: this.servicoPetService.listar(),
     }).subscribe({
       next: ({ agendamentos, pets, servicos }) => {
-        const petsMap = new Map(pets.map(p => [p.animalId, p]));
-        const servicosMap = new Map(servicos.map(s => [s.servicoId, s]));
+        const petsMap = new Map(pets.map((p) => [p.animalId, p]));
+        const servicosMap = new Map(servicos.map((s) => [s.servicoId, s]));
 
-        const agendamentosCompletos = agendamentos.map(agenda => ({
+        const agendamentosCompletos = agendamentos.map((agenda) => ({
           ...agenda,
           pet: petsMap.get(agenda.animalId),
-          servico: servicosMap.get(agenda.servicoId)
+          servico: servicosMap.get(agenda.servicoId),
         }));
 
         this.agendamentos.set(agendamentosCompletos);
         this.carregando.set(false);
       },
       error: (error) => {
-        console.error('❌ Erro ao carregar agendamentos:', error);
+        console.error('Erro ao carregar agendamentos:', error);
         this.erroMsg.set('Erro ao carregar agendamentos. Tente novamente.');
         this.carregando.set(false);
-      }
+      },
     });
   }
 
@@ -110,10 +108,9 @@ export class AgendaListComponent implements OnInit {
       return;
     }
 
-    // Atualiza status para Cancelado
     const agendaAtualizada = { ...agenda, status: 'Cancelado' };
 
-    this.agendaService.atualizar(idAgendamento, agenda Atualizada).subscribe({
+    this.agendaService.atualizar(idAgendamento, agendaAtualizada).subscribe({
       next: () => {
         alert('Agendamento cancelado.');
         this.carregarDados();
@@ -121,11 +118,10 @@ export class AgendaListComponent implements OnInit {
       error: (err) => {
         console.error('Erro ao cancelar agendamento:', err);
         alert('Erro ao cancelar agendamento. Tente novamente.');
-      }
+      },
     });
   }
 
-  // Método para recarregar dados
   recarregar(): void {
     this.carregarDados();
   }

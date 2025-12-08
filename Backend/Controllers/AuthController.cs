@@ -37,11 +37,14 @@ namespace SIGA_PET.Controllers
 
             if (usuario == null || !BCrypt.Net.BCrypt.Verify(loginDto.Senha, usuario.PasswordHash))
             {
-                return Unauthorized("Email ou senha inválidos.");
+                return Unauthorized("Email ou senha invÃ¡lidos.");
             }
 
             var token = GenerateJwtToken(usuario);
             var userInfo = _mapper.Map<UserInfo>(usuario);
+
+            // Debug: Log para verificar TutorId
+            Console.WriteLine($"DEBUG LOGIN - Usuario: {usuario.Email}, TutorId mapeado: {userInfo.TutorId}");
 
             return Ok(new LoginResponseDto { Token = token, Usuario = userInfo });
         }
@@ -56,16 +59,16 @@ namespace SIGA_PET.Controllers
                     return BadRequest(ModelState);
                 }
 
-                // Verificar se email já existe
+                // Verificar se email jÃ¡ existe
                 if (await _context.Usuarios.AnyAsync(u => u.Email == registerDto.Email))
                 {
-                    return BadRequest("Este email já está cadastrado.");
+                    return BadRequest("Este email jÃ¡ estÃ¡ cadastrado.");
                 }
 
                 using var transaction = await _context.Database.BeginTransactionAsync();
                 try
                 {
-                    // 1. CRIAR USUÁRIO PRIMEIRO (sempre obrigatório)
+                    // 1. CRIAR USUï¿½RIO PRIMEIRO (sempre obrigatï¿½rio)
                     var usuario = new Usuario
                     {
                         Nome = registerDto.Nome, // Nome sempre vem do Usuario
@@ -78,12 +81,12 @@ namespace SIGA_PET.Controllers
                     _context.Usuarios.Add(usuario);
                     await _context.SaveChangesAsync();
 
-                    // 2. Criar tutor vinculado ao usuário
+                    // 2. Criar tutor vinculado ao usuï¿½rio
                     var tutor = new Tutor
                     {
                         Nome = registerDto.Nome, // Sincroniza nome com Usuario
                         Telefone = registerDto.Telefone,
-                        Endereco = registerDto.Endereco ?? "Não informado",
+                        Endereco = registerDto.Endereco ?? "NÃ£o informado",
                         UsuarioId = usuario.UsuarioId,
                         DataCadastro = DateTime.UtcNow
                     };
@@ -125,7 +128,7 @@ namespace SIGA_PET.Controllers
             {
                 new Claim(ClaimTypes.NameIdentifier, usuario.UsuarioId.ToString()),
                 new Claim(ClaimTypes.Email, usuario.Email),
-                // A role é o 'Cargo' para funcionários ou 'TipoUsuario' para outros (ex: Tutor)
+                // A role Ã© o 'Cargo' para funcionÃ¡rios ou 'TipoUsuario' para outros (ex: Tutor)
                 new Claim(ClaimTypes.Role, usuario.Funcionario?.Cargo ?? usuario.TipoUsuario)
             };
 

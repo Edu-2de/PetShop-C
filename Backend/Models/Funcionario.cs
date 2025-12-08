@@ -7,12 +7,12 @@ namespace SIGA_PET.Models
     {
         public int FuncionarioId { get; set; }
 
-        [Required(ErrorMessage = "Nome È obrigatÛrio")]
-        [StringLength(100, ErrorMessage = "Nome deve ter no m·ximo 100 caracteres")]
+    [Required(ErrorMessage = "Nome √© obrigat√≥rio")]
+    [StringLength(100, ErrorMessage = "Nome deve ter no m√°ximo 100 caracteres")]
         public string Nome { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "Cargo È obrigatÛrio")]
-        [StringLength(50, ErrorMessage = "Cargo deve ter no m·ximo 50 caracteres")]
+    [Required(ErrorMessage = "Cargo √© obrigat√≥rio")]
+    [StringLength(50, ErrorMessage = "Cargo deve ter no m√°ximo 50 caracteres")]
         public string Cargo { get; set; } = string.Empty;
 
         [StringLength(20)]
@@ -32,7 +32,10 @@ namespace SIGA_PET.Models
         public virtual ICollection<Agendamento> Agendamentos { get; set; } = new List<Agendamento>();
         public virtual ICollection<Servico> ServicosResponsavel { get; set; } = new List<Servico>();
         
-        // NOVO: Relacionamento muitos-para-muitos com serviÁos
+    // NOVO: Relacionamento muitos-para-muitos com servi√ßos
         public virtual ICollection<ServicoFuncionario> ServicoFuncionarios { get; set; } = new List<ServicoFuncionario>();
+        
+        // Relacionamento com Vendas
+        public virtual ICollection<Venda> Vendas { get; set; } = new List<Venda>();
     }
 }

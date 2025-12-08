@@ -26,9 +26,9 @@ namespace SIGA_PET.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // Configurações existentes...
+            // ConfiguraÃ§Ãµes existentes...
 
-            // Configuração Usuario
+            // ConfiguraÃ§Ã£o Usuario
             modelBuilder.Entity<Usuario>(entity =>
             {
                 entity.HasIndex(e => e.Email).IsUnique();
@@ -37,7 +37,7 @@ namespace SIGA_PET.Data
                 entity.Property(e => e.TipoUsuario).HasMaxLength(20);
             });
 
-            // Configuração Tutor
+            // ConfiguraÃ§Ã£o Tutor
             modelBuilder.Entity<Tutor>(entity =>
             {
                 entity.HasOne(t => t.Usuario)
@@ -46,7 +46,7 @@ namespace SIGA_PET.Data
                       .OnDelete(DeleteBehavior.Cascade);
             });
 
-            // Configuração Funcionario
+            // ConfiguraÃ§Ã£o Funcionario
             modelBuilder.Entity<Funcionario>(entity =>
             {
                 entity.HasOne(f => f.Usuario)
@@ -55,7 +55,7 @@ namespace SIGA_PET.Data
                       .OnDelete(DeleteBehavior.Cascade);
             });
 
-            // Configuração Animal
+            // ConfiguraÃ§Ã£o Animal
             modelBuilder.Entity<Animal>(entity =>
             {
                 entity.HasOne(a => a.Tutor)
@@ -64,7 +64,7 @@ namespace SIGA_PET.Data
                       .OnDelete(DeleteBehavior.NoAction);
             });
 
-            // Configuração Servico
+            // ConfiguraÃ§Ã£o Servico
             modelBuilder.Entity<Servico>(entity =>
             {
                 entity.HasOne(s => s.FuncionarioResponsavel)
@@ -73,7 +73,7 @@ namespace SIGA_PET.Data
                       .OnDelete(DeleteBehavior.SetNull);
             });
 
-            // NOVA: Configuração ServicoFuncionario (muitos-para-muitos)
+            // NOVA: ConfiguraÃ§Ã£o ServicoFuncionario (muitos-para-muitos)
             modelBuilder.Entity<ServicoFuncionario>(entity =>
             {
                 // Chave composta
@@ -92,7 +92,7 @@ namespace SIGA_PET.Data
                       .OnDelete(DeleteBehavior.Cascade);
             });
 
-            // Configuração Agendamento
+            // ConfiguraÃ§Ã£o Agendamento
             modelBuilder.Entity<Agendamento>(entity =>
             {
                 entity.HasOne(a => a.Animal)
@@ -115,7 +115,7 @@ namespace SIGA_PET.Data
                       .HasMaxLength(20);
             });
 
-            // Configuração Produto
+            // ConfiguraÃ§Ã£o Produto
             modelBuilder.Entity<Produto>(entity =>
             {
                 entity.HasOne(p => p.Categoria)
@@ -133,7 +133,7 @@ namespace SIGA_PET.Data
                       .HasFilter("[CodigoBarras] IS NOT NULL");
             });
 
-            // Configuração ItemVenda
+            // ConfiguraÃ§Ã£o ItemVenda
             modelBuilder.Entity<ItemVenda>(entity =>
             {
                 entity.HasOne(iv => iv.Venda)
@@ -152,26 +152,10 @@ namespace SIGA_PET.Data
                       .OnDelete(DeleteBehavior.NoAction);
             });
 
-            // ? Configuração Venda - ADICIONADO RELACIONAMENTO COM USUARIO
-            modelBuilder.Entity<Venda>(entity =>
-            {
-                entity.HasOne(v => v.Tutor)
-                      .WithMany()
-                      .HasForeignKey(v => v.TutorId)
-                      .OnDelete(DeleteBehavior.NoAction);
+            // Aplicar configuraÃ§Ãµes externas
+            modelBuilder.ApplyConfiguration(new Mappings.VendaMap());
 
-                entity.HasOne(v => v.Usuario)
-                      .WithMany()
-                      .HasForeignKey(v => v.UsuarioId)
-                      .OnDelete(DeleteBehavior.NoAction);
-
-                entity.HasOne(v => v.Funcionario)
-                      .WithMany()
-                      .HasForeignKey(v => v.FuncionarioId)
-                      .OnDelete(DeleteBehavior.SetNull);
-            });
-
-            // Configuração ProdutoImagem
+            // ConfiguraÃ§Ã£o ProdutoImagem
             modelBuilder.Entity<ProdutoImagem>(entity =>
             {
                 entity.HasOne(pi => pi.Produto)

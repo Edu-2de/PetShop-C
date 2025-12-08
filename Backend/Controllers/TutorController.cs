@@ -214,23 +214,52 @@ namespace SIGA_PET.Controllers
             return NoContent();
         }
 
-        // DELETE CORRIGIDO PARA EVITAR ERRO DE CICLO SQL
+        // DELETE COM VERIFICAÇÃO E LIMPEZA DE DEPENDÊNCIAS
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteTutor(int id)
         {
             try
             {
-                var tutor = await _context.Tutores.FindAsync(id);
-                if (tutor == null) return NotFound("Tutor não encontrado.");
+                var tutor = await _context.Tutores
+                    .Include(t => t.Animais)
+                    .Include(t => t.Vendas)
+                    .FirstOrDefaultAsync(t => t.TutorId == id);
 
-                // 1. Removemos o Tutor (dispara cascade para Animais, etc)
+                if (tutor == null) 
+                    return NotFound("Tutor não encontrado.");
+
+                // Verificar se há vendas associadas (não pode deletar)
+                if (tutor.Vendas != null && tutor.Vendas.Any())
+                {
+                    return BadRequest($"Não é possível excluir o tutor pois existem {tutor.Vendas.Count} venda(s) associada(s). Exclua as vendas primeiro.");
+                }
+
+                // Verificar se há animais associados
+                if (tutor.Animais != null && tutor.Animais.Any())
+                {
+                    // Verificar se os animais têm agendamentos
+                    var animalIds = tutor.Animais.Select(a => a.AnimalId).ToList();
+                    var temAgendamentos = await _context.Agendamentos
+                        .AnyAsync(ag => animalIds.Contains(ag.AnimalId));
+
+                    if (temAgendamentos)
+                    {
+                        return BadRequest("Não é possível excluir o tutor pois seus animais possuem agendamentos. Exclua os agendamentos primeiro.");
+                    }
+
+                    // Deletar animais primeiro (não têm agendamentos)
+                    _context.Animais.RemoveRange(tutor.Animais);
+                }
+
+                // Remover o Tutor
                 _context.Tutores.Remove(tutor);
 
-                // 2. Removemos o Usuario (Login) se existir
+                // Remover o Usuario (Login) se existir
                 if (tutor.UsuarioId.HasValue)
                 {
                     var usuario = await _context.Usuarios.FindAsync(tutor.UsuarioId);
-                    if (usuario != null) _context.Usuarios.Remove(usuario);
+                    if (usuario != null) 
+                        _context.Usuarios.Remove(usuario);
                 }
 
                 await _context.SaveChangesAsync();
@@ -238,8 +267,7 @@ namespace SIGA_PET.Controllers
             }
             catch (DbUpdateException ex)
             {
-                // Captura exceções de restrição de chave estrangeira
-                return StatusCode(500, $"Erro ao deletar: O tutor pode estar associado a outros registros (ex: vendas). Detalhes: {ex.InnerException?.Message}");
+                return StatusCode(500, $"Erro ao deletar tutor: {ex.InnerException?.Message ?? ex.Message}");
             }
             catch (Exception ex)
             {

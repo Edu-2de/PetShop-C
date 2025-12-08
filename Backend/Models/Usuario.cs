@@ -2,20 +2,28 @@ using System.ComponentModel.DataAnnotations;
 
 namespace SIGA_PET.Models
 {
+    /// <summary>
+    /// Representa um usu√°rio do sistema SIGA-PET
+    /// </summary>
+    /// <remarks>
+    /// Um usu√°rio pode ser um Tutor, Funcion√°rio ou Administrador.
+    /// Cada usu√°rio possui credenciais de autentica√ß√£o e pode ter relacionamentos
+    /// com tutores, funcion√°rios e vendas.
+    /// </remarks>
     public class Usuario
     {
         public int UsuarioId { get; set; }
 
-        [Required(ErrorMessage = "Nome È obrigatÛrio")]
-        [StringLength(120, ErrorMessage = "Nome deve ter no m·ximo 120 caracteres")]
+    [Required(ErrorMessage = "Nome √© obrigat√≥rio")]
+    [StringLength(120, ErrorMessage = "Nome deve ter no m√°ximo 120 caracteres")]
         public string Nome { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "Email È obrigatÛrio")]
-        [EmailAddress(ErrorMessage = "Email inv·lido")]
+    [Required(ErrorMessage = "Email √© obrigat√≥rio")]
+    [EmailAddress(ErrorMessage = "Email inv√°lido")]
         [StringLength(150)]
         public string Email { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "Senha È obrigatÛria")]
+    [Required(ErrorMessage = "Senha √© obrigat√≥ria")]
         public string PasswordHash { get; set; } = string.Empty;
 
         [Required]
@@ -27,5 +35,6 @@ namespace SIGA_PET.Models
         // Relacionamentos
         public virtual Tutor? Tutor { get; set; }
         public virtual Funcionario? Funcionario { get; set; }
+        public virtual ICollection<Venda> Vendas { get; set; } = new List<Venda>();
     }
 }

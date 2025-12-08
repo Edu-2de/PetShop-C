@@ -7,6 +7,14 @@ using SIGA_PET.Models;
 
 namespace SIGA_PET.Controllers
 {
+    /// <summary>
+    /// API para gerenciamento de vendas e itens de venda
+    /// </summary>
+    /// <remarks>
+    /// Fornece endpoints para cria√ß√£o, leitura e consulta de vendas.
+    /// Suporta vendas de produtos, servi√ßos ou combina√ß√µes.
+    /// Permite compras de clientes avulsos e tutores registrados.
+    /// </remarks>
     [ApiController]
     [Route("api/[controller]")]
     public class VendaController : ControllerBase
@@ -14,14 +22,31 @@ namespace SIGA_PET.Controllers
         private readonly AppDbContext _context;
         private readonly IMapper _mapper;
 
+        /// <summary>
+        /// Inicializa uma nova inst√¢ncia do controlador de vendas
+        /// </summary>
+        /// <param name="context">Contexto do banco de dados</param>
+        /// <param name="mapper">Servi√ßo de mapeamento de DTOs</param>
         public VendaController(AppDbContext context, IMapper mapper)
         {
             _context = context;
             _mapper = mapper;
         }
 
-        // NOVO: GET todas as vendas (para buscar por usu·rio no frontend)
+        // NOVO: GET todas as vendas (para buscar por usu√°rio no frontend)
+        /// <summary>
+        /// Obter todas as vendas do sistema
+        /// </summary>
+        /// <remarks>
+        /// Retorna uma lista completa de todas as vendas registradas,
+        /// incluindo itens, produtos, servi√ßos, tutores e funcion√°rios.
+        /// Os resultados s√£o ordenados por data decrescente.
+        /// </remarks>
+        /// <response code="200">Lista de vendas retornada com sucesso</response>
+        /// <response code="500">Erro interno do servidor</response>
         [HttpGet]
+        [ProducesResponseType(typeof(IEnumerable<VendaDto>), 200)]
+        [ProducesResponseType(typeof(string), 500)]
         public async Task<ActionResult<IEnumerable<VendaDto>>> GetVendas()
         {
             try
@@ -46,8 +71,19 @@ namespace SIGA_PET.Controllers
             }
         }
 
-        // GET: api/Venda/5
+        /// <summary>
+        /// Obter uma venda espec√≠fica por ID
+        /// </summary>
+        /// <param name="id">ID da venda</param>
+        /// <remarks>
+        /// Retorna os detalhes completos de uma venda, incluindo todos os itens
+        /// com seus produtos ou servi√ßos associados.
+        /// </remarks>
+        /// <response code="200">Venda encontrada e retornada com sucesso</response>
+        /// <response code="404">Venda n√£o encontrada</response>
         [HttpGet("{id}")]
+        [ProducesResponseType(typeof(VendaDto), 200)]
+        [ProducesResponseType(typeof(string), 404)]
         public async Task<ActionResult<VendaDto>> GetVenda(int id)
         {
             var venda = await _context.Vendas
@@ -63,16 +99,16 @@ namespace SIGA_PET.Controllers
         }
 
         /// <summary>
-        /// ?? Buscar vendas por tutor
+    /// Buscar vendas por tutor
         /// </summary>
         /// <param name="tutorId">ID do tutor</param>
         /// <remarks>
-        /// Retorna todas as vendas realizadas por um tutor especÌfico.
+    /// Retorna todas as vendas realizadas por um tutor espec√≠fico.
         /// 
         /// **Exemplo de uso:** `/api/Venda/tutor/1`
         /// </remarks>
         /// <response code="200">Lista de vendas do tutor retornada com sucesso</response>
-        /// <response code="404">Tutor n„o encontrado</response>
+        /// <response code="404">Tutor nÔøΩo encontrado</response>
         /// <response code="500">Erro interno do servidor</response>
         [HttpGet("tutor/{tutorId}")]
         [ProducesResponseType(typeof(IEnumerable<VendaDto>), 200)]
@@ -85,7 +121,7 @@ namespace SIGA_PET.Controllers
                 // Verificar se o tutor existe
                 var tutorExiste = await _context.Tutores.AnyAsync(t => t.TutorId == tutorId);
                 if (!tutorExiste)
-                    return NotFound($"Tutor com ID {tutorId} n„o encontrado.");
+                    return NotFound($"Tutor com ID {tutorId} n√£o encontrado.");
 
                 var vendas = await _context.Vendas
                     .Include(v => v.Itens)
@@ -109,17 +145,17 @@ namespace SIGA_PET.Controllers
         }
 
         /// <summary>
-        /// ?? Buscar vendas por ID do usu·rio
+        /// Buscar vendas por ID do usu√°rio
         /// </summary>
-        /// <param name="usuarioId">ID do usu·rio</param>
+    /// <param name="usuarioId">ID do usu√°rio</param>
         /// <remarks>
-        /// Retorna todas as vendas associadas a um usu·rio, seja diretamente 
-        /// ou atravÈs do seu perfil de tutor.
+    /// Retorna todas as vendas associadas a um usu√°rio, seja diretamente 
+    /// ou atrav√©s do seu perfil de tutor.
         /// 
         /// **Exemplo de uso:** `/api/Venda/usuario/5`
         /// </remarks>
-        /// <response code="200">Lista de vendas do usu·rio retornada com sucesso</response>
-        /// <response code="404">Usu·rio n„o encontrado</response>
+    /// <response code="200">Lista de vendas do usu√°rio retornada com sucesso</response>
+    /// <response code="404">Usu√°rio n√£o encontrado</response>
         /// <response code="500">Erro interno do servidor</response>
         [HttpGet("usuario/{usuarioId}")]
         [ProducesResponseType(typeof(IEnumerable<VendaDto>), 200)]
@@ -131,12 +167,12 @@ namespace SIGA_PET.Controllers
             {
                 var usuario = await _context.Usuarios.FindAsync(usuarioId);
                 if (usuario == null)
-                    return NotFound($"Usu·rio com ID {usuarioId} n„o encontrado.");
+                    return NotFound($"Usu√°rio com ID {usuarioId} n√£o encontrado.");
 
-                // Encontrar o tutorId associado a este usu·rio, se houver
+                // Encontrar o tutorId associado a este usuÔøΩrio, se houver
                 var tutor = await _context.Tutores.FirstOrDefaultAsync(t => t.UsuarioId == usuarioId);
 
-                // Buscar vendas onde o TutorId corresponde ao tutor do usu·rio
+                // Buscar vendas onde o TutorId corresponde ao tutor do usuÔøΩrio
                 // OU onde o UsuarioId da venda corresponde diretamente.
                 var vendas = await _context.Vendas
                     .Include(v => v.Itens)
@@ -160,22 +196,22 @@ namespace SIGA_PET.Controllers
         }
 
         /// <summary>
-        /// ? Criar nova venda (permite compra sem ser tutor)
+    /// Criar nova venda (permite compra sem ser tutor)
         /// </summary>
         /// <param name="createVendaDto">Dados da venda</param>
         /// <remarks>
         /// Cria uma nova venda no sistema.
         /// 
         /// **NOVIDADE:** Permite compras sem ser tutor registrado!
-        /// - Se n„o informar tutorId, a venda ser· criada como "Cliente Avulso"
-        /// - Se informar dados de cliente (nome, email, telefone), cria tutor automaticamente
+    /// - Se n√£o informar tutorId, a venda ser√° criada como "Cliente Avulso"
+    /// - Se informar dados de cliente (nome, email, telefone), cria tutor automaticamente
         /// 
-        /// **ValidaÁıes aplicadas:**
+    /// **Valida√ß√µes aplicadas:**
         /// - Pelo menos um item deve ser fornecido
         /// - Produtos devem ter estoque suficiente
-        /// - ServiÁos devem estar ativos
+    /// - Servi√ßos devem estar ativos
         /// 
-        /// **Exemplo de requisiÁ„o (cliente avulso):**
+        /// **Exemplo de requisiÔøΩÔøΩo (cliente avulso):**
         /// ```json
         /// {
         ///   "itens": [
@@ -185,14 +221,14 @@ namespace SIGA_PET.Controllers
         ///     }
         ///   ],
         ///   "formaPagamento": "Dinheiro",
-        ///   "observacoes": "Venda balc„o"
+    ///   "observacoes": "Venda balc√£o"
         /// }
         /// ```
         /// 
-        /// **Exemplo de requisiÁ„o (criar tutor na hora):**
+        /// **Exemplo de requisiÔøΩÔøΩo (criar tutor na hora):**
         /// ```json
         /// {
-        ///   "nomeCliente": "Jo„o Silva",
+    ///   "nomeCliente": "Jo√£o Silva",
         ///   "emailCliente": "joao@email.com", 
         ///   "telefoneCliente": "(11) 99999-9999",
         ///   "enderecoCliente": "Rua Exemplo, 123",
@@ -202,12 +238,12 @@ namespace SIGA_PET.Controllers
         ///       "quantidade": 2
         ///     }
         ///   ],
-        ///   "formaPagamento": "Cart„o"
+        ///   "formaPagamento": "Cartao de Credito"
         /// }
         /// ```
         /// </remarks>
         /// <response code="201">Venda criada com sucesso</response>
-        /// <response code="400">Dados inv·lidos ou estoque insuficiente</response>
+    /// <response code="400">Dados inv√°lidos ou estoque insuficiente</response>
         /// <response code="500">Erro interno do servidor</response>
         [HttpPost]
         [ProducesResponseType(typeof(VendaDto), 201)]
@@ -215,17 +251,17 @@ namespace SIGA_PET.Controllers
         [ProducesResponseType(typeof(string), 500)]
         public async Task<ActionResult<VendaDto>> CreateVenda([FromBody] CreateVendaDto createVendaDto)
         {
-            // ValidaÁ„o preliminar dos itens para evitar estado inconsistente
+            // Valida√ß√£o preliminar dos itens para evitar estado inconsistente
             if (createVendaDto.Itens == null || !createVendaDto.Itens.Any())
-                return BadRequest("? A venda deve conter pelo menos um item.");
+                return BadRequest("A venda deve conter pelo menos um item.");
 
             foreach (var itemDto in createVendaDto.Itens)
             {
                 if (itemDto.ProdutoId == null && itemDto.ServicoId == null)
-                    return BadRequest("? Cada item da venda deve ter um Produto OU um ServiÁo vinculado.");
+                    return BadRequest("Cada item da venda deve ter um Produto OU um Servi√ßo vinculado.");
 
                 if (itemDto.ProdutoId != null && itemDto.ServicoId != null)
-                    return BadRequest("? Um item n„o pode ser Produto e ServiÁo ao mesmo tempo.");
+                    return BadRequest("Um item n√£o pode ser Produto e Servi√ßo ao mesmo tempo.");
             }
 
             using var transaction = await _context.Database.BeginTransactionAsync();
@@ -234,18 +270,18 @@ namespace SIGA_PET.Controllers
                 var venda = _mapper.Map<Venda>(createVendaDto);
                 venda.DataVenda = DateTime.Now;
 
-                // Corrigido: Garante que o UsuarioId do DTO seja atribuÌdo ‡ venda.
+                // Corrigido: Garante que o UsuarioId do DTO seja atribuÔøΩdo ÔøΩ venda.
                 venda.UsuarioId = createVendaDto.UsuarioId;
 
-                // ?? NOVO: LÛgica para criar tutor automaticamente se dados foram fornecidos
+                // NOVO: L√≥gica para criar tutor automaticamente se dados foram fornecidos
                 if (createVendaDto.TutorId == null && !string.IsNullOrEmpty(createVendaDto.NomeCliente))
                 {
-                    // Verificar se j· existe tutor com mesmo email ou telefone
+                    // Verificar se jÔøΩ existe tutor com mesmo email ou telefone
                     Tutor? tutorExistente = null;
                     
                     if (!string.IsNullOrEmpty(createVendaDto.EmailCliente))
                     {
-                        // Buscar por email no usu·rio associado
+                        // Buscar por email no usuÔøΩrio associado
                         var usuarioExistente = await _context.Usuarios
                             .FirstOrDefaultAsync(u => u.Email == createVendaDto.EmailCliente);
                         if (usuarioExistente != null)
@@ -269,12 +305,12 @@ namespace SIGA_PET.Controllers
                     }
                     else
                     {
-                        // Criar novo tutor simplificado (sem usu·rio/senha)
+                        // Criar novo tutor simplificado (sem usuÔøΩrio/senha)
                         var novoTutor = new Tutor
                         {
                             Nome = createVendaDto.NomeCliente,
                             Telefone = createVendaDto.TelefoneCliente ?? "",
-                            Endereco = createVendaDto.EnderecoCliente ?? "N„o informado",
+                            Endereco = createVendaDto.EnderecoCliente ?? "N√£o informado",
                             DataCadastro = DateTime.Now,
                             UsuarioId = null // Tutor sem login, apenas para compras
                         };
@@ -285,8 +321,8 @@ namespace SIGA_PET.Controllers
                         venda.TutorId = novoTutor.TutorId;
                     }
                 }
-                // Se o usu·rio estiver logado e tiver um tutorId, mas n„o foi passado no DTO,
-                // vamos tentar associ·-lo.
+                // Se o usuÔøΩrio estiver logado e tiver um tutorId, mas nÔøΩo foi passado no DTO,
+                // vamos tentar associÔøΩ-lo.
                 else if (venda.TutorId == null && venda.UsuarioId.HasValue)
                 {
                     var tutorDoUsuario = await _context.Tutores.FirstOrDefaultAsync(t => t.UsuarioId == venda.UsuarioId.Value);
@@ -300,28 +336,28 @@ namespace SIGA_PET.Controllers
 
                 foreach (var item in venda.Itens)
                 {
-                    // LÛgica para Produtos
+                    // LÔøΩgica para Produtos
                     if (item.ProdutoId.HasValue)
                     {
                         var produto = await _context.Produtos.FindAsync(item.ProdutoId);
-                        if (produto == null) return BadRequest($"? Produto {item.ProdutoId} n„o encontrado.");
+                        if (produto == null) return BadRequest($"Produto {item.ProdutoId} n√£o encontrado.");
 
                         if (produto.QuantidadeEstoque < item.Quantidade)
-                            return BadRequest($"? Estoque insuficiente para o produto: {produto.Nome}. DisponÌvel: {produto.QuantidadeEstoque}");
+                            return BadRequest($"Estoque insuficiente para o produto: {produto.Nome}. Dispon√≠vel: {produto.QuantidadeEstoque}");
 
                         // BAIXA NO ESTOQUE
                         produto.QuantidadeEstoque -= item.Quantidade;
-                        item.PrecoUnitario = produto.Preco; // Garante preÁo atual
+                        item.PrecoUnitario = produto.Preco; // Garante preÔøΩo atual
                         totalCalculado += (produto.Preco * item.Quantidade);
                     }
-                    // LÛgica para ServiÁos
+                    // LÔøΩgica para ServiÔøΩos
                     else if (item.ServicoId.HasValue)
                     {
                         var servico = await _context.Servicos.FindAsync(item.ServicoId);
-                        if (servico == null) return BadRequest($"? ServiÁo {item.ServicoId} n„o encontrado.");
+                        if (servico == null) return BadRequest($"Servi√ßo {item.ServicoId} n√£o encontrado.");
 
                         if (!servico.Ativo)
-                            return BadRequest($"? O serviÁo {servico.Nome} n„o est· mais disponÌvel.");
+                            return BadRequest($"O servi√ßo {servico.Nome} n√£o est√° mais dispon√≠vel.");
 
                         item.PrecoUnitario = servico.Preco;
                         totalCalculado += (servico.Preco * item.Quantidade);

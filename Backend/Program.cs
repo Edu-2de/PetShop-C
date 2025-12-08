@@ -11,23 +11,23 @@ using System.Reflection;
 var builder = WebApplication.CreateBuilder(args);
 
 // ==============================================================================
-// 1. CONFIGURAÇÃO DO JSON (EVITAR REFERÊNCIAS CÍCLICAS)
-// ==============================================================================
+// 1. CONFIGURAÃ‡ÃƒO DO JSON (EVITAR REFERÃŠNCIAS CÃCLICAS)
+// ===============================================================================
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
         options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
     });
 
-// 2. Configuração do Banco de Dados
+// 2. ConfiguraÃ§Ã£o do Banco de Dados
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(connectionString));
 
-// 3. Configuração do AutoMapper
+// 3. ConfiguraÃ§Ã£o do AutoMapper
 builder.Services.AddAutoMapper(typeof(MappingProfile));
 
-// 4. Configuração de Autenticação e JWT
+// 4. ConfiguraÃ§Ã£o de AutenticaÃ§Ã£o e JWT
 var jwtKey = builder.Configuration["Jwt:Key"] ?? "MinhaChaveSecretaSuperSegura123!";
 var key = Encoding.ASCII.GetBytes(jwtKey);
 
@@ -49,7 +49,7 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
-// 5. Configuração do CORS
+// 5. ConfiguraÃ§Ã£o do CORS
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAngularApp",
@@ -62,47 +62,47 @@ builder.Services.AddCors(options =>
         });
 });
 
-// 6. Swagger com Documentação Completa e Melhorada
+// 6. Swagger com DocumentaÃ§Ã£o Completa e Melhorada
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
-    // Informações da API
+    // Informacoes da API
     options.SwaggerDoc("v1", new OpenApiInfo
     {
-        Title = "?? SIGA-PET API",
+        Title = "SIGA-PET API",
         Version = "v2.0.0",
         Description = @"
-# API RESTful Completa para Gestão de Pet Shop
+# API RESTful Completa para Gestao de Pet Shop
 
-## ?? Funcionalidades
+## Funcionalidades
 
-### ?? Autenticação e Usuários
-- Login e Registro de usuários
-- Controle de perfis (Admin, Funcionário, Tutor)
-- Autenticação JWT
+### Autenticacao e Usuarios
+- Login e Registro de usuarios
+- Controle de perfis (Admin, Funcionario, Tutor)
+- Autenticacao JWT
 
-### ?? Gestão de Pessoas
+### Gestao de Pessoas
 - **Tutores**: Clientes/donos de pets
-- **Funcionários**: Veterinários, Tosadores, Atendentes
+- **Funcionarios**: Veterinarios, Tosadores, Atendentes
 - **Animais**: Cadastro completo de pets
 
-### ?? E-commerce
-- **Produtos**: Catálogo completo com imagens
-- **Categorias**: Organização de produtos
-- **Carrinho**: Gestão de compras
-- **Vendas**: Histórico e relatórios
+### E-commerce
+- **Produtos**: Catalogo completo com imagens
+- **Categorias**: Organizacao de produtos
+- **Carrinho**: Gestao de compras
+- **Vendas**: Historico e relatorios
 
-### ?? Agendamentos
-- Serviços de banho, tosa e veterinária
-- Controle de horários e profissionais
-- Validação de conflitos
+### Agendamentos
+- Servicos de banho, tosa e veterinaria
+- Controle de horarios e profissionais
+- Validacao de conflitos
 
-### ??? Banco de Dados
+### Banco de Dados
 - **Resetar Banco**: Recria toda estrutura
 - **Popular Banco**: Insere dados de exemplo
 - **Status**: Verifica estado do banco
 
-## ?? Começando
+## Comecando
 
 1. **Resetar e Popular o Banco**
    - Use o endpoint `POST /api/Database/reset-e-popular`
@@ -113,24 +113,24 @@ builder.Services.AddSwaggerGen(options =>
    - Copie o token JWT retornado
 
 3. **Autorizar no Swagger**
-   - Clique no botão ?? **Authorize** no topo
+   - Clique no botao **Authorize** no topo
    - Digite: `Bearer {seu_token_aqui}`
    - Agora pode testar os endpoints protegidos!
 
-## ?? Credenciais de Teste
+## Credenciais de Teste
 
-Após popular o banco, use estas credenciais:
+Apos popular o banco, use estas credenciais:
 
 | Perfil | Email | Senha |
 |--------|-------|-------|
-| ????? Admin | admin@sigapet.com | senha123 |
-| ????? Veterinário | carlos.vet@sigapet.com | senha123 |
-| ?? Tosador | ana.tosa@sigapet.com | senha123 |
-| ?? Cliente | maria.silva@email.com | senha123 |
+| Admin | admin@sigapet.com | senha123 |
+| Veterinario | carlos.vet@sigapet.com | senha123 |
+| Tosador | ana.tosa@sigapet.com | senha123 |
+| Cliente | maria.silva@email.com | senha123 |
 
-## ?? Documentação Completa
+## DocumentaÃ§Ã£o Completa
 
-Explore os endpoints abaixo para ver exemplos detalhados de requisições e respostas.
+Explore os endpoints abaixo para ver exemplos detalhados de requisiÃ§Ãµes e respostas.
 ",
         TermsOfService = new Uri("https://example.com/terms"),
         Contact = new OpenApiContact
@@ -146,23 +146,23 @@ Explore os endpoints abaixo para ver exemplos detalhados de requisições e respos
         }
     });
 
-    // Segurança JWT
+    // SeguranÃ§a JWT
     options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         Name = "Authorization",
         Type = SecuritySchemeType.Http,
         Scheme = "Bearer",
         BearerFormat = "JWT",
-        Description = @"
-**Como usar a autenticação JWT:**
+    Description = @"
+**Como usar a autenticaÃ§Ã£o JWT:**
 
-1. Faça login usando `POST /api/Auth/login`
+1. FaÃ§a login usando `POST /api/Auth/login`
 2. Copie o token retornado no campo `token`
-3. Clique no botão ?? **Authorize** acima
+3. Clique no botÃ£o **Authorize** acima
 4. Digite: `Bearer {seu_token_aqui}` (substitua {seu_token_aqui} pelo token copiado)
-5. Clique em **Authorize** e depois **Close**
+5. Clique em **Authorize** e depois **Close`
 
-Agora você pode testar os endpoints protegidos!
+Agora vocÃª pode testar os endpoints protegidos!
 
 **Exemplo:**
 ```
@@ -187,7 +187,7 @@ Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
         }
     });
 
-    // Tags personalizadas para organização
+    // Tags personalizadas para organizaÃ§Ã£o
     options.TagActionsBy(api =>
     {
         if (api.GroupName != null)
@@ -213,9 +213,9 @@ Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 
 var app = builder.Build();
 
-// ==============================================================================
-// CONFIGURAÇÃO DE PASTAS DE UPLOAD
-// ==============================================================================
+// ==================================================================
+// CONFIGURAÃ‡ÃƒO DE PASTAS DE UPLOAD
+// ==================================================================
 var uploadPath = Path.Combine(app.Environment.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot"), "imagens");
 if (!Directory.Exists(uploadPath))
 {
@@ -235,9 +235,9 @@ if (app.Environment.IsDevelopment())
     {
         options.SwaggerEndpoint("/swagger/v1/swagger.json", "SIGA-PET API v2.0");
         options.RoutePrefix = string.Empty; // Swagger em /
-        options.DocumentTitle = "?? SIGA-PET API - Documentação Completa";
+    options.DocumentTitle = "SIGA-PET API - DocumentaÃ§Ã£o";
         
-        // Configurações de UI
+        // ConfiguraÃ§Ãµes de UI
         options.DefaultModelsExpandDepth(2);
         options.DefaultModelExpandDepth(2);
         options.DisplayRequestDuration();
@@ -257,7 +257,7 @@ if (app.Environment.IsDevelopment())
     });
 }
 
-// Habilita arquivos estáticos
+// Habilita arquivos estÃ¡ticos
 app.UseStaticFiles();
 
 var imagensPath = Path.Combine(builder.Environment.ContentRootPath, "wwwroot", "imagens");
@@ -281,20 +281,20 @@ app.MapControllers();
 
 Console.WriteLine(@"
 ========================================
-  ?? SIGA-PET API INICIADA COM SUCESSO
+  SIGA-PET API INICIADA COM SUCESSO
 ========================================
 
-?? Documentação: http://localhost:5000
-?? Swagger UI: http://localhost:5000/swagger
-?? Frontend: http://localhost:4200
+Documentacao: http://localhost:5000
+Swagger UI: http://localhost:5000/swagger
+Frontend: http://localhost:4200
 
-?? INÍCIO RÁPIDO:
+INICIO RAPIDO:
 1. Acesse http://localhost:5000
 2. Use POST /api/Database/reset-e-popular para criar o banco
 3. Use POST /api/Auth/login para autenticar
-4. Copie o token e clique em ?? Authorize
+4. Copie o token e clique em Authorize
 
-? Sistema pronto para uso!
+Sistema pronto para uso!
 ========================================
 ");
 

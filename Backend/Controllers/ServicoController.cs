@@ -21,7 +21,7 @@ namespace SIGA_PET.Controllers
         }
 
         /// <summary>
-        /// Lista todos os serviços
+        /// Lista todos os serviï¿½os
         /// </summary>
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ServicoDto>>> GetServicos()
@@ -37,7 +37,7 @@ namespace SIGA_PET.Controllers
             {
                 var dto = _mapper.Map<ServicoDto>(s);
                 
-                // NOVO: Buscar funcionários aptos baseado nos cargos
+                // NOVO: Buscar funcionï¿½rios aptos baseado nos cargos
                 if (!string.IsNullOrEmpty(s.CargosResponsaveis))
                 {
                     var cargos = s.CargosResponsaveis.Split(',', StringSplitOptions.RemoveEmptyEntries)
@@ -58,7 +58,7 @@ namespace SIGA_PET.Controllers
         }
 
         /// <summary>
-        /// Lista apenas serviços ativos
+        /// Lista apenas serviï¿½os ativos
         /// </summary>
         [HttpGet("ativos")]
         public async Task<ActionResult<IEnumerable<ServicoDto>>> GetServicosAtivos()
@@ -75,7 +75,7 @@ namespace SIGA_PET.Controllers
             {
                 var dto = _mapper.Map<ServicoDto>(s);
                 
-                // NOVO: Buscar funcionários aptos baseado nos cargos
+                // NOVO: Buscar funcionï¿½rios aptos baseado nos cargos
                 if (!string.IsNullOrEmpty(s.CargosResponsaveis))
                 {
                     var cargos = s.CargosResponsaveis.Split(',', StringSplitOptions.RemoveEmptyEntries)
@@ -96,7 +96,7 @@ namespace SIGA_PET.Controllers
         }
 
         /// <summary>
-        /// NOVO: Busca funcionários aptos para um serviço específico baseado nos cargos
+        /// NOVO: Busca funcionï¿½rios aptos para um serviï¿½o especï¿½fico baseado nos cargos
         /// </summary>
         [HttpGet("{id}/funcionarios-aptos")]
         public async Task<ActionResult<IEnumerable<FuncionarioSimplificadoDto>>> GetFuncionariosAptos(int id)
@@ -107,7 +107,7 @@ namespace SIGA_PET.Controllers
 
             if (servico == null)
             {
-                return NotFound("Serviço não encontrado.");
+                return NotFound("Serviï¿½o nï¿½o encontrado.");
             }
 
             List<Funcionario> funcionariosAptos = new List<Funcionario>();
@@ -127,7 +127,7 @@ namespace SIGA_PET.Controllers
         }
 
         /// <summary>
-        /// NOVO: Lista todos os cargos disponíveis
+        /// NOVO: Lista todos os cargos disponï¿½veis
         /// </summary>
         [HttpGet("cargos-disponiveis")]
         public async Task<ActionResult<IEnumerable<string>>> GetCargosDisponiveis()
@@ -153,12 +153,12 @@ namespace SIGA_PET.Controllers
 
             if (servico == null)
             {
-                return NotFound("Serviço não encontrado.");
+                return NotFound("Serviï¿½o nï¿½o encontrado.");
             }
 
             var dto = _mapper.Map<ServicoDto>(servico);
             
-            // NOVO: Buscar funcionários aptos baseado nos cargos
+            // NOVO: Buscar funcionï¿½rios aptos baseado nos cargos
             if (!string.IsNullOrEmpty(servico.CargosResponsaveis))
             {
                 var cargos = servico.CargosResponsaveis.Split(',', StringSplitOptions.RemoveEmptyEntries)
@@ -206,7 +206,7 @@ namespace SIGA_PET.Controllers
 
             if (servico == null)
             {
-                return NotFound("Serviço não encontrado.");
+                return NotFound("Serviï¿½o nï¿½o encontrado.");
             }
 
             _mapper.Map(dto, servico);
@@ -233,16 +233,50 @@ namespace SIGA_PET.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteServico(int id)
         {
-            var servico = await _context.Servicos.FindAsync(id);
-            if (servico == null)
+            try
             {
-                return NotFound("Serviço não encontrado.");
+                var servico = await _context.Servicos
+                    .Include(s => s.Agendamentos)
+                    .Include(s => s.ItemVendas)
+                    .Include(s => s.ServicoFuncionarios)
+                    .FirstOrDefaultAsync(s => s.ServicoId == id);
+
+                if (servico == null)
+                {
+                    return NotFound("ServiÃ§o nÃ£o encontrado.");
+                }
+
+                // Verificar se hÃ¡ vendas associadas (nÃ£o pode deletar)
+                if (servico.ItemVendas != null && servico.ItemVendas.Any())
+                {
+                    return BadRequest($"NÃ£o Ã© possÃ­vel excluir o serviÃ§o pois existem {servico.ItemVendas.Count} venda(s) associada(s).");
+                }
+
+                // Verificar se hÃ¡ agendamentos associados (nÃ£o pode deletar)
+                if (servico.Agendamentos != null && servico.Agendamentos.Any())
+                {
+                    return BadRequest($"NÃ£o Ã© possÃ­vel excluir o serviÃ§o pois existem {servico.Agendamentos.Count} agendamento(s) associado(s).");
+                }
+
+                // Deletar relacionamentos ServicoFuncionario (cascade jÃ¡ configurado, mas garantindo)
+                if (servico.ServicoFuncionarios != null && servico.ServicoFuncionarios.Any())
+                {
+                    _context.ServicoFuncionarios.RemoveRange(servico.ServicoFuncionarios);
+                }
+
+                _context.Servicos.Remove(servico);
+                await _context.SaveChangesAsync();
+
+                return NoContent();
             }
-
-            _context.Servicos.Remove(servico);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
+            catch (DbUpdateException ex)
+            {
+                return StatusCode(500, $"Erro ao deletar serviÃ§o: {ex.InnerException?.Message ?? ex.Message}");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Erro interno: {ex.Message}");
+            }
         }
     }
 }

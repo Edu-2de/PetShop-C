@@ -24,19 +24,19 @@ namespace SIGA_PET.Data.Mappings
             builder.HasOne(v => v.Tutor)
                 .WithMany(t => t.Vendas)
                 .HasForeignKey(v => v.TutorId)
-                .OnDelete(DeleteBehavior.SetNull); // Se o tutor for deletado, o TutorId na venda fica nulo
+                .OnDelete(DeleteBehavior.NoAction);
 
             // Relacionamento com Usuario (1 Venda pertence a 1 Usuario)
             builder.HasOne(v => v.Usuario)
                 .WithMany(u => u.Vendas)
                 .HasForeignKey(v => v.UsuarioId)
-                .OnDelete(DeleteBehavior.SetNull); // Se o usuário for deletado, o UsuarioId na venda fica nulo
+                .OnDelete(DeleteBehavior.NoAction);
 
-            // Relacionamento com Funcionario (1 Venda é registrada por 1 Funcionario)
+            // Relacionamento com Funcionario (1 Venda Ã© registrada por 1 Funcionario)
             builder.HasOne(v => v.Funcionario)
                 .WithMany(f => f.Vendas)
                 .HasForeignKey(v => v.FuncionarioId)
-                .OnDelete(DeleteBehavior.SetNull); // Se o funcionário for deletado, o FuncionarioId fica nulo
+                .OnDelete(DeleteBehavior.SetNull);
         }
     }
 }
