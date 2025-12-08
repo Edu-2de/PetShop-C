@@ -5,29 +5,30 @@ namespace SIGA_PET.Models
 {
     public class Tutor
     {
+        [Key]
         public int TutorId { get; set; }
 
-        [Required(ErrorMessage = "Nome é obrigatório")]
-        [StringLength(120, ErrorMessage = "Nome deve ter no máximo 120 caracteres")]
+        [Required]
+        [StringLength(120)]
         public string Nome { get; set; } = string.Empty;
 
-        [StringLength(20, ErrorMessage = "Telefone deve ter no máximo 20 caracteres")]
+        [StringLength(20)]
         public string? Telefone { get; set; }
 
-
-        [StringLength(250, ErrorMessage = "Endereço deve ter no máximo 250 caracteres")]
+        [StringLength(250)]
         public string? Endereco { get; set; }
 
         public DateTime DataCadastro { get; set; } = DateTime.UtcNow;
 
-        // Chave estrangeira para o Usuário (Login)
-        public int UsuarioId { get; set; }
+        // Relacionamento com Usuario (pode ser null - tutor sem login)
+        [ForeignKey("Usuario")]
+        public int? UsuarioId { get; set; }
+        public Usuario? Usuario { get; set; }
 
-        [ForeignKey("UsuarioId")]
-        public virtual Usuario Usuario { get; set; } = null!;
+        // Relacionamento com Animais (um tutor pode ter muitos animais)
+        public ICollection<Animal> Animais { get; set; } = new List<Animal>();
 
-        // Relacionamentos
-        public virtual ICollection<Animal> Animais { get; set; } = new List<Animal>();
-        public virtual ICollection<Venda> Vendas { get; set; } = new List<Venda>();
+        // Relacionamento com Vendas (um tutor pode ter muitas vendas)
+        public ICollection<Venda> Vendas { get; set; } = new List<Venda>();
     }
 }

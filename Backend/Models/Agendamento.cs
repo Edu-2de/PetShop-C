@@ -1,6 +1,5 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using SIGA_PET.Enums; // ESSENCIAL PARA CORRIGIR O ERRO
 
 namespace SIGA_PET.Models
 {
@@ -19,7 +18,9 @@ namespace SIGA_PET.Models
         [Required(ErrorMessage = "DataHora é obrigatória")]
         public DateTime DataHora { get; set; }
 
-        public StatusAgendamento Status { get; set; } = StatusAgendamento.Pendente;
+        // TEMPORÁRIO: Mantendo como string para evitar problemas de migração
+        [StringLength(20)]
+        public string Status { get; set; } = "Pendente";
 
         [StringLength(500, ErrorMessage = "Observações deve ter no máximo 500 caracteres")]
         public string? Observacoes { get; set; }

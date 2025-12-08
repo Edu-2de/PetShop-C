@@ -161,6 +161,11 @@ namespace SIGA_PET.Controllers
 
                 return NoContent();
             }
+            catch (DbUpdateException ex)
+            {
+                // Captura exceções de restrição de chave estrangeira
+                return StatusCode(500, $"Erro ao deletar: O fornecedor pode estar associado a produtos. Detalhes: {ex.InnerException?.Message}");
+            }
             catch (Exception ex)
             {
                 return StatusCode(500, $"Erro interno: {ex.Message}");

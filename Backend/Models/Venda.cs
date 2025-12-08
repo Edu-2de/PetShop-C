@@ -9,6 +9,9 @@ namespace SIGA_PET.Models
 
         public int? TutorId { get; set; }
 
+        // ? Adicionado para vincular a venda a um usuário, mesmo que ele não seja um tutor
+        public int? UsuarioId { get; set; }
+
         public int? FuncionarioId { get; set; }
 
         public DateTime DataVenda { get; set; } = DateTime.UtcNow;
@@ -26,6 +29,10 @@ namespace SIGA_PET.Models
         // Navigation Properties
         [ForeignKey("TutorId")]
         public virtual Tutor? Tutor { get; set; }
+
+        // ? Adicionada propriedade de navegação para o usuário
+        [ForeignKey("UsuarioId")]
+        public virtual Usuario? Usuario { get; set; }
 
         [ForeignKey("FuncionarioId")]
         public virtual Funcionario? Funcionario { get; set; }

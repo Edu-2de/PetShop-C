@@ -4,44 +4,103 @@
       <h2 class="mb-0">{{ isEdit ? 'Editar Pet' : 'Novo Pet' }}</h2>
     </div>
     <div class="card-body">
-      <form (ngSubmit)="salvar()">
-        <!-- Campo Nome -->
-        <div class="mb-3">
-          <label for="nome" class="form-label">Nome</label>
-          <input type="text" id="nome" [(ngModel)]="pet.nome" name="nome" class="form-control" required>
+
+      <!-- Mensagem de erro -->
+      <div class="alert alert-danger" *ngIf="erro" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+        {{ erro }}
+      </div>
+
+      <form #form="ngForm" (ngSubmit)="salvar()">
+        <div class="row g-3">
+          
+          <!-- Tutor (Dono) - Só mostra para admin -->
+          <div class="col-md-12" *ngIf="isAdmin">
+            <label for="tutor" class="form-label">Tutor (Dono)</label>
+            <select id="tutor" class="form-select" [(ngModel)]="pet.tutorId" name="tutorId" required #tutorId="ngModel">
+              <option value="0" disabled>Selecione um tutor</option>
+              <option *ngFor="let tutor of tutores" [value]="tutor.tutorId">{{ tutor.nome }}</option>
+            </select>
+            <div *ngIf="tutorId.invalid && (tutorId.dirty || tutorId.touched)" class="text-danger mt-1 small">
+              <div *ngIf="tutorId.errors?.['required']">É obrigatório selecionar um tutor.</div>
+            </div>
+          </div>
+
+          <!-- Tutor info para cliente comum -->
+          <div class="col-md-12" *ngIf="!isAdmin">
+            <div class="alert alert-info">
+              <i class="bi bi-info-circle me-2"></i>
+              Este pet será cadastrado em sua conta.
+            </div>
+          </div>
+
+          <!-- Nome do Pet -->
+          <div class="col-md-6">
+            <label for="nome" class="form-label">Nome do Pet</label>
+            <input type="text" id="nome" class="form-control" [(ngModel)]="pet.nome" name="nome" required minlength="2" #nome="ngModel">
+            <div *ngIf="nome.invalid && (nome.dirty || nome.touched)" class="text-danger mt-1 small">
+              <div *ngIf="nome.errors?.['required']">O nome do pet é obrigatório.</div>
+              <div *ngIf="nome.errors?.['minlength']">O nome deve ter no mínimo 2 caracteres.</div>
+            </div>
+          </div>
+
+          <!-- Espécie -->
+          <div class="col-md-6">
+            <label for="especie" class="form-label">Espécie</label>
+            <select id="especie" class="form-select" [(ngModel)]="pet.especie" name="especie">
+              <option value="Cão">Cão</option>
+              <option value="Gato">Gato</option>
+              <option value="Pássaro">Pássaro</option>
+              <option value="Peixe">Peixe</option>
+              <option value="Roedor">Roedor</option>
+              <option value="Outro">Outro</option>
+            </select>
+          </div>
+
+          <!-- Raça -->
+          <div class="col-md-6">
+            <label for="raca" class="form-label">Raça</label>
+            <input type="text" id="raca" class="form-control" [(ngModel)]="pet.raca" name="raca" placeholder="Ex: Labrador, SRD, etc.">
+          </div>
+
+          <!-- Sexo -->
+          <div class="col-md-6">
+            <label for="sexo" class="form-label">Sexo</label>
+            <select id="sexo" class="form-select" [(ngModel)]="pet.sexo" name="sexo" required #sexo="ngModel">
+              <option value="Macho">Macho</option>
+              <option value="Fêmea">Fêmea</option>
+            </select>
+            <div *ngIf="sexo.invalid && (sexo.dirty || sexo.touched)" class="text-danger mt-1 small">
+              <div *ngIf="sexo.errors?.['required']">Selecione o sexo do pet.</div>
+            </div>
+          </div>
+
+          <!-- Pelagem -->
+          <div class="col-md-6">
+            <label for="pelagem" class="form-label">Pelagem</label>
+            <input type="text" id="pelagem" class="form-control" [(ngModel)]="pet.pelagem" name="pelagem" placeholder="Ex: Dourada, Preta, Branca">
+          </div>
+
+          <!-- Data de Nascimento -->
+          <div class="col-md-6">
+            <label for="dataNascimento" class="form-label">Data de Nascimento (Opcional)</label>
+            <input type="date" id="dataNascimento" class="form-control" [(ngModel)]="pet.dataNascimento" name="dataNascimento">
+          </div>
+
+          <!-- Observações -->
+          <div class="col-12">
+            <label for="observacoes" class="form-label">Observações</label>
+            <textarea id="observacoes" class="form-control" [(ngModel)]="pet.observacoes" name="observacoes" rows="3" placeholder="Informações importantes sobre o pet (alergias, temperamento, etc.)"></textarea>
+          </div>
         </div>
 
-        <!-- Campo Espécie -->
-        <div class="mb-3">
-          <label for="especie" class="form-label">Espécie</label>
-          <input type="text" id="especie" [(ngModel)]="pet.especie" name="especie" class="form-control" required>
-        </div>
-
-        <!-- Campo Raça -->
-        <div class="mb-3">
-          <label for="raca" class="form-label">Raça</label>
-          <input type="text" id="raca" [(ngModel)]="pet.raca" name="raca" class="form-control">
-        </div>
-
-        <!-- Campo Nascimento -->
-        <div class="mb-3">
-          <label for="nascimento" class="form-label">Nascimento</label>
-          <input type="date" id="nascimento" [(ngModel)]="pet.nascimento" name="nascimento" class="form-control">
-        </div>
-
-        <!-- Campo Tutor (Select) -->
-        <div class="mb-3">
-          <label for="tutor" class="form-label">Tutor</label>
-          <select id="tutor" [(ngModel)]="pet.tutorId" name="tutorId" class="form-select" required>
-            <option [ngValue]="undefined" disabled>Selecione um tutor</option>
-            <option *ngFor="let tutor of tutores" [value]="tutor.id">{{ tutor.nome }}</option>
-          </select>
-        </div>
-
-        <!-- Botões de Ação -->
+        <!-- Botões -->
         <div class="d-flex justify-content-end gap-2 mt-4">
           <a routerLink="/pets" class="btn btn-secondary">Cancelar</a>
-          <button type="submit" class="btn btn-primary">Salvar</button>
+          <button type="submit" class="btn btn-primary" [disabled]="form.invalid">
+            <i class="bi bi-check-lg me-2"></i>
+            {{ isEdit ? 'Atualizar' : 'Cadastrar' }}
+          </button>
         </div>
       </form>
     </div>

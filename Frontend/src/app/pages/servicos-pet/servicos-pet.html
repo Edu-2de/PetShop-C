@@ -34,8 +34,10 @@
                 </span>
               </td>
               <td class="text-end pe-4">
-                <a routerLink="/servicos/editar/{{servico.id}}" class="btn btn-sm btn-link text-secondary p-0 me-3"><i class="bi bi-pencil-square"></i></a>
-                <button class="btn btn-sm btn-link text-danger p-0" (click)="excluir(servico.id)"><i class="bi bi-trash"></i></button>
+                <div class="d-flex gap-1">
+                  <a [routerLink]="['/servicos/editar', servico.servicoId]" class="btn btn-sm btn-link text-primary p-0"><i class="bi bi-pencil"></i></a>
+                  <button type="button" class="btn btn-sm btn-link text-danger p-0" (click)="excluir(servico.servicoId)"><i class="bi bi-trash"></i></button>
+                </div>
               </td>
             </tr>
           </tbody>

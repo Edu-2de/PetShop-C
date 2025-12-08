@@ -6,6 +6,10 @@ namespace SIGA_PET.Models
     {
         public int UsuarioId { get; set; }
 
+        [Required(ErrorMessage = "Nome é obrigatório")]
+        [StringLength(120, ErrorMessage = "Nome deve ter no máximo 120 caracteres")]
+        public string Nome { get; set; } = string.Empty;
+
         [Required(ErrorMessage = "Email é obrigatório")]
         [EmailAddress(ErrorMessage = "Email inválido")]
         [StringLength(150)]

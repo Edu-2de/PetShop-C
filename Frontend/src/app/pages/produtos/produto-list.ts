@@ -7,6 +7,7 @@ import { ProdutoService } from '../../service/produtos/produto.service';
 import { AuthService } from '../../service/auth/auth.service';
 import { CategoriaService } from '../../service/categorias/categoria.service';
 import { Categoria } from '../../model/categoria.model';
+import { CarrinhoService } from '../../service/carrinho/carrinho.service';
 
 @Component({
   selector: 'app-produto-list',
@@ -21,6 +22,7 @@ export class ProdutoListComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private produtoService = inject(ProdutoService);
   private categoriaService = inject(CategoriaService);
+  private carrinhoService = inject(CarrinhoService);
 
   produtos = signal<Produto[]>([]);
   categorias = signal<Categoria[]>([]);
@@ -95,7 +97,7 @@ export class ProdutoListComponent implements OnInit {
   // Converte o ID da categoria em Nome
   getNomeCategoria(id: number | undefined): string {
     if (!id) return 'Geral';
-    const cat = this.categorias().find(c => c.id === id);
+    const cat = this.categorias().find(c => c.categoriaId === id);
     return cat ? cat.nome : 'Geral';
   }
 
@@ -139,16 +141,66 @@ export class ProdutoListComponent implements OnInit {
     if (!id) return;
     if (confirm('Deseja excluir?')) {
       this.produtoService.delete(id).subscribe(() => {
-        this.produtos.update(curr => curr.filter(p => p.id !== id));
+        this.produtos.update(curr => curr.filter(p => p.produtoId !== id));
       });
     }
   }
 
-  comprar(produto: Produto): void {
-    if (!this.authService.isAuthenticated()) {
-      this.router.navigate(['/login']);
+  adicionarAoCarrinho(produto: Produto): void {
+    if (!produto.produtoId) {
+      console.error('Produto sem ID');
       return;
     }
-    alert(`Adicionado ao carrinho!`);
+
+    if (produto.quantidadeEstoque <= 0) {
+      this.mostrarToast('Produto sem estoque', 'error');
+      return;
+    }
+
+    this.carrinhoService.adicionarItem(produto, 1);
+    this.mostrarToast(`${produto.nome} adicionado ao carrinho!`, 'success');
+  }
+
+  private mostrarToast(mensagem: string, tipo: 'success' | 'error'): void {
+    // Criar elemento toast
+    const toastContainer = document.getElementById('toast-container') || this.criarToastContainer();
+    
+    const toast = document.createElement('div');
+    toast.className = `toast align-items-center text-white bg-${tipo === 'success' ? 'success' : 'danger'} border-0`;
+    toast.setAttribute('role', 'alert');
+    toast.setAttribute('aria-live', 'assertive');
+    toast.setAttribute('aria-atomic', 'true');
+    
+    toast.innerHTML = `
+      <div class="d-flex">
+        <div class="toast-body">
+          <i class="bi bi-${tipo === 'success' ? 'check-circle' : 'exclamation-circle'} me-2"></i>
+          ${mensagem}
+        </div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+      </div>
+    `;
+    
+    toastContainer.appendChild(toast);
+    
+    // Inicializar e mostrar o toast usando Bootstrap
+    const bsToast = new (window as any).bootstrap.Toast(toast, {
+      delay: 3000
+    });
+    bsToast.show();
+    
+    // Remover toast após ser ocultado
+    toast.addEventListener('hidden.bs.toast', () => {
+      toast.remove();
+    });
+  }
+
+  private criarToastContainer(): HTMLElement {
+    const container = document.createElement('div');
+    container.id = 'toast-container';
+    container.className = 'toast-container position-fixed top-0 end-0 p-3';
+    container.style.zIndex = '9999';
+    document.body.appendChild(container);
+    return container;
   }
 }

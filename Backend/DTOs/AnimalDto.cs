@@ -38,7 +38,7 @@ namespace SIGA_PET.DTOs
         public int TutorId { get; set; }
 
         [Required(ErrorMessage = "Nome é obrigatório")]
-        [StringLength(100, ErrorMessage = "Nome deve ter no máximo 100 caracteres")]
+        [StringLength(100, MinimumLength = 2, ErrorMessage = "Nome deve ter entre 2 e 100 caracteres")]
         public string Nome { get; set; } = string.Empty;
 
         [StringLength(50, ErrorMessage = "Espécie deve ter no máximo 50 caracteres")]
@@ -53,6 +53,7 @@ namespace SIGA_PET.DTOs
         public string? Observacoes { get; set; }
 
         [StringLength(20, ErrorMessage = "Sexo deve ter no máximo 20 caracteres")]
+        [RegularExpression("^(Macho|Fêmea)$", ErrorMessage = "Sexo deve ser 'Macho' ou 'Fêmea'.")]
         public string? Sexo { get; set; }
 
         [StringLength(100, ErrorMessage = "Pelagem deve ter no máximo 100 caracteres")]
@@ -65,7 +66,7 @@ namespace SIGA_PET.DTOs
         public int TutorId { get; set; }
 
         [Required(ErrorMessage = "Nome é obrigatório")]
-        [StringLength(100, ErrorMessage = "Nome deve ter no máximo 100 caracteres")]
+        [StringLength(100, MinimumLength = 2, ErrorMessage = "Nome deve ter entre 2 e 100 caracteres")]
         public string Nome { get; set; } = string.Empty;
 
         [StringLength(50, ErrorMessage = "Espécie deve ter no máximo 50 caracteres")]
@@ -80,6 +81,7 @@ namespace SIGA_PET.DTOs
         public string? Observacoes { get; set; }
 
         [StringLength(20, ErrorMessage = "Sexo deve ter no máximo 20 caracteres")]
+        [RegularExpression("^(Macho|Fêmea)$", ErrorMessage = "Sexo deve ser 'Macho' ou 'Fêmea'.")]
         public string? Sexo { get; set; }
 
         [StringLength(100, ErrorMessage = "Pelagem deve ter no máximo 100 caracteres")]

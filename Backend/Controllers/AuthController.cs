@@ -1,3 +1,4 @@
+using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -7,111 +8,136 @@ using SIGA_PET.Models;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using BCrypt.Net;
 
 namespace SIGA_PET.Controllers
 {
-    [Route("api/[controller]")]
     [ApiController]
+    [Route("api/[controller]")]
     public class AuthController : ControllerBase
     {
         private readonly AppDbContext _context;
         private readonly IConfiguration _configuration;
+        private readonly IMapper _mapper;
 
-        public AuthController(AppDbContext context, IConfiguration configuration)
+        public AuthController(AppDbContext context, IConfiguration configuration, IMapper mapper)
         {
             _context = context;
             _configuration = configuration;
+            _mapper = mapper;
         }
 
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginDto loginDto)
         {
-            var user = await _context.Usuarios
+            var usuario = await _context.Usuarios
                 .Include(u => u.Funcionario)
                 .Include(u => u.Tutor)
+                .AsNoTracking()
                 .FirstOrDefaultAsync(u => u.Email == loginDto.Email);
 
-            if (user == null || !BCrypt.Net.BCrypt.Verify(loginDto.Senha, user.PasswordHash))
-                return Unauthorized("Credenciais inválidas");
-
-            if (!user.Ativo)
-                return Unauthorized("Usuário inativo");
-
-            var token = GenerateJwtToken(user);
-
-            var nome = user.Funcionario?.Nome ?? user.Tutor?.Nome ?? "Admin";
-            var idVinculo = user.Funcionario?.FuncionarioId ?? user.Tutor?.TutorId ?? 0;
-
-            return Ok(new
+            if (usuario == null || !BCrypt.Net.BCrypt.Verify(loginDto.Senha, usuario.PasswordHash))
             {
-                token,
-                usuario = new
+                return Unauthorized("Email ou senha inválidos.");
+            }
+
+            var token = GenerateJwtToken(usuario);
+            var userInfo = _mapper.Map<UserInfo>(usuario);
+
+            return Ok(new LoginResponseDto { Token = token, Usuario = userInfo });
+        }
+
+        [HttpPost("register")]
+        public async Task<IActionResult> Register([FromBody] CreateTutorDto registerDto)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
                 {
-                    email = user.Email,
-                    nome = nome,
-                    cargo = user.TipoUsuario,
-                    id = idVinculo
+                    return BadRequest(ModelState);
                 }
-            });
+
+                // Verificar se email já existe
+                if (await _context.Usuarios.AnyAsync(u => u.Email == registerDto.Email))
+                {
+                    return BadRequest("Este email já está cadastrado.");
+                }
+
+                using var transaction = await _context.Database.BeginTransactionAsync();
+                try
+                {
+                    // 1. CRIAR USUÁRIO PRIMEIRO (sempre obrigatório)
+                    var usuario = new Usuario
+                    {
+                        Nome = registerDto.Nome, // Nome sempre vem do Usuario
+                        Email = registerDto.Email,
+                        PasswordHash = BCrypt.Net.BCrypt.HashPassword(registerDto.Senha),
+                        TipoUsuario = "Tutor",
+                        Ativo = true
+                    };
+
+                    _context.Usuarios.Add(usuario);
+                    await _context.SaveChangesAsync();
+
+                    // 2. Criar tutor vinculado ao usuário
+                    var tutor = new Tutor
+                    {
+                        Nome = registerDto.Nome, // Sincroniza nome com Usuario
+                        Telefone = registerDto.Telefone,
+                        Endereco = registerDto.Endereco ?? "Não informado",
+                        UsuarioId = usuario.UsuarioId,
+                        DataCadastro = DateTime.UtcNow
+                    };
+
+                    _context.Tutores.Add(tutor);
+                    await _context.SaveChangesAsync();
+
+                    await transaction.CommitAsync();
+
+                    // Gerar token e retornar como login
+                    await _context.Entry(usuario).Reference(u => u.Tutor).LoadAsync();
+                    var token = GenerateJwtToken(usuario);
+                    var userInfo = _mapper.Map<UserInfo>(usuario);
+
+                    return Ok(new LoginResponseDto
+                    {
+                        Token = token,
+                        Usuario = userInfo
+                    });
+                }
+                catch (Exception ex)
+                {
+                    await transaction.RollbackAsync();
+                    return StatusCode(500, $"Erro ao criar conta: {ex.Message}");
+                }
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Erro interno: {ex.Message}");
+            }
         }
 
-        [HttpPost("seed")]
-        public async Task<IActionResult> Seed()
+        private string GenerateJwtToken(Usuario usuario)
         {
-            if (await _context.Usuarios.AnyAsync()) return Ok("Usuários já existem.");
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var key = Encoding.ASCII.GetBytes(_configuration["Jwt:Key"] ?? throw new InvalidOperationException("JWT Key not configured."));
 
-            // Criar Admin
-            var adminUser = new Usuario
+            var claims = new List<Claim>
             {
-                Email = "admin@sigapet.com",
-                PasswordHash = BCrypt.Net.BCrypt.HashPassword("admin123"),
-                TipoUsuario = "Admin",
-                Ativo = true
-            };
-            _context.Usuarios.Add(adminUser);
-            await _context.SaveChangesAsync();
-
-            // Criar um Funcionario vinculado a um Usuario
-            var funcUser = new Usuario
-            {
-                Email = "func@sigapet.com",
-                PasswordHash = BCrypt.Net.BCrypt.HashPassword("func123"),
-                TipoUsuario = "Funcionario",
-                Ativo = true
-            };
-            _context.Usuarios.Add(funcUser);
-            await _context.SaveChangesAsync();
-
-            var funcionario = new Funcionario
-            {
-                Nome = "João Funcionário",
-                Cargo = "Atendente",
-                UsuarioId = funcUser.UsuarioId
-            };
-            _context.Funcionarios.Add(funcionario);
-
-            await _context.SaveChangesAsync();
-            return Ok("Seed realizado com sucesso!");
-        }
-
-        private string GenerateJwtToken(Usuario user)
-        {
-            var key = Encoding.ASCII.GetBytes(_configuration["Jwt:Key"] ?? "MinhaChaveSecretaSuperSegura123!");
-            var claims = new[]
-            {
-                new Claim(JwtRegisteredClaimNames.Sub, user.Email),
-                new Claim("id", user.UsuarioId.ToString()),
-                new Claim("role", user.TipoUsuario)
+                new Claim(ClaimTypes.NameIdentifier, usuario.UsuarioId.ToString()),
+                new Claim(ClaimTypes.Email, usuario.Email),
+                // A role é o 'Cargo' para funcionários ou 'TipoUsuario' para outros (ex: Tutor)
+                new Claim(ClaimTypes.Role, usuario.Funcionario?.Cargo ?? usuario.TipoUsuario)
             };
 
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(claims),
-                Expires = DateTime.UtcNow.AddHours(8),
+                Expires = DateTime.UtcNow.AddHours(Convert.ToDouble(_configuration["Jwt:ExpireHours"] ?? "8")),
+                Issuer = _configuration["Jwt:Issuer"],
+                Audience = _configuration["Jwt:Audience"],
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             };
-            var tokenHandler = new JwtSecurityTokenHandler();
+
             var token = tokenHandler.CreateToken(tokenDescriptor);
             return tokenHandler.WriteToken(token);
         }

@@ -5,6 +5,9 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>SIGA_PET</RootNamespace>
+    <!-- Gerar arquivo XML com comentários para o Swagger -->
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\SIGA-PET.xml</DocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>

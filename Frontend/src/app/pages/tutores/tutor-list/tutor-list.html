@@ -40,13 +40,13 @@
           </thead>
           <tbody>
             <tr *ngFor="let tutor of tutoresFiltrados()">
-              <th scope="row">{{ tutor.id }}</th>
+              <th scope="row">{{ tutor.tutorId }}</th>
               <td>{{ tutor.nome }}</td>
               <td>{{ tutor.email }}</td>
               <td>{{ tutor.telefone }}</td>
-              <td class="text-end">
-                <a routerLink="/tutores/editar/{{tutor.id}}" class="btn btn-sm btn-outline-info me-2">Editar</a>
-                <button class="btn btn-sm btn-outline-danger" (click)="excluir(tutor.id)">Excluir</button>
+              <td>
+                <a routerLink="/tutores/editar/{{tutor.tutorId}}" class="btn btn-sm btn-outline-primary me-2">Editar</a>
+                <button class="btn btn-sm btn-outline-danger" (click)="excluir(tutor.tutorId)">Excluir</button>
               </td>
             </tr>
           </tbody>

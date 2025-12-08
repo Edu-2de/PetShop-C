@@ -49,7 +49,7 @@ export class PetListComponent implements OnInit {
       pets: this.petService.listar(),
       tutores: this.tutorService.listar()
     }).subscribe(({ pets, tutores }) => {
-      const tutoresMap = new Map(tutores.map(t => [t.id, t]));
+      const tutoresMap = new Map(tutores.map(t => [t.tutorId, t]));
       const petsComTutor: PetComTutor[] = pets.map(pet => ({
         ...pet,
         tutor: tutoresMap.get(pet.tutorId)

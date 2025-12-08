@@ -23,7 +23,7 @@
 
         <div class="mb-auto">
           <span class="badge bg-primary-subtle text-primary mb-2 px-3 py-2 rounded-pill">
-            {{ produto()?.categoria || 'Geral' }}
+            {{ produto()?.nomeCategoria || 'Geral' }}
           </span>
           <h1 class="fw-bold text-dark mb-3">{{ produto()?.nome }}</h1>
 
@@ -49,9 +49,18 @@
           </div>
         </div>
 
-        <div class="d-grid gap-3">
+        <div class="d-grid gap-2">
+          <!-- Botão Comprar Agora -->
+          <button class="btn btn-success btn-lg rounded-pill py-3 fw-bold shadow-sm"
+                  (click)="comprarAgora()"
+                  [disabled]="produto()!.quantidadeEstoque === 0 || processandoCompra">
+            <i class="bi bi-lightning-charge me-2"></i> 
+            {{ processandoCompra ? 'Processando...' : 'Comprar Agora' }}
+          </button>
+
+          <!-- Botão Adicionar ao Carrinho -->
           <button class="btn btn-primary btn-lg rounded-pill py-3 fw-bold shadow-sm"
-                  (click)="comprar()"
+                  (click)="adicionarAoCarrinho()"
                   [disabled]="produto()!.quantidadeEstoque === 0">
             <i class="bi bi-cart-plus me-2"></i> Adicionar ao Carrinho
           </button>

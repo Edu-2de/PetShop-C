@@ -52,21 +52,24 @@ export class ServicoPetListComponent implements OnInit {
     this.termoBusca.set(target.value);
   }
 
-  excluir(id: number | undefined): void {
-    if (id === undefined) return;
-    if (confirm('Deseja realmente excluir este serviço?')) {
-      this.servicoPetService.deletar(id).subscribe(() => {
-        this.servicos.update(servicosAtuais => servicosAtuais.filter(s => s.id !== id));
-      });
+  excluir(id: number): void {
+    if (!confirm('Deseja realmente excluir este serviço?')) {
+      return;
     }
+
+    this.servicoPetService.deletar(id).subscribe({
+      next: () => {
+        this.servicos.update(servicosAtuais => servicosAtuais.filter(s => s.servicoId !== id));
+        alert('Serviço excluído com sucesso!');
+      },
+      error: (err) => {
+        console.error('Erro ao excluir serviço:', err);
+        alert('Erro ao excluir serviço. Tente novamente.');
+      }
+    });
   }
 
   agendar(servico: ServicoPet): void {
-    if (!this.authService.isAuthenticated()) {
-      this.router.navigate(['/login']);
-      return;
-    }
-    // Redireciona para o formulário de agendamento (você pode passar o ID do serviço via queryParams se quiser pré-selecionar)
-    this.router.navigate(['/agenda/novo'], { queryParams: { servicoId: servico.id } });
+    this.router.navigate(['/agenda/novo'], { queryParams: { servicoId: servico.servicoId } });
   }
 }

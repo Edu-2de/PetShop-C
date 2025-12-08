@@ -9,7 +9,12 @@ export interface Pet {
   observacoes?: string;
   tutorId: number;
   tutorNome?: string;
-  
+  tutor?: { // Adicionando o objeto tutor opcional
+    tutorId: number;
+    usuarioId?: number;
+    nome: string;
+  };
+
   // Aliases para compatibilidade com componentes antigos
   id?: number;
   nascimento?: Date;

@@ -20,170 +20,229 @@ namespace SIGA_PET.Controllers
             _mapper = mapper;
         }
 
-        // GET: api/Servico
+        /// <summary>
+        /// Lista todos os serviços
+        /// </summary>
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ServicoDto>>> GetServicos()
         {
-            try
-            {
-                var servicos = await _context.Servicos
-                    .AsNoTracking()
-                    .ToListAsync();
-
-                var servicosDto = _mapper.Map<IEnumerable<ServicoDto>>(servicos);
-                return Ok(servicosDto);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Erro interno: {ex.Message}");
-            }
-        }
-
-        // GET: api/Servico/search?name=...
-        [HttpGet("search")]
-        public async Task<ActionResult<IEnumerable<ServicoDto>>> SearchServicos([FromQuery] string name)
-        {
-            if (string.IsNullOrWhiteSpace(name))
-            {
-                return BadRequest("O nome para busca não pode ser vazio.");
-            }
-
             var servicos = await _context.Servicos
+                .Include(s => s.ServicoFuncionarios)
+                    .ThenInclude(sf => sf.Funcionario)
+                .Include(s => s.FuncionarioResponsavel)
                 .AsNoTracking()
-                .Where(s => s.Nome.Contains(name))
                 .ToListAsync();
 
-            if (!servicos.Any())
+            var servicosDto = servicos.Select(s =>
             {
-                return NotFound("Nenhum serviço encontrado com o nome fornecido.");
-            }
+                var dto = _mapper.Map<ServicoDto>(s);
+                
+                // NOVO: Buscar funcionários aptos baseado nos cargos
+                if (!string.IsNullOrEmpty(s.CargosResponsaveis))
+                {
+                    var cargos = s.CargosResponsaveis.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                                                   .Select(c => c.Trim())
+                                                   .ToList();
+                    
+                    var funcionariosAptos = _context.Funcionarios
+                        .Where(f => f.Ativo && cargos.Contains(f.Cargo))
+                        .ToList();
+                        
+                    dto.FuncionariosAptos = _mapper.Map<List<FuncionarioSimplificadoDto>>(funcionariosAptos);
+                }
+                
+                return dto;
+            }).ToList();
 
-            var servicosDto = _mapper.Map<IEnumerable<ServicoDto>>(servicos);
             return Ok(servicosDto);
         }
 
-        // GET: api/Servico/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<ServicoDto>> GetServico(int id)
-        {
-            try
-            {
-                var servico = await _context.Servicos.FindAsync(id);
-
-                if (servico == null)
-                {
-                    return NotFound($"Serviço com ID {id} não encontrado.");
-                }
-
-                var servicoDto = _mapper.Map<ServicoDto>(servico);
-                return Ok(servicoDto);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Erro interno: {ex.Message}");
-            }
-        }
-
-        // GET: api/Servico/ativos
+        /// <summary>
+        /// Lista apenas serviços ativos
+        /// </summary>
         [HttpGet("ativos")]
         public async Task<ActionResult<IEnumerable<ServicoDto>>> GetServicosAtivos()
         {
-            try
+            var servicos = await _context.Servicos
+                .Where(s => s.Ativo)
+                .Include(s => s.ServicoFuncionarios)
+                    .ThenInclude(sf => sf.Funcionario)
+                .Include(s => s.FuncionarioResponsavel)
+                .AsNoTracking()
+                .ToListAsync();
+
+            var servicosDto = servicos.Select(s =>
             {
-                var servicos = await _context.Servicos
-                    .Where(s => s.Ativo)
-                    .AsNoTracking()
+                var dto = _mapper.Map<ServicoDto>(s);
+                
+                // NOVO: Buscar funcionários aptos baseado nos cargos
+                if (!string.IsNullOrEmpty(s.CargosResponsaveis))
+                {
+                    var cargos = s.CargosResponsaveis.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                                                   .Select(c => c.Trim())
+                                                   .ToList();
+                    
+                    var funcionariosAptos = _context.Funcionarios
+                        .Where(f => f.Ativo && cargos.Contains(f.Cargo))
+                        .ToList();
+                        
+                    dto.FuncionariosAptos = _mapper.Map<List<FuncionarioSimplificadoDto>>(funcionariosAptos);
+                }
+                
+                return dto;
+            }).ToList();
+
+            return Ok(servicosDto);
+        }
+
+        /// <summary>
+        /// NOVO: Busca funcionários aptos para um serviço específico baseado nos cargos
+        /// </summary>
+        [HttpGet("{id}/funcionarios-aptos")]
+        public async Task<ActionResult<IEnumerable<FuncionarioSimplificadoDto>>> GetFuncionariosAptos(int id)
+        {
+            var servico = await _context.Servicos
+                .AsNoTracking()
+                .FirstOrDefaultAsync(s => s.ServicoId == id);
+
+            if (servico == null)
+            {
+                return NotFound("Serviço não encontrado.");
+            }
+
+            List<Funcionario> funcionariosAptos = new List<Funcionario>();
+
+            if (!string.IsNullOrEmpty(servico.CargosResponsaveis))
+            {
+                var cargos = servico.CargosResponsaveis.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                                                     .Select(c => c.Trim())
+                                                     .ToList();
+                
+                funcionariosAptos = await _context.Funcionarios
+                    .Where(f => f.Ativo && cargos.Contains(f.Cargo))
                     .ToListAsync();
+            }
 
-                var servicosDto = _mapper.Map<IEnumerable<ServicoDto>>(servicos);
-                return Ok(servicosDto);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Erro interno: {ex.Message}");
-            }
+            return Ok(_mapper.Map<IEnumerable<FuncionarioSimplificadoDto>>(funcionariosAptos));
         }
 
-        // POST: api/Servico
+        /// <summary>
+        /// NOVO: Lista todos os cargos disponíveis
+        /// </summary>
+        [HttpGet("cargos-disponiveis")]
+        public async Task<ActionResult<IEnumerable<string>>> GetCargosDisponiveis()
+        {
+            var cargos = await _context.Funcionarios
+                .Where(f => f.Ativo)
+                .Select(f => f.Cargo)
+                .Distinct()
+                .OrderBy(c => c)
+                .ToListAsync();
+
+            return Ok(cargos);
+        }
+
+        [HttpGet("{id}")]
+        public async Task<ActionResult<ServicoDto>> GetServico(int id)
+        {
+            var servico = await _context.Servicos
+                .Include(s => s.ServicoFuncionarios)
+                    .ThenInclude(sf => sf.Funcionario)
+                .Include(s => s.FuncionarioResponsavel)
+                .FirstOrDefaultAsync(s => s.ServicoId == id);
+
+            if (servico == null)
+            {
+                return NotFound("Serviço não encontrado.");
+            }
+
+            var dto = _mapper.Map<ServicoDto>(servico);
+            
+            // NOVO: Buscar funcionários aptos baseado nos cargos
+            if (!string.IsNullOrEmpty(servico.CargosResponsaveis))
+            {
+                var cargos = servico.CargosResponsaveis.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                                                     .Select(c => c.Trim())
+                                                     .ToList();
+                
+                var funcionariosAptos = await _context.Funcionarios
+                    .Where(f => f.Ativo && cargos.Contains(f.Cargo))
+                    .ToListAsync();
+                    
+                dto.FuncionariosAptos = _mapper.Map<List<FuncionarioSimplificadoDto>>(funcionariosAptos);
+            }
+
+            return Ok(dto);
+        }
+
         [HttpPost]
-        public async Task<ActionResult<ServicoDto>> CreateServico([FromBody] CreateServicoDto createServicoDto)
+        public async Task<ActionResult<ServicoDto>> CreateServico([FromBody] CreateServicoDto dto)
         {
-            try
+            if (!ModelState.IsValid)
             {
-                if (!ModelState.IsValid)
-                {
-                    return BadRequest(ModelState);
-                }
-
-                var servico = _mapper.Map<Servico>(createServicoDto);
-
-                _context.Servicos.Add(servico);
-                await _context.SaveChangesAsync();
-
-                var servicoDto = _mapper.Map<ServicoDto>(servico);
-                return CreatedAtAction(nameof(GetServico), new { id = servico.ServicoId }, servicoDto);
+                return BadRequest(ModelState);
             }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Erro interno: {ex.Message}");
-            }
+
+            var servico = _mapper.Map<Servico>(dto);
+
+            _context.Servicos.Add(servico);
+            await _context.SaveChangesAsync();
+
+            var servicoDto = _mapper.Map<ServicoDto>(servico);
+            return CreatedAtAction(nameof(GetServico), new { id = servico.ServicoId }, servicoDto);
         }
 
-        // PUT: api/Servico/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateServico(int id, [FromBody] UpdateServicoDto updateServicoDto)
+        public async Task<IActionResult> UpdateServico(int id, [FromBody] UpdateServicoDto dto)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var servico = await _context.Servicos
+                .Include(s => s.ServicoFuncionarios)
+                .FirstOrDefaultAsync(s => s.ServicoId == id);
+
+            if (servico == null)
+            {
+                return NotFound("Serviço não encontrado.");
+            }
+
+            _mapper.Map(dto, servico);
+
             try
             {
-                if (!ModelState.IsValid)
-                {
-                    return BadRequest(ModelState);
-                }
-
-                var servico = await _context.Servicos.FindAsync(id);
-                if (servico == null)
-                {
-                    return NotFound($"Serviço com ID {id} não encontrado.");
-                }
-
-                _mapper.Map(updateServicoDto, servico);
-
-                _context.Entry(servico).State = EntityState.Modified;
                 await _context.SaveChangesAsync();
-
-                return NoContent();
             }
             catch (DbUpdateConcurrencyException)
             {
-                return Conflict("Erro de concorrência. O registro foi modificado por outro usuário.");
+                if (!_context.Servicos.Any(e => e.ServicoId == id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
             }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Erro interno: {ex.Message}");
-            }
+
+            return NoContent();
         }
 
-        // DELETE: api/Servico/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteServico(int id)
         {
-            try
+            var servico = await _context.Servicos.FindAsync(id);
+            if (servico == null)
             {
-                var servico = await _context.Servicos.FindAsync(id);
-                if (servico == null)
-                {
-                    return NotFound($"Serviço com ID {id} não encontrado.");
-                }
-
-                _context.Servicos.Remove(servico);
-                await _context.SaveChangesAsync();
-
-                return NoContent();
+                return NotFound("Serviço não encontrado.");
             }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Erro interno: {ex.Message}");
-            }
+
+            _context.Servicos.Remove(servico);
+            await _context.SaveChangesAsync();
+
+            return NoContent();
         }
     }
 }

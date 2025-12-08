@@ -36,6 +36,59 @@ namespace SIGA_PET.Controllers
             return Ok(_mapper.Map<CategoriaDto>(categoria));
         }
 
-        // Pode adicionar PUT e DELETE conforme necessidade
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateCategoria(int id, [FromBody] CategoriaDto categoriaDto)
+        {
+            if (id != categoriaDto.CategoriaId)
+            {
+                return BadRequest("ID da categoria não corresponde.");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var categoria = await _context.Categorias.FindAsync(id);
+            if (categoria == null)
+            {
+                return NotFound("Categoria não encontrada.");
+            }
+
+            _mapper.Map(categoriaDto, categoria);
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!_context.Categorias.Any(e => e.CategoriaId == id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+
+            return NoContent();
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteCategoria(int id)
+        {
+            var categoria = await _context.Categorias.FindAsync(id);
+            if (categoria == null)
+            {
+                return NotFound("Categoria não encontrada.");
+            }
+
+            _context.Categorias.Remove(categoria);
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+        }
     }
 }

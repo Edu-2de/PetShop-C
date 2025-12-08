@@ -27,6 +27,8 @@ export class AgendaListComponent implements OnInit {
   // Tornamos público para o HTML acessar
   agendamentos = signal<AgendamentoCompleto[]>([]);
   termoBusca = signal<string>('');
+  carregando = signal<boolean>(true);
+  erroMsg = signal<string>('');
 
   public authService = inject(AuthService);
   private router = inject(Router);
@@ -47,38 +49,50 @@ export class AgendaListComponent implements OnInit {
   });
 
   ngOnInit(): void {
-    // Removemos qualquer redirecionamento forçado aqui
     this.carregarDados();
   }
 
   carregarDados(): void {
     const user = this.authService.getCurrentUser()();
-    let obsAgendamentos;
+    this.carregando.set(true);
+    this.erroMsg.set('');
 
-    // LÓGICA PRINCIPAL:
-    if (this.authService.isAdmin()) {
-      // Admin vê tudo
-      obsAgendamentos = this.agendaService.listar();
-    } else {
-      // Tutor vê apenas os seus
-      obsAgendamentos = this.agendaService.buscarPorTutor(user?.id || 0);
+    if (!user || !user.usuarioId) {
+      this.erroMsg.set('Usuário não está logado ou não possui ID.');
+      this.carregando.set(false);
+      return;
     }
 
+    // Se for admin ou funcionário, busca todos. Senão, busca por usuário.
+    const agendamentos$ = (this.authService.isAdmin() || this.authService.isFuncionario())
+      ? this.agendaService.listar()
+      : this.agendaService.buscarPorUsuario(user.usuarioId);
+
     forkJoin({
-      agendamentos: obsAgendamentos,
+      agendamentos: agendamentos$,
+      // Carregar todos os pets e serviços para mapeamento, independentemente do usuário.
+      // O filtro principal já foi feito no backend.
       pets: this.petService.listar(),
       servicos: this.servicoPetService.listar()
-    }).subscribe(({ agendamentos, pets, servicos }) => {
-      const petsMap = new Map(pets.map(p => [p.id, p]));
-      const servicosMap = new Map(servicos.map(s => [s.id, s]));
+    }).subscribe({
+      next: ({ agendamentos, pets, servicos }) => {
+        const petsMap = new Map(pets.map(p => [p.animalId, p]));
+        const servicosMap = new Map(servicos.map(s => [s.servicoId, s]));
 
-      const completos = agendamentos.map(agenda => ({
-        ...agenda,
-        pet: petsMap.get(agenda.animalId),
-        servico: servicosMap.get(agenda.servicoId)
-      }));
+        const agendamentosCompletos = agendamentos.map(agenda => ({
+          ...agenda,
+          pet: petsMap.get(agenda.animalId),
+          servico: servicosMap.get(agenda.servicoId)
+        }));
 
-      this.agendamentos.set(completos);
+        this.agendamentos.set(agendamentosCompletos);
+        this.carregando.set(false);
+      },
+      error: (error) => {
+        console.error('❌ Erro ao carregar agendamentos:', error);
+        this.erroMsg.set('Erro ao carregar agendamentos. Tente novamente.');
+        this.carregando.set(false);
+      }
     });
   }
 
@@ -90,16 +104,29 @@ export class AgendaListComponent implements OnInit {
   cancelar(agenda: AgendamentoCompleto) {
     if (!confirm('Deseja realmente cancelar este agendamento?')) return;
 
+    const idAgendamento = agenda.agendamentoId || agenda.id;
+    if (!idAgendamento) {
+      alert('Erro: ID do agendamento não encontrado.');
+      return;
+    }
+
     // Atualiza status para Cancelado
     const agendaAtualizada = { ...agenda, status: 'Cancelado' };
 
-    // Usa o update para mudar o status (não deleta o registro histórico)
-    this.agendaService.atualizar(agenda.id!, agendaAtualizada).subscribe({
+    this.agendaService.atualizar(idAgendamento, agenda Atualizada).subscribe({
       next: () => {
         alert('Agendamento cancelado.');
         this.carregarDados();
       },
-      error: () => alert('Erro ao cancelar.')
+      error: (err) => {
+        console.error('Erro ao cancelar agendamento:', err);
+        alert('Erro ao cancelar agendamento. Tente novamente.');
+      }
     });
+  }
+
+  // Método para recarregar dados
+  recarregar(): void {
+    this.carregarDados();
   }
 }

@@ -11,6 +11,8 @@ import { PetService } from '../../service/pets/pet.service';
 import { ServicoPet } from '../../model/servico-pet.model';
 import { ServicoPetService } from '../../service/servico-pet/servico-pet';
 import { AuthService } from '../../service/auth/auth.service';
+import { FuncionarioService, Funcionario } from '../../service/funcionarios/funcionario.service';
+import { TutorService } from '../../service/tutores/tutor.service';
 import { switchMap, of, Observable } from 'rxjs';
 
 @Component({
@@ -24,15 +26,24 @@ export class AgendaFormComponent implements OnInit {
   private agendaService = inject(AgendaService);
   private petService = inject(PetService);
   private servicoPetService = inject(ServicoPetService);
+  private funcionarioService = inject(FuncionarioService);
+  private tutorService = inject(TutorService);
   public authService = inject(AuthService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
 
-  agendamento: Partial<Agenda> = { dataHora: new Date(), status: 'Pendente' };
+  agendamento: Partial<Agenda> = { status: 'Pendente' };
   novoPet: Partial<Pet> = { nome: '', especie: 'Cão', raca: '', sexo: 'Macho' };
+
+  // Campos separados para data e hora
+  dataSelecionada: string = '';
+  horaSelecionada: string = '';
 
   pets: Pet[] = [];
   servicos: ServicoPet[] = [];
+  funcionarios: Funcionario[] = [];
+  funcionariosAptos: any[] = []; // NOVO: Funcionários específicos para o serviço
+
   isEdit = false;
   titulo = 'Novo Agendamento';
   erroMsg: string = '';
@@ -40,20 +51,37 @@ export class AgendaFormComponent implements OnInit {
   isCliente = false;
   precisaCadastrarPet = false;
   tutorIdLogado: number = 0;
+  servicoSelecionado?: ServicoPet;
+
+  // Horários disponíveis (de 8h às 18h, intervalos de 30min)
+  horariosDisponiveis: string[] = [];
 
   ngOnInit(): void {
+    this.gerarHorariosDisponiveis();
     this.carregarServicos();
+    this.carregarFuncionarios();
 
     const userSignal = this.authService.getCurrentUser();
     const user = userSignal();
 
+    console.log('Usuário logado:', user); // DEBUG
+
     this.isCliente = !this.authService.isAdmin();
 
     if (this.isCliente && user) {
-      this.tutorIdLogado = user.id || 0;
-      this.carregarPetsDoTutor(this.tutorIdLogado);
-      // CORREÇÃO: "Agendado" não existe no Enum do Backend. Usar "Pendente".
-      this.agendamento.status = 'Pendente'; 
+      // CORREÇÃO: Se usuário não tem tutorId, permitir que ele se torne tutor ao cadastrar pet
+      this.tutorIdLogado = user.tutorId || 0;
+      console.log('TutorId logado:', this.tutorIdLogado); // DEBUG
+      
+      if (this.tutorIdLogado > 0) {
+        this.carregarPetsDoTutor(this.tutorIdLogado);
+      } else {
+        // NOVO: Se não é tutor, permitir cadastro de pet (que criará o tutor automaticamente)
+        console.log('Usuário não é tutor ainda. Permitindo cadastro de pet para se tornar tutor.');
+        this.pets = [];
+        this.precisaCadastrarPet = true; // Força cadastro de pet para virar tutor
+      }
+      this.agendamento.status = 'Pendente';
     } else {
       this.carregarTodosPets();
     }
@@ -64,59 +92,163 @@ export class AgendaFormComponent implements OnInit {
       this.titulo = 'Editar Agendamento';
       this.agendaService.buscarPorId(Number(id)).subscribe(data => {
         this.agendamento = data;
+        if (this.agendamento.dataHora) {
+          const dataHora = new Date(this.agendamento.dataHora);
+          this.dataSelecionada = dataHora.toISOString().split('T')[0];
+          this.horaSelecionada = dataHora.toTimeString().substring(0, 5);
+        }
+        // Se estiver editando e já tiver serviço, carregar funcionários aptos
+        if (this.agendamento.servicoId) {
+          this.carregarFuncionariosAptos(this.agendamento.servicoId);
+        }
       });
     }
+
+    // Definir data mínima como hoje
+    const hoje = new Date();
+    this.dataSelecionada = hoje.toISOString().split('T')[0];
 
     this.route.queryParams.subscribe(params => {
       if (params['servicoId']) {
         this.agendamento.servicoId = Number(params['servicoId']);
+        this.onServicoChange();
       }
     });
   }
 
-  formatarDataParaInput(data: Date | string | undefined): string {
-    if (!data) return '';
-    const d = new Date(data);
-    d.setSeconds(0, 0); // Remove segundos/ms visuais
-
-    const offset = d.getTimezoneOffset() * 60000;
-    const adjustedDate = new Date(d.getTime() - offset);
-    return adjustedDate.toISOString().slice(0, 16);
+  gerarHorariosDisponiveis(): void {
+    this.horariosDisponiveis = [];
+    for (let hora = 8; hora <= 17; hora++) {
+      this.horariosDisponiveis.push(`${hora.toString().padStart(2, '0')}:00`);
+      this.horariosDisponiveis.push(`${hora.toString().padStart(2, '0')}:30`);
+    }
+    // Último horário às 18:00
+    this.horariosDisponiveis.push('18:00');
   }
 
-  // Método que recebe a mudança do input
-  atualizarData(valorInput: string) {
-    if (valorInput) {
-      const dataSelecionada = new Date(valorInput);
+  onServicoChange(): void {
+    if (this.agendamento.servicoId) {
+      this.servicoSelecionado = this.servicos.find(s => s.servicoId === this.agendamento.servicoId);
+      this.carregarFuncionariosAptos(this.agendamento.servicoId);
+      // Reset funcionário selecionado quando troca serviço
+      this.agendamento.funcionarioId = undefined;
+    }
+  }
 
-      // LÓGICA DE ARREDONDAMENTO (SNAP) PARA 30 MINUTOS
-      const minutos = dataSelecionada.getMinutes();
+  // NOVO: Carregar apenas funcionários aptos para o serviço
+  carregarFuncionariosAptos(servicoId: number): void {
+    this.servicoPetService.buscarFuncionariosAptos(servicoId).subscribe({
+      next: (funcionarios) => {
+        this.funcionariosAptos = funcionarios;
 
-      if (minutos !== 0 && minutos !== 30) {
-        // Se não for 00 ou 30, arredonda
-        if (minutos < 15) {
-          dataSelecionada.setMinutes(0);
-        } else if (minutos >= 15 && minutos < 45) {
-          dataSelecionada.setMinutes(30);
-        } else {
-          // Se for 45+, joga para a próxima hora cheia
-          dataSelecionada.setMinutes(0);
-          dataSelecionada.setHours(dataSelecionada.getHours() + 1);
+        // Se só há um funcionário apto, auto-selecionar
+        if (funcionarios.length === 1) {
+          this.agendamento.funcionarioId = funcionarios[0].funcionarioId;
         }
+      },
+      error: (err) => {
+        console.error('Erro ao carregar funcionários aptos:', err);
+        this.funcionariosAptos = [];
+      }
+    });
+  }
+
+  atualizarDataHora(): void {
+    if (this.dataSelecionada && this.horaSelecionada) {
+      const dataHora = new Date(`${this.dataSelecionada}T${this.horaSelecionada}:00`);
+
+      // VALIDAÇÃO: Verificar se a data/hora não é no passado
+      const agora = new Date();
+      if (dataHora <= agora) {
+        this.erroMsg = '❌ Não é possível agendar para uma data/hora que já passou!';
+        return;
       }
 
-      // Garante segundos zerados
-      dataSelecionada.setSeconds(0, 0);
+      // VALIDAÇÃO: Verificar se é domingo
+      if (dataHora.getDay() === 0) { // 0 = Domingo
+        this.erroMsg = '❌ Não atendemos aos domingos. Por favor, escolha outro dia da semana.';
+        return;
+      }
 
-      // Atualiza o modelo
-      this.agendamento.data = dataSelecionada;
+      // VALIDAÇÃO: Verificar horário de funcionamento (8:00 às 18:00 inclusive) - CORRIGIDO
+      const hora = dataHora.getHours();
+      const minutos = dataHora.getMinutes();
+      
+      // Corrige: aceita de 8:00 até 18:00 (inclusive)
+      if (hora < 8 || hora > 18) {
+        this.erroMsg = '❌ Atendemos apenas das 8:00 às 18:00. Por favor, escolha um horário dentro deste intervalo.';
+        return;
+      }
+
+      // Se passou por todas as validações, limpar erro e atualizar
+      this.erroMsg = '';
+      this.agendamento.dataHora = dataHora;
+    }
+  }
+
+  // NOVO: Método para validar data selecionada
+  onDataChange(): void {
+    if (this.dataSelecionada) {
+      const dataSelecionada = new Date(this.dataSelecionada);
+      const hoje = new Date();
+      hoje.setHours(0, 0, 0, 0); // Zerar horas para comparar apenas a data
+
+      if (dataSelecionada < hoje) {
+        this.erroMsg = '❌ Não é possível selecionar uma data que já passou!';
+        this.dataSelecionada = hoje.toISOString().split('T')[0]; // Reset para hoje
+        return;
+      }
+
+      if (dataSelecionada.getDay() === 0) { // Domingo
+        this.erroMsg = '❌ Não atendemos aos domingos. Por favor, escolha outro dia.';
+        return;
+      }
+
+      // Verificar se não é muito no futuro (6 meses)
+      const seiseMesesFuture = new Date();
+      seiseMesesFuture.setMonth(seiseMesesFuture.getMonth() + 6);
+      if (dataSelecionada > seiseMesesFuture) {
+        this.erroMsg = '❌ Não é possível agendar com mais de 6 meses de antecedência.';
+        return;
+      }
+
+      this.erroMsg = '';
+      this.atualizarDataHora();
+    }
+  }
+
+  // NOVO: Método para validar hora selecionada - CORRIGIDO
+  onHoraChange(): void {
+    if (this.horaSelecionada) {
+      const [horas, minutos] = this.horaSelecionada.split(':').map(Number);
+
+      // Corrige: aceita de 8:00 até 18:00 (inclusive)
+      if (horas < 8 || horas > 18) {
+        this.erroMsg = '❌ Horário deve estar entre 8:00 e 18:00.';
+        this.horaSelecionada = '08:00'; // Reset para 8:00
+        return;
+      }
+
+      this.erroMsg = '';
+      this.atualizarDataHora();
     }
   }
 
   carregarServicos() {
-    this.servicoPetService.listar().subscribe(data =>
-      this.servicos = data.filter(s => s.ativo)
+    this.servicoPetService.listarAtivos().subscribe(data =>
+      this.servicos = data
     );
+  }
+
+  carregarFuncionarios() {
+    this.funcionarioService.listar().subscribe({
+      next: (data) => {
+        this.funcionarios = data;
+      },
+      error: (err) => {
+        console.error('Erro ao carregar funcionários:', err);
+      }
+    });
   }
 
   carregarTodosPets() {
@@ -138,6 +270,7 @@ export class AgendaFormComponent implements OnInit {
   toggleNovoPet() {
     this.precisaCadastrarPet = !this.precisaCadastrarPet;
     if (this.precisaCadastrarPet) {
+      this.agendamento.animalId = undefined;
       this.agendamento.petid = undefined;
     }
   }
@@ -145,9 +278,19 @@ export class AgendaFormComponent implements OnInit {
   salvar(): void {
     this.erroMsg = '';
 
+    // Executar validações antes de prosseguir
+    if (!this.validarAgendamento()) {
+      return;
+    }
+
+    // Atualizar data/hora antes de salvar
+    this.atualizarDataHora();
+
+    // 🆕 NOVO: Se é cliente E precisa cadastrar pet, usar endpoint completo
     if (this.isCliente && this.precisaCadastrarPet) {
-      this.salvarPetEAgendar();
+      this.salvarAgendamentoCompleto();
     } else {
+      // Fluxo tradicional: já tem pet selecionado
       this.salvarAgendamento();
     }
   }
@@ -158,14 +301,72 @@ export class AgendaFormComponent implements OnInit {
       return;
     }
 
-    this.novoPet.tutorId = this.tutorIdLogado;
+    const user = this.authService.getCurrentUserValue();
+    if (!user) {
+      this.erroMsg = '❌ Erro: Usuário não está logado.';
+      return;
+    }
+
+    console.log('Criando pet para usuário:', user);
+
+    // CORREÇÃO: Se usuário não tem tutorId, vamos criá-lo automaticamente via backend
+    if (this.tutorIdLogado <= 0) {
+      // Primeiro criar o tutor, depois o pet
+      this.criarTutorEPet();
+    } else {
+      // Usuário já é tutor, só criar o pet
+      this.novoPet.tutorId = this.tutorIdLogado;
+      this.criarPetEAgendar();
+    }
+  }
+
+  // NOVO: Criar tutor automaticamente e depois o pet
+  criarTutorEPet() {
+    const user = this.authService.getCurrentUserValue();
+    if (!user) {
+      this.erroMsg = '❌ Erro: Usuário não identificado.';
+      return;
+    }
+
+    // Criar tutor usando dados do usuário
+    const novoTutor = {
+      nome: user.nome,
+      email: user.email,
+      telefone: '', // Usuário pode preencher depois
+      endereco: '', // Usuário pode preencher depois
+      senha: '' // Não precisa, já tem usuário
+    };
+
+    console.log('Criando tutor automaticamente:', novoTutor);
+
+    this.tutorService.criar(novoTutor).subscribe({
+      next: (tutorCriado) => {
+        console.log('Tutor criado:', tutorCriado);
+        this.tutorIdLogado = tutorCriado.tutorId;
+        this.novoPet.tutorId = tutorCriado.tutorId;
+        
+        // Agora criar o pet
+        this.criarPetEAgendar();
+      },
+      error: (err) => {
+        console.error('Erro ao criar tutor:', err);
+        this.erroMsg = '❌ Erro ao criar perfil de tutor. Tente novamente.';
+      }
+    });
+  }
+
+  // NOVO: Método separado para criar pet e agendar
+  criarPetEAgendar() {
+    console.log('Criando pet com dados:', this.novoPet);
 
     this.petService.criar(this.novoPet).pipe(
       switchMap((petCriado) => {
+        console.log('Pet criado:', petCriado);
+        this.agendamento.animalId = petCriado.animalId || petCriado.id;
         this.agendamento.petid = petCriado.animalId || petCriado.id;
 
-        if (this.isEdit && this.agendamento.id) {
-          return this.agendaService.atualizar(this.agendamento.id, this.agendamento as Agenda);
+        if (this.isEdit && this.agendamento.agendamentoId) {
+          return this.agendaService.atualizar(this.agendamento.agendamentoId, this.agendamento as Agenda);
         }
         return this.agendaService.criar(this.agendamento as Agenda);
       })
@@ -181,8 +382,8 @@ export class AgendaFormComponent implements OnInit {
   salvarAgendamento() {
     let operation: Observable<any>;
 
-    if (this.isEdit && this.agendamento.id) {
-      operation = this.agendaService.atualizar(this.agendamento.id, this.agendamento as Agenda);
+    if (this.isEdit && this.agendamento.agendamentoId) {
+      operation = this.agendaService.atualizar(this.agendamento.agendamentoId, this.agendamento as Agenda);
     } else {
       operation = this.agendaService.criar(this.agendamento as Agenda);
     }
@@ -196,6 +397,52 @@ export class AgendaFormComponent implements OnInit {
     });
   }
 
+  // NOVO: Método para criar tutor e animal automaticamente via backend
+  salvarAgendamentoCompleto() {
+    const user = this.authService.getCurrentUserValue();
+    if (!user) {
+      this.erroMsg = '❌ Erro: Usuário não está logado.';
+      return;
+    }
+
+    const agendamentoCompleto = {
+      servicoId: this.agendamento.servicoId,
+      funcionarioId: this.agendamento.funcionarioId,
+      dataHora: this.agendamento.dataHora,
+      status: this.agendamento.status || 'Pendente',
+      observacoes: this.agendamento.observacoes,
+      
+      // Dados do tutor (usar dados do usuário logado)
+      nomeTutor: user.nome,
+      emailTutor: user.email,
+      telefoneTutor: '', // Usuário pode cadastrar depois
+      enderecoTutor: 'A definir', // Usuário pode cadastrar depois
+      
+      // Dados do pet
+      nomeAnimal: this.novoPet.nome,
+      especieAnimal: this.novoPet.especie,
+      racaAnimal: this.novoPet.raca || 'SRD',
+      sexoAnimal: this.novoPet.sexo,
+      dataNascimentoAnimal: this.novoPet.dataNascimento,
+      pelagemAnimal: this.novoPet.pelagem || 'Curta',
+      observacoesAnimal: this.novoPet.observacoes
+    };
+
+    console.log('Criando agendamento completo:', agendamentoCompleto);
+
+    this.agendaService.criarCompleto(agendamentoCompleto).subscribe({
+      next: (agendamentoCriado) => {
+        console.log('Agendamento completo criado:', agendamentoCriado);
+        alert('✅ Agendamento realizado com sucesso!\n\n🐾 Seu pet foi cadastrado automaticamente.\n👤 Agora você pode fazer novos agendamentos!');
+        this.router.navigate(['/agenda']);
+      },
+      error: (err) => {
+        console.error('Erro ao criar agendamento completo:', err);
+        this.tratarErro(err);
+      }
+    });
+  }
+
   tratarErro(err: any) {
     console.error('Erro:', err);
     if (err.error && typeof err.error === 'string') {
@@ -203,5 +450,65 @@ export class AgendaFormComponent implements OnInit {
     } else {
       this.erroMsg = 'Erro ao salvar. Verifique se todos os campos estão preenchidos corretamente.';
     }
+  }
+
+  // Métodos auxiliares para validação de datas
+  getMinDate(): string {
+    const hoje = new Date();
+    return hoje.toISOString().split('T')[0];
+  }
+
+  getMaxDate(): string {
+    const seisMesesFuture = new Date();
+    seisMesesFuture.setMonth(seisMesesFuture.getMonth() + 6);
+    return seisMesesFuture.toISOString().split('T')[0];
+  }
+
+  // NOVO: Validação mais robusta no método salvar - CORRIGIDA
+  validarAgendamento(): boolean {
+    // Validar data/hora
+    if (!this.dataSelecionada || !this.horaSelecionada) {
+      this.erroMsg = '❌ Por favor, selecione data e horário para o agendamento.';
+      return false;
+    }
+
+    const dataHora = new Date(`${this.dataSelecionada}T${this.horaSelecionada}:00`);
+    const agora = new Date();
+
+    if (dataHora <= agora) {
+      this.erroMsg = '❌ Não é possível agendar para uma data/hora que já passou!';
+      return false;
+    }
+
+    if (dataHora.getDay() === 0) {
+      this.erroMsg = '❌ Não atendemos aos domingos. Por favor, escolha outro dia.';
+      return false;
+    }
+
+    // Corrige validação de horário
+    const hora = dataHora.getHours();
+    if (hora < 8 || hora > 18) {
+      this.erroMsg = '❌ Horário deve estar entre 8:00 e 18:00.';
+      return false;
+    }
+
+    // Validar serviço
+    if (!this.agendamento.servicoId) {
+      this.erroMsg = '❌ Por favor, selecione um serviço.';
+      return false;
+    }
+
+    // Validar pet
+    if (!this.agendamento.animalId && !this.precisaCadastrarPet) {
+      this.erroMsg = '❌ Por favor, selecione um pet ou cadastre um novo.';
+      return false;
+    }
+
+    if (this.precisaCadastrarPet && (!this.novoPet.nome || !this.novoPet.especie)) {
+      this.erroMsg = '❌ Por favor, preencha os dados do novo pet.';
+      return false;
+    }
+
+    return true;
   }
 }

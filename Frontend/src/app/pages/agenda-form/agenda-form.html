@@ -15,7 +15,7 @@
         <i class="bi bi-exclamation-triangle-fill me-2"></i> {{ erroMsg }}
       </div>
 
-      <form (ngSubmit)="salvar()">
+      <form #form="ngForm" (ngSubmit)="salvar()">
 
         <div class="mb-4 border-bottom pb-4">
           <h6 class="fw-bold text-secondary text-uppercase small mb-3">1. Quem será atendido?</h6>
@@ -33,10 +33,13 @@
 
           <div *ngIf="!precisaCadastrarPet">
             <label for="pet" class="form-label">Selecione o Pet</label>
-            <select id="pet" name="pet" class="form-select" [(ngModel)]="agendamento.petid" [required]="!precisaCadastrarPet">
+            <select id="pet" name="pet" class="form-select" [(ngModel)]="agendamento.animalId" #petId="ngModel" [required]="!precisaCadastrarPet">
               <option [ngValue]="undefined" disabled>Selecione...</option>
-              <option *ngFor="let p of pets" [value]="p.id">{{ p.nome }} ({{ p.raca || p.especie }})</option>
+              <option *ngFor="let p of pets" [value]="p.animalId">{{ p.nome }} ({{ p.raca || p.especie }})</option>
             </select>
+            <div *ngIf="petId.invalid && (petId.dirty || petId.touched)" class="text-danger mt-1 small">
+              <div *ngIf="petId.errors?.['required']">É obrigatório selecionar um pet.</div>
+            </div>
             <div *ngIf="pets.length === 0 && !isCliente" class="form-text text-danger">
               Nenhum pet cadastrado.
             </div>
@@ -58,36 +61,113 @@
                 </select>
               </div>
               <div class="col-md-3">
-                <label class="form-label small">Raça</label>
-                <input type="text" class="form-control" [(ngModel)]="novoPet.raca" name="racaPet" placeholder="Ex: Vira-lata">
+                <label class="form-label small">Sexo</label>
+                <select class="form-select" [(ngModel)]="novoPet.sexo" name="sexoPet" required>
+                  <option value="Macho">Macho</option>
+                  <option value="Fêmea">Fêmea</option>
+                </select>
               </div>
             </div>
           </div>
         </div>
 
-        <div class="mb-4">
-          <h6 class="fw-bold text-secondary text-uppercase small mb-3">2. Detalhes do Atendimento</h6>
+        <div class="mb-4 border-bottom pb-4">
+          <h6 class="fw-bold text-secondary text-uppercase small mb-3">2. Serviço e Profissional</h6>
           <div class="row g-3">
-            <div class="col-md-6">
+            <div class="col-md-12">
               <label for="servico" class="form-label">Serviço Desejado</label>
-              <select id="servico" name="servico" class="form-select" [(ngModel)]="agendamento.servicoId" required>
+              <select id="servico" name="servico" class="form-select" 
+                      [(ngModel)]="agendamento.servicoId" 
+                      (ngModelChange)="onServicoChange()"
+                      #servicoId="ngModel" required>
                 <option [ngValue]="undefined" disabled>Escolha o serviço...</option>
-                <option *ngFor="let servico of servicos" [value]="servico.id">
+                <option *ngFor="let servico of servicos" [value]="servico.servicoId">
                   {{ servico.nome }} - {{ servico.preco | currency:'BRL' }}
+                  <span *ngIf="servico.funcionarioResponsavelNome"> (Responsável: {{ servico.funcionarioResponsavelNome }})</span>
                 </option>
               </select>
+              <div *ngIf="servicoId.invalid && (servicoId.dirty || servicoId.touched)" class="text-danger mt-1 small">
+                <div *ngIf="servicoId.errors?.['required']">É obrigatório selecionar um serviço.</div>
+              </div>
             </div>
 
+            <div class="col-md-12" *ngIf="funcionariosAptos.length > 0">
+              <label for="funcionario" class="form-label">
+                Profissional Disponível
+                <span *ngIf="funcionariosAptos.length === 1" class="badge bg-info ms-2">Especialista</span>
+                <span *ngIf="funcionariosAptos.length > 1" class="badge bg-success ms-2">{{ funcionariosAptos.length }} Disponíveis</span>
+              </label>
+              <select id="funcionario" name="funcionario" class="form-select" 
+                      [(ngModel)]="agendamento.funcionarioId"
+                      [disabled]="funcionariosAptos.length === 1">
+                <option [ngValue]="null" *ngIf="funcionariosAptos.length > 1">Escolha o profissional...</option>
+                <option *ngFor="let func of funcionariosAptos" [value]="func.funcionarioId">
+                  {{ func.nome }} - {{ func.cargo }}
+                </option>
+              </select>
+              <small class="form-text text-muted">
+                <span *ngIf="funcionariosAptos.length === 1">
+                  <i class="bi bi-info-circle me-1"></i>Este profissional é especialista neste serviço.
+                </span>
+                <span *ngIf="funcionariosAptos.length > 1">
+                  <i class="bi bi-people me-1"></i>Temos {{ funcionariosAptos.length }} profissionais aptos para este serviço.
+                </span>
+              </small>
+            </div>
+
+            <div class="col-md-12" *ngIf="agendamento.servicoId && funcionariosAptos.length === 0">
+              <div class="alert alert-warning">
+                <i class="bi bi-exclamation-triangle me-2"></i>
+                <strong>Atenção:</strong> Este serviço ainda não possui profissionais cadastrados. 
+                Entre em contato conosco para mais informações.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="mb-4 border-bottom pb-4">
+          <h6 class="fw-bold text-secondary text-uppercase small mb-3">3. Data e Horário</h6>
+          <div class="row g-3">
             <div class="col-md-6">
-              <label for="data" class="form-label">Data e Hora Preferida</label>
-              <input type="datetime-local"
+              <label for="data" class="form-label">Data do Agendamento</label>
+              <input type="date" 
                      class="form-control"
                      id="data"
                      name="data"
-                     [ngModel]="formatarDataParaInput(agendamento.data)"
-                     (ngModelChange)="atualizarData($event)"
-                     step="300"
-                     required>
+                     [(ngModel)]="dataSelecionada"
+                     [min]="getMinDate()"
+                     [max]="getMaxDate()"
+                     (change)="onDataChange()"
+                     required
+                     #dataInput="ngModel">
+              <div *ngIf="dataInput.invalid && (dataInput.dirty || dataInput.touched)" class="text-danger mt-1 small">
+                <div *ngIf="dataInput.errors?.['required']">A data é obrigatória.</div>
+              </div>
+              <small class="form-text text-muted">
+                <i class="bi bi-info-circle me-1"></i>Não atendemos aos domingos
+              </small>
+            </div>
+
+            <div class="col-md-6">
+              <label for="hora" class="form-label">Horário</label>
+              <select class="form-select"
+                      id="hora"
+                      name="hora"
+                      [(ngModel)]="horaSelecionada"
+                      (change)="onHoraChange()"
+                      required
+                      #horaInput="ngModel">
+                <option value="" disabled>Selecione o horário...</option>
+                <option *ngFor="let hora of horariosDisponiveis" [value]="hora">
+                  {{ hora }}
+                </option>
+              </select>
+              <div *ngIf="horaInput.invalid && (horaInput.dirty || horaInput.touched)" class="text-danger mt-1 small">
+                <div *ngIf="horaInput.errors?.['required']">O horário é obrigatório.</div>
+              </div>
+              <small class="form-text text-muted">
+                <i class="bi bi-clock me-1"></i>Horário de funcionamento: 8:00 às 18:00
+              </small>
             </div>
           </div>
         </div>
@@ -97,6 +177,7 @@
           <select id="status" name="status" class="form-select" [(ngModel)]="agendamento.status">
             <option value="Pendente">Pendente</option>
             <option value="Confirmado">Confirmado</option>
+            <option value="EmAndamento">Em Andamento</option>
             <option value="Concluido">Concluído</option>
             <option value="Cancelado">Cancelado</option>
           </select>
@@ -110,9 +191,13 @@
         </div>
 
         <div class="d-flex justify-content-end gap-2">
-          <a routerLink="/" class="btn btn-light border">Cancelar</a>
-          <button type="submit" class="btn btn-primary px-4 fw-bold shadow-sm">
-            <i class="bi bi-check-lg me-1"></i> Confirmar Agendamento
+          <a routerLink="/agenda" class="btn btn-light border">
+            <i class="bi bi-x-lg me-2"></i>
+            Cancelar
+          </a>
+          <button type="submit" class="btn btn-primary px-4 fw-bold shadow-sm" [disabled]="form.invalid">
+            <i class="bi bi-check-lg me-1"></i> 
+            Confirmar Agendamento
           </button>
         </div>
 

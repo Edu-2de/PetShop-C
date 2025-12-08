@@ -15,6 +15,6 @@ namespace SIGA_PET.DTOs
     public class LoginResponseDto
     {
         public string Token { get; set; } = string.Empty;
-        public FuncionarioDto Usuario { get; set; } = new FuncionarioDto(); // Inicializado para evitar warning
+        public UserInfo Usuario { get; set; } = new UserInfo();
     }
 }

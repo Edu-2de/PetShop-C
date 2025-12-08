@@ -109,15 +109,16 @@ namespace SIGA_PET.Controllers
                 var func = await _context.Funcionarios.FindAsync(id);
                 if (func == null) return NotFound("Funcionário não encontrado.");
 
-                // 1. Remove Funcionario
+                // A deleção em cascata configurada no DbContext cuidará de remover o usuário.
                 _context.Funcionarios.Remove(func);
-
-                // 2. Remove Usuario
-                var usuario = await _context.Usuarios.FindAsync(func.UsuarioId);
-                if (usuario != null) _context.Usuarios.Remove(usuario);
 
                 await _context.SaveChangesAsync();
                 return NoContent();
+            }
+            catch (DbUpdateException ex)
+            {
+                // Captura exceções de restrição de chave estrangeira
+                return StatusCode(500, $"Erro ao deletar: O funcionário pode estar associado a outros registros (ex: agendamentos, vendas). Detalhes: {ex.InnerException?.Message}");
             }
             catch (Exception ex)
             {
