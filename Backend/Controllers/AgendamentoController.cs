@@ -180,19 +180,20 @@ namespace SIGA_PET.Controllers
         }
 
         /// <summary>
-        /// ? Criar novo agendamento
+        /// <summary>
+        /// Criar novo agendamento
         /// </summary>
         /// <param name="createAgendamentoDto">Dados do agendamento</param>
         /// <remarks>
         /// Cria um novo agendamento no sistema.
         /// 
-        /// **Valida��es aplicadas:**
-        /// - Data e hora n�o podem ser no passado
-        /// - Funcion�rio deve estar dispon�vel no hor�rio
+        /// **Validações aplicadas:**
+        /// - Data e hora não podem ser no passado
+        /// - Funcionário deve estar disponível no horário
         /// - Animal deve existir e estar ativo
-        /// - Servi�o deve estar ativo
+        /// - Serviço deve estar ativo
         /// 
-        /// **Exemplo de requisi��o:**
+        /// **Exemplo de requisição:**
         /// ```json
         /// {
         ///   "animalId": 1,
@@ -204,8 +205,8 @@ namespace SIGA_PET.Controllers
         /// ```
         /// </remarks>
         /// <response code="201">Agendamento criado com sucesso</response>
-        /// <response code="400">Dados inv�lidos ou conflito de hor�rio</response>
-        /// <response code="404">Animal, servi�o ou funcion�rio n�o encontrado</response>
+        /// <response code="400">Dados inválidos ou conflito de horário</response>
+        /// <response code="404">Animal, serviço ou funcionário não encontrado</response>
         /// <response code="500">Erro interno do servidor</response>
         [HttpPost]
         [ProducesResponseType(typeof(AgendamentoDto), 201)]
@@ -219,17 +220,17 @@ namespace SIGA_PET.Controllers
                 if (!ModelState.IsValid)
                     return BadRequest(ModelState);
 
-                // VALIDA��O: Verificar se a data n�o � no passado
+                // VALIDAÇÃO: Verificar se a data não é no passado
                 var agora = DateTime.Now;
                 if (createAgendamentoDto.DataHora <= agora)
                 {
-                    return BadRequest($"? N�o � poss�vel agendar para uma data/hora que j� passou. Data/hora atual: {agora:dd/MM/yyyy HH:mm}");
+                    return BadRequest($"❌ Não é possível agendar para uma data/hora que já passou. Data/hora atual: {agora:dd/MM/yyyy HH:mm}");
                 }
 
-                // VALIDA��O: Verificar se a data n�o � muito no futuro (opcional - m�ximo 6 meses)
+                // VALIDAÇÃO: Verificar se a data não é muito no futuro (opcional - máximo 6 meses)
                 if (createAgendamentoDto.DataHora > agora.AddMonths(6))
                 {
-                    return BadRequest("? N�o � poss�vel agendar com mais de 6 meses de anteced�ncia.");
+                    return BadRequest("❌ Não é possível agendar com mais de 6 meses de antecedência.");
                 }
 
                 // VALIDAÇÃO: Verificar horário de funcionamento (8h às 18h INCLUSIVE)
@@ -422,7 +423,7 @@ namespace SIGA_PET.Controllers
                     return BadRequest($"? N�o � poss�vel reagendar para uma data/hora que j� passou. Data/hora atual: {agora:dd/MM/yyyy HH:mm}");
                 }
 
-                // VALIDA��O: Verificar hor�rio de funcionamento se a data mudou
+                // VALIDAÇÃO: Verificar horário de funcionamento se a data mudou
                 if (updateAgendamentoDto.DataHora != agendamento.DataHora)
                 {
                     var horaAgendamento = updateAgendamentoDto.DataHora.TimeOfDay;
@@ -431,13 +432,13 @@ namespace SIGA_PET.Controllers
 
                     if (horaAgendamento < horaAbertura || horaAgendamento > horaFechamento)
                     {
-                        return BadRequest("? Agendamentos s� podem ser feitos entre 8:00 e 18:00.");
+                        return BadRequest("❌ Agendamentos só podem ser feitos entre 8:00 e 18:00.");
                     }
 
-                    // Verificar se � domingo
+                    // Verificar se é domingo
                     if (updateAgendamentoDto.DataHora.DayOfWeek == DayOfWeek.Sunday)
                     {
-                        return BadRequest("? N�o atendemos aos domingos. Escolha outro dia da semana.");
+                        return BadRequest("❌ Não atendemos aos domingos. Escolha outro dia da semana.");
                     }
                 }
 
@@ -620,7 +621,7 @@ namespace SIGA_PET.Controllers
 
                 if (createCompletoDto.DataHora > agora.AddMonths(6))
                 {
-                    return BadRequest("? N�o � poss�vel agendar com mais de 6 meses de anteced�ncia.");
+                    return BadRequest("❌ Não é possível agendar com mais de 6 meses de antecedência.");
                 }
 
                 var horaAgendamento = createCompletoDto.DataHora.TimeOfDay;
@@ -629,12 +630,12 @@ namespace SIGA_PET.Controllers
 
                 if (horaAgendamento < horaAbertura || horaAgendamento > horaFechamento)
                 {
-                    return BadRequest("? Agendamentos s� podem ser feitos entre 8:00 e 18:00.");
+                    return BadRequest("❌ Agendamentos só podem ser feitos entre 8:00 e 18:00.");
                 }
 
                 if (createCompletoDto.DataHora.DayOfWeek == DayOfWeek.Sunday)
                 {
-                    return BadRequest("? N�o atendemos aos domingos. Escolha outro dia da semana.");
+                    return BadRequest("❌ Não atendemos aos domingos. Escolha outro dia da semana.");
                 }
 
                 // Verificar se servi�o existe

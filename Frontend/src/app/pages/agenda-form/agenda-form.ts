@@ -265,14 +265,24 @@ export class AgendaFormComponent implements OnInit {
   }
 
   carregarPetsDoTutor(tutorId: number) {
+    console.log('🐾 Carregando pets do tutor:', tutorId);
     this.petService.buscarPorTutor(tutorId).subscribe({
       next: (data) => {
         this.pets = data;
+        console.log('✅ Pets carregados:', this.pets.length, this.pets);
         if (this.pets.length === 0) {
+          console.log('⚠️ Nenhum pet encontrado, forçando cadastro');
           this.precisaCadastrarPet = true;
+        } else {
+          console.log('✅ Pets disponíveis, permitindo seleção');
+          this.precisaCadastrarPet = false;
         }
       },
-      error: () => console.error('Erro ao buscar pets do tutor'),
+      error: (err) => {
+        console.error('❌ Erro ao buscar pets do tutor:', err);
+        this.pets = [];
+        this.precisaCadastrarPet = true;
+      },
     });
   }
 
