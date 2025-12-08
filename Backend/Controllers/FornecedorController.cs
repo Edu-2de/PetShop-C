@@ -45,18 +45,18 @@ namespace SIGA_PET.Controllers
         {
             if (string.IsNullOrWhiteSpace(name))
             {
-                return BadRequest("O nome para busca não pode ser vazio.");
+                return BadRequest("O nome para busca nï¿½o pode ser vazio.");
             }
 
             var fornecedores = await _context.Fornecedores
                 .AsNoTracking()
-                // Correção: Verifica se RazaoSocial não é nulo antes de chamar Contains
+                // Correï¿½ï¿½o: Verifica se RazaoSocial nï¿½o ï¿½ nulo antes de chamar Contains
                 .Where(f => f.Nome.Contains(name) || (f.RazaoSocial != null && f.RazaoSocial.Contains(name)))
                 .ToListAsync();
 
             if (!fornecedores.Any())
             {
-                return NotFound("Nenhum fornecedor encontrado com o nome ou razão social fornecida.");
+                return NotFound("Nenhum fornecedor encontrado com o nome ou razï¿½o social fornecida.");
             }
 
             var fornecedoresDto = _mapper.Map<IEnumerable<FornecedorDto>>(fornecedores);
@@ -73,7 +73,7 @@ namespace SIGA_PET.Controllers
 
                 if (fornecedor == null)
                 {
-                    return NotFound($"Fornecedor com ID {id} não encontrado.");
+                    return NotFound($"Fornecedor com ID {id} nï¿½o encontrado.");
                 }
 
                 var fornecedorDto = _mapper.Map<FornecedorDto>(fornecedor);
@@ -124,7 +124,7 @@ namespace SIGA_PET.Controllers
                 var fornecedor = await _context.Fornecedores.FindAsync(id);
                 if (fornecedor == null)
                 {
-                    return NotFound($"Fornecedor com ID {id} não encontrado.");
+                    return NotFound($"Fornecedor com ID {id} nï¿½o encontrado.");
                 }
 
                 _mapper.Map(updateFornecedorDto, fornecedor);
@@ -136,7 +136,7 @@ namespace SIGA_PET.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                return Conflict("Erro de concorrência. O registro foi modificado por outro usuário.");
+                return Conflict("Erro de concorrï¿½ncia. O registro foi modificado por outro usuï¿½rio.");
             }
             catch (Exception ex)
             {
@@ -144,22 +144,35 @@ namespace SIGA_PET.Controllers
             }
         }
 
-        // DELETE: api/Fornecedor/5
+        // DELETE: api/Fornecedor/5 - COM VERIFICAÃ‡ÃƒO DE PRODUTOS
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteFornecedor(int id)
         {
             try
             {
-                var fornecedor = await _context.Fornecedores.FindAsync(id);
+                var fornecedor = await _context.Fornecedores
+                    .Include(f => f.Produtos)
+                    .FirstOrDefaultAsync(f => f.FornecedorId == id);
+
                 if (fornecedor == null)
                 {
-                    return NotFound($"Fornecedor com ID {id} não encontrado.");
+                    return NotFound($"Fornecedor com ID {id} nÃ£o encontrado.");
+                }
+
+                // Verificar se hÃ¡ produtos associados
+                if (fornecedor.Produtos != null && fornecedor.Produtos.Any())
+                {
+                    return BadRequest($"NÃ£o Ã© possÃ­vel excluir o fornecedor pois existem {fornecedor.Produtos.Count} produto(s) associado(s). Remova os produtos ou altere seus fornecedores primeiro.");
                 }
 
                 _context.Fornecedores.Remove(fornecedor);
                 await _context.SaveChangesAsync();
 
                 return NoContent();
+            }
+            catch (DbUpdateException ex)
+            {
+                return StatusCode(500, $"Erro ao deletar fornecedor: {ex.InnerException?.Message ?? ex.Message}");
             }
             catch (Exception ex)
             {

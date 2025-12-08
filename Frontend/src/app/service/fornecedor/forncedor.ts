@@ -1,39 +1,25 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, map } from 'rxjs';
+import { Observable } from 'rxjs';
 import { Fornecedor } from '../../model/fornecedor.model';
-import { environment } from '../../../environments/environment'; // Importar environment
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class FornecedorService {
   private readonly http = inject(HttpClient);
-  // CORREÇÃO: Usar a URL da API real
   private readonly apiUrl = `${environment.apiUrl}/Fornecedor`;
 
-  findAll(): Observable<Fornecedor[]> {
-    return this.http.get<Fornecedor[]>(this.apiUrl).pipe(
-      // Mapeamento para compatibilidade caso o backend retorne FornecedorId
-      map(data => data.map(f => ({
-        ...f,
-        id: f.fornecedorId // Garante que o front tenha um 'id' acessível
-      })))
-    );
-  }
-
   listar(): Observable<Fornecedor[]> {
-    return this.findAll();
+    return this.http.get<Fornecedor[]>(this.apiUrl);
   }
 
   findById(id: number): Observable<Fornecedor> {
-    return this.http.get<Fornecedor>(`${this.apiUrl}/${id}`).pipe(
-      map(f => ({ ...f, id: f.fornecedorId }))
-    );
+    return this.http.get<Fornecedor>(`${this.apiUrl}/${id}`);
   }
 
   create(fornecedor: Partial<Fornecedor>): Observable<Fornecedor> {
-    // O backend espera 'Nome', 'Email', etc.
     return this.http.post<Fornecedor>(this.apiUrl, fornecedor);
   }
 

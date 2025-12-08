@@ -34,8 +34,8 @@ export class ForncedorFormComponent implements OnInit {
     }
 
     salvar(): void {
-        if (this.isEdit && this.fornecedor.id) {
-            this.fornecedorService.update(this.fornecedor.id, this.fornecedor as Fornecedor).subscribe(() => {
+        if (this.isEdit && this.fornecedor.fornecedorId) {
+            this.fornecedorService.update(this.fornecedor.fornecedorId, this.fornecedor as Fornecedor).subscribe(() => {
                 this.router.navigate(['/fornecedores']);
             });
         } else {

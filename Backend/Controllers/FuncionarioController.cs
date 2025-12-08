@@ -31,7 +31,7 @@ namespace SIGA_PET.Controllers
         public async Task<ActionResult<FuncionarioDto>> GetFuncionario(int id)
         {
             var funcionario = await _context.Funcionarios.Include(f => f.Usuario).FirstOrDefaultAsync(f => f.FuncionarioId == id);
-            if (funcionario == null) return NotFound("Funcionário não encontrado.");
+            if (funcionario == null) return NotFound("Funcionï¿½rio nï¿½o encontrado.");
             return Ok(_mapper.Map<FuncionarioDto>(funcionario));
         }
 
@@ -39,7 +39,7 @@ namespace SIGA_PET.Controllers
         public async Task<ActionResult<FuncionarioDto>> CreateFuncionario([FromBody] CreateFuncionarioDto dto)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
-            if (await _context.Usuarios.AnyAsync(u => u.Email == dto.Email)) return BadRequest("Email já em uso.");
+            if (await _context.Usuarios.AnyAsync(u => u.Email == dto.Email)) return BadRequest("Email jï¿½ em uso.");
 
             using var transaction = await _context.Database.BeginTransactionAsync();
             try
@@ -70,24 +70,24 @@ namespace SIGA_PET.Controllers
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
-            // CORREÇÃO: Incluir Usuario para permitir editar o email
+            // CORREï¿½ï¿½O: Incluir Usuario para permitir editar o email
             var func = await _context.Funcionarios
                 .Include(f => f.Usuario)
                 .FirstOrDefaultAsync(f => f.FuncionarioId == id);
 
-            if (func == null) return NotFound("Funcionário não encontrado.");
+            if (func == null) return NotFound("Funcionï¿½rio nï¿½o encontrado.");
 
-            // Atualiza dados do Funcionário (Nome, Cargo, Telefone)
+            // Atualiza dados do Funcionï¿½rio (Nome, Cargo, Telefone)
             _mapper.Map(dto, func);
 
-            // Atualiza dados do Usuário (Email) manualmente se foi alterado
+            // Atualiza dados do Usuï¿½rio (Email) manualmente se foi alterado
             if (!string.IsNullOrEmpty(dto.Email) && func.Usuario != null)
             {
-                // Verifica se o novo email já está em uso por OUTRO usuário
+                // Verifica se o novo email jï¿½ estï¿½ em uso por OUTRO usuï¿½rio
                 bool emailEmUso = await _context.Usuarios.AnyAsync(u => u.Email == dto.Email && u.UsuarioId != func.UsuarioId);
                 if (emailEmUso)
                 {
-                    return BadRequest("Este email já está em uso por outro usuário.");
+                    return BadRequest("Este email jï¿½ estï¿½ em uso por outro usuï¿½rio.");
                 }
                 func.Usuario.Email = dto.Email;
             }
@@ -95,29 +95,61 @@ namespace SIGA_PET.Controllers
             _context.Entry(func).State = EntityState.Modified;
 
             try { await _context.SaveChangesAsync(); }
-            catch (DbUpdateConcurrencyException) { return Conflict("Erro de concorrência."); }
+            catch (DbUpdateConcurrencyException) { return Conflict("Erro de concorrï¿½ncia."); }
 
             return NoContent();
         }
 
-        // DELETE CORRIGIDO
+        // DELETE COM VERIFICAÃ‡ÃƒO DE DEPENDÃŠNCIAS
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteFuncionario(int id)
         {
             try
             {
-                var func = await _context.Funcionarios.FindAsync(id);
-                if (func == null) return NotFound("Funcionário não encontrado.");
+                var func = await _context.Funcionarios
+                    .Include(f => f.Agendamentos)
+                    .Include(f => f.Vendas)
+                    .Include(f => f.ServicoFuncionarios)
+                    .FirstOrDefaultAsync(f => f.FuncionarioId == id);
 
-                // 1. Remove Funcionario
+                if (func == null) 
+                    return NotFound("FuncionÃ¡rio nÃ£o encontrado.");
+
+                // Verificar se hÃ¡ vendas associadas
+                if (func.Vendas != null && func.Vendas.Any())
+                {
+                    return BadRequest($"NÃ£o Ã© possÃ­vel excluir o funcionÃ¡rio pois existem {func.Vendas.Count} venda(s) registrada(s) por ele.");
+                }
+
+                // Verificar se hÃ¡ agendamentos associados
+                if (func.Agendamentos != null && func.Agendamentos.Any())
+                {
+                    return BadRequest($"NÃ£o Ã© possÃ­vel excluir o funcionÃ¡rio pois existem {func.Agendamentos.Count} agendamento(s) associado(s).");
+                }
+
+                // Deletar relacionamentos ServicoFuncionario
+                if (func.ServicoFuncionarios != null && func.ServicoFuncionarios.Any())
+                {
+                    _context.ServicoFuncionarios.RemoveRange(func.ServicoFuncionarios);
+                }
+
+                // Remover funcionÃ¡rio
                 _context.Funcionarios.Remove(func);
 
-                // 2. Remove Usuario
-                var usuario = await _context.Usuarios.FindAsync(func.UsuarioId);
-                if (usuario != null) _context.Usuarios.Remove(usuario);
+                // Remover usuario se existir
+                if (func.UsuarioId.HasValue)
+                {
+                    var usuario = await _context.Usuarios.FindAsync(func.UsuarioId);
+                    if (usuario != null) 
+                        _context.Usuarios.Remove(usuario);
+                }
 
                 await _context.SaveChangesAsync();
                 return NoContent();
+            }
+            catch (DbUpdateException ex)
+            {
+                return StatusCode(500, $"Erro ao deletar funcionÃ¡rio: {ex.InnerException?.Message ?? ex.Message}");
             }
             catch (Exception ex)
             {

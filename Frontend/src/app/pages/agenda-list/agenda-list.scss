@@ -1,0 +1,23 @@
+.spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.table-hover tbody tr:hover {
+  background-color: rgba(0, 0, 0, 0.02);
+  cursor: pointer;
+}
+
+.badge {
+  font-size: 0.85rem;
+  padding: 0.35em 0.75em;
+  font-weight: 500;
+}

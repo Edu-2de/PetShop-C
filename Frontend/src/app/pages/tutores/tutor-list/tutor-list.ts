@@ -53,7 +53,7 @@ export class TutorListComponent implements OnInit {
       this.tutorService.deletar(id).subscribe({
         next: () => {
           // Atualiza o signal removendo o tutor excluído
-          this.tutoresSignal.update(tutoresAtuais => tutoresAtuais.filter(t => t.id !== id));
+          this.tutoresSignal.update(tutoresAtuais => tutoresAtuais.filter(t => t.tutorId !== id));
         },
         error: (err) => console.error('Erro ao excluir tutor', err)
       });

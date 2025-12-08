@@ -8,10 +8,10 @@
         <p class="brand-subtitle">Entre na sua conta</p>
       </div>
 
-      <!-- Alert de Erro -->
-      <div class="alert alert-danger alert-custom" *ngIf="erro">
-        <i class="bi bi-exclamation-circle me-2"></i>
-        {{ erro }}
+      <!-- Alert de Erro - MELHORADO -->
+      <div class="alert alert-danger d-flex align-items-center" role="alert" *ngIf="erro">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+        <div>{{ erro }}</div>
       </div>
 
       <!-- Informações de Teste -->
@@ -21,11 +21,10 @@
           Contas de teste
         </div>
         <div class="info-content">
+          <div class="info-item"><strong>Admin:</strong> admin@sigapet.com / senha123</div>
           <div class="info-item">
-            <strong>Admin:</strong> admin@sigapet.com / admin123
-          </div>
-          <div class="info-item">
-            <strong>Usuário:</strong> user@sigapet.com / user123
+            <strong>Cliente/Tutor:</strong> maria.silva@email.com / senha123 (Maria Silva - tem
+            pets)
           </div>
         </div>
       </div>
@@ -37,14 +36,16 @@
           <label for="email" class="form-label">Email</label>
           <div class="input-wrapper">
             <i class="bi bi-envelope input-icon"></i>
-            <input 
-              type="email" 
-              class="form-control form-input" 
-              id="email" 
+            <input
+              type="email"
+              class="form-control form-input"
+              id="email"
               [(ngModel)]="email"
               name="email"
               placeholder="seu@email.com"
-              required>
+              autocomplete="email"
+              required
+            />
           </div>
         </div>
 
@@ -53,26 +54,33 @@
           <label for="senha" class="form-label">Senha</label>
           <div class="input-wrapper">
             <i class="bi bi-lock input-icon"></i>
-            <input 
-              [type]="mostrarSenha ? 'text' : 'password'" 
-              class="form-control form-input" 
-              id="senha" 
+            <input
+              [type]="mostrarSenha ? 'text' : 'password'"
+              class="form-control form-input"
+              id="senha"
               [(ngModel)]="senha"
               name="senha"
               placeholder="Sua senha"
-              required>
-            <button 
-              type="button"
-              class="btn-toggle-password" 
-              (click)="toggleSenha()">
+              autocomplete="current-password"
+              required
+            />
+            <button type="button" class="btn-toggle-password" (click)="toggleSenha()">
               <i class="bi" [class.bi-eye]="!mostrarSenha" [class.bi-eye-slash]="mostrarSenha"></i>
             </button>
           </div>
         </div>
 
         <!-- Botão Submit -->
-        <button type="submit" class="btn btn-submit">
-          Entrar
+        <button type="submit" class="btn btn-submit" [disabled]="carregando">
+          <span *ngIf="!carregando">Entrar</span>
+          <span *ngIf="carregando">
+            <span
+              class="spinner-border spinner-border-sm me-2"
+              role="status"
+              aria-hidden="true"
+            ></span>
+            Entrando...
+          </span>
         </button>
       </form>
 
@@ -82,6 +90,8 @@
           <i class="bi bi-arrow-left me-1"></i>
           Voltar para home
         </a>
+        <span class="mx-2">•</span>
+        <a routerLink="/cadastrar" class="link-back"> Criar conta </a>
       </div>
     </div>
   </div>

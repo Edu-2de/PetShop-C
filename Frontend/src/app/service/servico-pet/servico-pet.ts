@@ -1,45 +1,43 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, map } from 'rxjs';
-import { ServicoPet } from '../../model/servico-pet.model';
+import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
+import { ServicoPet, CreateServicoPet, UpdateServicoPet, FuncionarioSimples } from '../../model/servico-pet.model';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ServicoPetService {
-  private readonly http = inject(HttpClient);
-  private readonly apiUrl = `${environment.apiUrl}/Servico`;
-
-  findAll(): Observable<ServicoPet[]> {
-    return this.http.get<ServicoPet[]>(this.apiUrl).pipe(
-      map(servicos => servicos.map(s => ({ ...s, id: s.servicoId })))
-    );
-  }
+  private http = inject(HttpClient);
+  private apiUrl = `${environment.apiUrl}/Servico`;
 
   listar(): Observable<ServicoPet[]> {
-    return this.findAll();
+    return this.http.get<ServicoPet[]>(this.apiUrl);
+  }
+
+  listarAtivos(): Observable<ServicoPet[]> {
+    return this.http.get<ServicoPet[]>(`${this.apiUrl}/ativos`);
   }
 
   buscarPorId(id: number): Observable<ServicoPet> {
-    return this.http.get<ServicoPet>(`${this.apiUrl}/${id}`).pipe(
-      map(s => ({ ...s, id: s.servicoId }))
-    );
+    return this.http.get<ServicoPet>(`${this.apiUrl}/${id}`);
   }
 
-  searchByName(name: string): Observable<ServicoPet[]> {
-    return this.http.get<ServicoPet[]>(`${this.apiUrl}/search?name=${name}`).pipe(
-      map(servicos => servicos.map(s => ({ ...s, id: s.servicoId })))
-    );
+  // NOVO: Buscar funcionários aptos baseado nos cargos do serviço
+  buscarFuncionariosAptos(servicoId: number): Observable<FuncionarioSimples[]> {
+    return this.http.get<FuncionarioSimples[]>(`${this.apiUrl}/${servicoId}/funcionarios-aptos`);
   }
 
-  criar(servico: Partial<ServicoPet>): Observable<ServicoPet> {
-    return this.http.post<ServicoPet>(this.apiUrl, servico).pipe(
-      map(s => ({ ...s, id: s.servicoId }))
-    );
+  // NOVO: Listar cargos disponíveis
+  listarCargosDisponiveis(): Observable<string[]> {
+    return this.http.get<string[]>(`${this.apiUrl}/cargos-disponiveis`);
   }
 
-  atualizar(id: number, servico: Partial<ServicoPet>): Observable<void> {
+  criar(servico: CreateServicoPet): Observable<ServicoPet> {
+    return this.http.post<ServicoPet>(this.apiUrl, servico);
+  }
+
+  atualizar(id: number, servico: UpdateServicoPet): Observable<void> {
     return this.http.put<void>(`${this.apiUrl}/${id}`, servico);
   }
 

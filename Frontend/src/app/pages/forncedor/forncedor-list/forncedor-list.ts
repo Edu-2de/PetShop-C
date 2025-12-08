@@ -47,7 +47,7 @@ export class ForncedorListComponent implements OnInit {
         if (id === undefined) return;
         if (confirm('Deseja realmente excluir este fornecedor?')) {
             this.fornecedorService.delete(id).subscribe(() => {
-                this.fornecedores.update(atuais => atuais.filter(f => f.id !== id));
+                this.fornecedores.update(atuais => atuais.filter(f => f.fornecedorId !== id));
             });
         }
     }

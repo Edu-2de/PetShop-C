@@ -46,7 +46,7 @@ namespace SIGA_PET.Controllers
         {
             if (string.IsNullOrWhiteSpace(name))
             {
-                return BadRequest("O nome para busca não pode ser vazio.");
+                return BadRequest("O nome para busca nï¿½o pode ser vazio.");
             }
 
             var animais = await _context.Animais
@@ -76,7 +76,7 @@ namespace SIGA_PET.Controllers
 
                 if (animal == null)
                 {
-                    return NotFound($"Animal com ID {id} não encontrado.");
+                    return NotFound($"Animal com ID {id} nï¿½o encontrado.");
                 }
 
                 var animalDto = _mapper.Map<AnimalDto>(animal);
@@ -124,7 +124,7 @@ namespace SIGA_PET.Controllers
                 var tutorExists = await _context.Tutores.AnyAsync(t => t.TutorId == createAnimalDto.TutorId);
                 if (!tutorExists)
                 {
-                    return BadRequest($"Tutor com ID {createAnimalDto.TutorId} não encontrado.");
+                    return BadRequest($"Tutor com ID {createAnimalDto.TutorId} nï¿½o encontrado.");
                 }
 
                 var animal = _mapper.Map<Animal>(createAnimalDto);
@@ -158,14 +158,14 @@ namespace SIGA_PET.Controllers
                 var animal = await _context.Animais.FindAsync(id);
                 if (animal == null)
                 {
-                    return NotFound($"Animal com ID {id} não encontrado.");
+                    return NotFound($"Animal com ID {id} nï¿½o encontrado.");
                 }
 
                 // Verificar se o tutor existe
                 var tutorExists = await _context.Tutores.AnyAsync(t => t.TutorId == updateAnimalDto.TutorId);
                 if (!tutorExists)
                 {
-                    return BadRequest($"Tutor com ID {updateAnimalDto.TutorId} não encontrado.");
+                    return BadRequest($"Tutor com ID {updateAnimalDto.TutorId} nï¿½o encontrado.");
                 }
 
                 _mapper.Map(updateAnimalDto, animal);
@@ -177,7 +177,7 @@ namespace SIGA_PET.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                return Conflict("Erro de concorrência. O registro foi modificado por outro usuário.");
+                return Conflict("Erro de concorrï¿½ncia. O registro foi modificado por outro usuï¿½rio.");
             }
             catch (Exception ex)
             {
@@ -185,22 +185,37 @@ namespace SIGA_PET.Controllers
             }
         }
 
-        // DELETE: api/Animal/5
+        // DELETE: api/Animal/5 - COM VERIFICAÃ‡ÃƒO E LIMPEZA DE AGENDAMENTOS
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteAnimal(int id)
         {
             try
             {
-                var animal = await _context.Animais.FindAsync(id);
+                var animal = await _context.Animais
+                    .Include(a => a.Agendamentos)
+                    .FirstOrDefaultAsync(a => a.AnimalId == id);
+
                 if (animal == null)
                 {
-                    return NotFound($"Animal com ID {id} não encontrado.");
+                    return NotFound($"Animal com ID {id} nÃ£o encontrado.");
                 }
 
+                // Verificar se hÃ¡ agendamentos associados
+                if (animal.Agendamentos != null && animal.Agendamentos.Any())
+                {
+                    // Deletar todos os agendamentos do animal primeiro
+                    _context.Agendamentos.RemoveRange(animal.Agendamentos);
+                }
+
+                // Remover o animal
                 _context.Animais.Remove(animal);
                 await _context.SaveChangesAsync();
 
                 return NoContent();
+            }
+            catch (DbUpdateException ex)
+            {
+                return StatusCode(500, $"Erro ao deletar animal: {ex.InnerException?.Message ?? ex.Message}");
             }
             catch (Exception ex)
             {

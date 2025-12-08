@@ -12,14 +12,15 @@ export interface Produto {
   ativo: boolean;
   fornecedorId: number;
 
-  // Novos campos
+  // Campos para exibição
   categoriaId?: number;
+  nomeCategoria?: string;     // [NOVO] - Nome da categoria para exibição
   nomeFornecedor?: string;
   imagens?: ProdutoImagem[];
 
   // Aliases para compatibilidade (opcionais)
   id?: number;
-  categoria?: string;     // String para exibição
+  categoria?: string;     // String para exibição (alias para nomeCategoria)
   fotoUrl?: string;
-  fornecedorid?: number;  // Lowercase alias
+  fornecedorid?: number;
 }

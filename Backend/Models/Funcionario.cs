@@ -6,25 +6,36 @@ namespace SIGA_PET.Models
     public class Funcionario
     {
         public int FuncionarioId { get; set; }
-        public int UsuarioId { get; set; }
 
-        [ForeignKey("UsuarioId")]
-        public virtual Usuario Usuario { get; set; } = null!;
-
-        [Required(ErrorMessage = "Nome � obrigat�rio")]
-        [StringLength(120)]
+    [Required(ErrorMessage = "Nome é obrigatório")]
+    [StringLength(100, ErrorMessage = "Nome deve ter no máximo 100 caracteres")]
         public string Nome { get; set; } = string.Empty;
 
-        [StringLength(80)]
-        public string? Cargo { get; set; }
+    [Required(ErrorMessage = "Cargo é obrigatório")]
+    [StringLength(50, ErrorMessage = "Cargo deve ter no máximo 50 caracteres")]
+        public string Cargo { get; set; } = string.Empty;
 
         [StringLength(20)]
         public string? Telefone { get; set; }
 
-        public DateTime DataContratacao { get; set; } = DateTime.UtcNow;
+        [DataType(DataType.Date)]
+        public DateTime DataContratacao { get; set; } = DateTime.Now;
 
+        public bool Ativo { get; set; } = true;
+
+        // Relacionamento com Usuario
+        public int? UsuarioId { get; set; }
+        [ForeignKey("UsuarioId")]
+        public virtual Usuario? Usuario { get; set; }
+
+        // Navigation Properties
         public virtual ICollection<Agendamento> Agendamentos { get; set; } = new List<Agendamento>();
-        public virtual ICollection<RegistroProntuario> Registros { get; set; } = new List<RegistroProntuario>();
+        public virtual ICollection<Servico> ServicosResponsavel { get; set; } = new List<Servico>();
+        
+    // NOVO: Relacionamento muitos-para-muitos com serviços
+        public virtual ICollection<ServicoFuncionario> ServicoFuncionarios { get; set; } = new List<ServicoFuncionario>();
+        
+        // Relacionamento com Vendas
         public virtual ICollection<Venda> Vendas { get; set; } = new List<Venda>();
     }
 }

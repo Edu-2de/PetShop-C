@@ -40,9 +40,16 @@ namespace SIGA_PET.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<TutorDto>> GetTutor(int id)
         {
-            var tutor = await _context.Tutores.Include(t => t.Usuario).FirstOrDefaultAsync(t => t.TutorId == id);
-            if (tutor == null) return NotFound("Tutor não encontrado.");
-            return Ok(_mapper.Map<TutorDto>(tutor));
+            // SEMPRE incluir Usuario, pois é a entidade raiz
+            var tutor = await _context.Tutores
+                .Include(t => t.Usuario) // OBRIGATÓRIO - Todo tutor deve ter um usuário
+                .FirstOrDefaultAsync(t => t.TutorId == id);
+                
+            if (tutor == null) 
+                return NotFound("Tutor não encontrado.");
+                
+            var tutorDto = _mapper.Map<TutorDto>(tutor);
+            return Ok(tutorDto);
         }
 
         [HttpPost]
@@ -54,15 +61,32 @@ namespace SIGA_PET.Controllers
             using var transaction = await _context.Database.BeginTransactionAsync();
             try
             {
-                var usuario = new Usuario { Email = dto.Email, PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Senha), TipoUsuario = "Tutor", Ativo = true };
+                // 1. SEMPRE criar usuário primeiro (base)
+                var usuario = new Usuario 
+                { 
+                    Nome = dto.Nome, // Nome sempre no Usuario
+                    Email = dto.Email, 
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Senha), 
+                    TipoUsuario = "Tutor", 
+                    Ativo = true 
+                };
                 _context.Usuarios.Add(usuario);
                 await _context.SaveChangesAsync();
 
-                var tutor = new Tutor { Nome = dto.Nome, Telefone = dto.Telefone, Endereco = dto.Endereco, UsuarioId = usuario.UsuarioId };
+                // 2. Criar tutor vinculado
+                var tutor = new Tutor 
+                { 
+                    Nome = dto.Nome, // Sincroniza com Usuario
+                    Telefone = dto.Telefone, 
+                    Endereco = dto.Endereco, 
+                    UsuarioId = usuario.UsuarioId,
+                    DataCadastro = DateTime.Now
+                };
                 _context.Tutores.Add(tutor);
                 await _context.SaveChangesAsync();
 
                 await transaction.CommitAsync();
+                
                 var tutorDto = _mapper.Map<TutorDto>(tutor);
                 tutorDto.Email = usuario.Email;
                 return CreatedAtAction(nameof(GetTutor), new { id = tutor.TutorId }, tutorDto);
@@ -74,57 +98,176 @@ namespace SIGA_PET.Controllers
             }
         }
 
+        /// <summary>
+        /// 🆕 Criar tutor simplificado (sem senha) - EXCEÇÃO para casos específicos
+        /// </summary>
+        /// <param name="dto">Dados básicos do tutor</param>
+        /// <remarks>
+        /// ⚠️ ATENÇÃO: Este método é uma EXCEÇÃO à regra de que "Usuario é sempre obrigatório".
+        /// Usado APENAS para casos específicos como:
+        /// - Agendamentos rápidos onde cliente não quer criar conta
+        /// - Compras de balcão onde só precisamos do nome para nota fiscal
+        /// 
+        /// **Regra geral: TODO tutor DEVE ter um Usuario. Use POST /api/Tutor normal.**
+        /// 
+        /// **Exemplo de requisição:**
+        /// ```json
+        /// {
+        ///   "nome": "João Silva",
+        ///   "telefone": "(11) 98765-4321",
+        ///   "endereco": "Rua Exemplo, 123"
+        /// }
+        /// ```
+        /// </remarks>
+        [HttpPost("simplificado")]
+        public async Task<ActionResult<TutorDto>> CreateTutorSimplificado([FromBody] CreateTutorSimplificadoDto dto)
+        {
+            try
+            {
+                if (!ModelState.IsValid) 
+                    return BadRequest(ModelState);
+
+                // Verificar se já existe tutor com mesmo telefone
+                var tutorExistente = await _context.Tutores
+                    .FirstOrDefaultAsync(t => t.Telefone == dto.Telefone);
+
+                if (tutorExistente != null)
+                {
+                    // Retornar tutor existente
+                    var tutorDtoExistente = _mapper.Map<TutorDto>(tutorExistente);
+                    return Ok(tutorDtoExistente);
+                }
+
+                // ⚠️ EXCEÇÃO: Criar tutor sem usuário (UsuarioId = null)
+                // Só para casos muito específicos de agendamento/compra rápida
+                var tutor = new Tutor 
+                { 
+                    Nome = dto.Nome, 
+                    Telefone = dto.Telefone, 
+                    Endereco = dto.Endereco ?? "Não informado",
+                    DataCadastro = DateTime.UtcNow,
+                    UsuarioId = null // SEM USUÁRIO - exceção à regra
+                };
+
+                _context.Tutores.Add(tutor);
+                await _context.SaveChangesAsync();
+
+                var tutorDto = _mapper.Map<TutorDto>(tutor);
+                return CreatedAtAction(nameof(GetTutor), new { id = tutor.TutorId }, tutorDto);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Erro: {ex.Message}");
+            }
+        }
+
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateTutor(int id, [FromBody] UpdateTutorDto dto)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
-            // CORREÇÃO: Incluir Usuario para editar email
+            // SEMPRE incluir Usuario para edição completa
             var tutor = await _context.Tutores
                 .Include(t => t.Usuario)
                 .FirstOrDefaultAsync(t => t.TutorId == id);
 
             if (tutor == null) return NotFound("Tutor não encontrado.");
 
-            _mapper.Map(dto, tutor);
-
-            // Atualiza Email se necessário
-            if (!string.IsNullOrEmpty(dto.Email) && tutor.Usuario != null)
+            // ATENÇÃO: Usuario é a raiz - sempre atualizar dados principais no Usuario
+            if (tutor.Usuario != null)
             {
-                bool emailEmUso = await _context.Usuarios.AnyAsync(u => u.Email == dto.Email && u.UsuarioId != tutor.UsuarioId);
-                if (emailEmUso)
+                // Nome SEMPRE fica no Usuario (entidade raiz)
+                tutor.Usuario.Nome = dto.Nome;
+                
+                // Email também fica no Usuario
+                if (!string.IsNullOrEmpty(dto.Email))
                 {
-                    return BadRequest("Este email já está em uso.");
+                    bool emailEmUso = await _context.Usuarios.AnyAsync(u => u.Email == dto.Email && u.UsuarioId != tutor.UsuarioId);
+                    if (emailEmUso)
+                    {
+                        return BadRequest("Este email já está em uso.");
+                    }
+                    tutor.Usuario.Email = dto.Email;
                 }
-                tutor.Usuario.Email = dto.Email;
             }
 
-            _context.Entry(tutor).State = EntityState.Modified;
+            // Dados específicos do Tutor (telefone e endereço)
+            tutor.Nome = dto.Nome; // Sincroniza com Usuario por segurança
+            tutor.Telefone = dto.Telefone;
+            tutor.Endereco = dto.Endereco;
 
-            try { await _context.SaveChangesAsync(); }
-            catch (DbUpdateConcurrencyException) { return Conflict("Erro de concorrência."); }
+            _context.Entry(tutor).State = EntityState.Modified;
+            if (tutor.Usuario != null)
+            {
+                _context.Entry(tutor.Usuario).State = EntityState.Modified;
+            }
+
+            try 
+            { 
+                await _context.SaveChangesAsync(); 
+            }
+            catch (DbUpdateConcurrencyException) 
+            { 
+                return Conflict("Erro de concorrência."); 
+            }
 
             return NoContent();
         }
 
-        // DELETE CORRIGIDO PARA EVITAR ERRO DE CICLO SQL
+        // DELETE COM VERIFICAÇÃO E LIMPEZA DE DEPENDÊNCIAS
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteTutor(int id)
         {
             try
             {
-                var tutor = await _context.Tutores.FindAsync(id);
-                if (tutor == null) return NotFound("Tutor não encontrado.");
+                var tutor = await _context.Tutores
+                    .Include(t => t.Animais)
+                    .Include(t => t.Vendas)
+                    .FirstOrDefaultAsync(t => t.TutorId == id);
 
-                // 1. Removemos o Tutor (dispara cascade para Animais, etc)
+                if (tutor == null) 
+                    return NotFound("Tutor não encontrado.");
+
+                // Verificar se há vendas associadas (não pode deletar)
+                if (tutor.Vendas != null && tutor.Vendas.Any())
+                {
+                    return BadRequest($"Não é possível excluir o tutor pois existem {tutor.Vendas.Count} venda(s) associada(s). Exclua as vendas primeiro.");
+                }
+
+                // Verificar se há animais associados
+                if (tutor.Animais != null && tutor.Animais.Any())
+                {
+                    // Verificar se os animais têm agendamentos
+                    var animalIds = tutor.Animais.Select(a => a.AnimalId).ToList();
+                    var temAgendamentos = await _context.Agendamentos
+                        .AnyAsync(ag => animalIds.Contains(ag.AnimalId));
+
+                    if (temAgendamentos)
+                    {
+                        return BadRequest("Não é possível excluir o tutor pois seus animais possuem agendamentos. Exclua os agendamentos primeiro.");
+                    }
+
+                    // Deletar animais primeiro (não têm agendamentos)
+                    _context.Animais.RemoveRange(tutor.Animais);
+                }
+
+                // Remover o Tutor
                 _context.Tutores.Remove(tutor);
 
-                // 2. Removemos o Usuario (Login)
-                var usuario = await _context.Usuarios.FindAsync(tutor.UsuarioId);
-                if (usuario != null) _context.Usuarios.Remove(usuario);
+                // Remover o Usuario (Login) se existir
+                if (tutor.UsuarioId.HasValue)
+                {
+                    var usuario = await _context.Usuarios.FindAsync(tutor.UsuarioId);
+                    if (usuario != null) 
+                        _context.Usuarios.Remove(usuario);
+                }
 
                 await _context.SaveChangesAsync();
                 return NoContent();
+            }
+            catch (DbUpdateException ex)
+            {
+                return StatusCode(500, $"Erro ao deletar tutor: {ex.InnerException?.Message ?? ex.Message}");
             }
             catch (Exception ex)
             {

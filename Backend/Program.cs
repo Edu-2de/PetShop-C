@@ -1,33 +1,33 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using SIGA_PET.Data;
 using SIGA_PET.Profiles;
 using System.Text;
-using System.Text.Json.Serialization; // IMPORTANTE: Necess�rio para o IgnoreCycles
+using System.Text.Json.Serialization;
+using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // ==============================================================================
-// 1. CORRE��O DO ERRO DE LISTAGEM (JSON INFINITO)
-// ==============================================================================
+// 1. CONFIGURAÇÃO DO JSON (EVITAR REFERÊNCIAS CÍCLICAS)
+// ===============================================================================
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
-        // Esta linha impede que a API trave ao tentar converter
-        // relacionamentos circulares (Produto -> Fornecedor -> Produto...)
         options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
     });
 
-// 2. Configura��o do Banco de Dados
+// 2. Configuração do Banco de Dados
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(connectionString));
 
-// 3. Configura��o do AutoMapper
+// 3. Configuração do AutoMapper
 builder.Services.AddAutoMapper(typeof(MappingProfile));
 
-// 4. Configura��o de Autentica��o e JWT
+// 4. Configuração de Autenticação e JWT
 var jwtKey = builder.Configuration["Jwt:Key"] ?? "MinhaChaveSecretaSuperSegura123!";
 var key = Encoding.ASCII.GetBytes(jwtKey);
 
@@ -49,7 +49,7 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
-// 5. Configura��o do CORS
+// 5. Configuração do CORS
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAngularApp",
@@ -62,31 +62,202 @@ builder.Services.AddCors(options =>
         });
 });
 
-// 6. Swagger
+// 6. Swagger com Documentação Completa e Melhorada
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    // Informacoes da API
+    options.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "SIGA-PET API",
+        Version = "v2.0.0",
+        Description = @"
+# API RESTful Completa para Gestao de Pet Shop
+
+## Funcionalidades
+
+### Autenticacao e Usuarios
+- Login e Registro de usuarios
+- Controle de perfis (Admin, Funcionario, Tutor)
+- Autenticacao JWT
+
+### Gestao de Pessoas
+- **Tutores**: Clientes/donos de pets
+- **Funcionarios**: Veterinarios, Tosadores, Atendentes
+- **Animais**: Cadastro completo de pets
+
+### E-commerce
+- **Produtos**: Catalogo completo com imagens
+- **Categorias**: Organizacao de produtos
+- **Carrinho**: Gestao de compras
+- **Vendas**: Historico e relatorios
+
+### Agendamentos
+- Servicos de banho, tosa e veterinaria
+- Controle de horarios e profissionais
+- Validacao de conflitos
+
+### Banco de Dados
+- **Resetar Banco**: Recria toda estrutura
+- **Popular Banco**: Insere dados de exemplo
+- **Status**: Verifica estado do banco
+
+## Comecando
+
+1. **Resetar e Popular o Banco**
+   - Use o endpoint `POST /api/Database/reset-e-popular`
+   - Isso cria a estrutura e insere dados de exemplo
+
+2. **Fazer Login**
+   - Use `POST /api/Auth/login` com as credenciais fornecidas
+   - Copie o token JWT retornado
+
+3. **Autorizar no Swagger**
+   - Clique no botao **Authorize** no topo
+   - Digite: `Bearer {seu_token_aqui}`
+   - Agora pode testar os endpoints protegidos!
+
+## Credenciais de Teste
+
+Apos popular o banco, use estas credenciais:
+
+| Perfil | Email | Senha |
+|--------|-------|-------|
+| Admin | admin@sigapet.com | senha123 |
+| Veterinario | carlos.vet@sigapet.com | senha123 |
+| Tosador | ana.tosa@sigapet.com | senha123 |
+| Cliente | maria.silva@email.com | senha123 |
+
+## Documentação Completa
+
+Explore os endpoints abaixo para ver exemplos detalhados de requisições e respostas.
+",
+        TermsOfService = new Uri("https://example.com/terms"),
+        Contact = new OpenApiContact
+        {
+            Name = "Suporte SIGA-PET",
+            Email = "suporte@sigapet.com",
+            Url = new Uri("https://github.com/Edu-2de/PetShop-C")
+        },
+        License = new OpenApiLicense
+        {
+            Name = "MIT License",
+            Url = new Uri("https://opensource.org/licenses/MIT")
+        }
+    });
+
+    // Segurança JWT
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = SecuritySchemeType.Http,
+        Scheme = "Bearer",
+        BearerFormat = "JWT",
+    Description = @"
+**Como usar a autenticação JWT:**
+
+1. Faça login usando `POST /api/Auth/login`
+2. Copie o token retornado no campo `token`
+3. Clique no botão **Authorize** acima
+4. Digite: `Bearer {seu_token_aqui}` (substitua {seu_token_aqui} pelo token copiado)
+5. Clique em **Authorize** e depois **Close`
+
+Agora você pode testar os endpoints protegidos!
+
+**Exemplo:**
+```
+Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+```
+",
+        In = ParameterLocation.Header
+    });
+
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            new string[] { }
+        }
+    });
+
+    // Tags personalizadas para organização
+    options.TagActionsBy(api =>
+    {
+        if (api.GroupName != null)
+        {
+            return new[] { api.GroupName };
+        }
+
+        var controllerName = api.ActionDescriptor.RouteValues["controller"];
+        return new[] { controllerName ?? "Default" };
+    });
+
+    // Ordenar por nome do controller
+    options.OrderActionsBy(api => $"{api.ActionDescriptor.RouteValues["controller"]}_{api.HttpMethod}");
+
+    // XML Documentation
+    var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+    if (File.Exists(xmlPath))
+    {
+        options.IncludeXmlComments(xmlPath, includeControllerXmlComments: true);
+    }
+});
 
 var app = builder.Build();
 
-// ==============================================================================
-// 2. CORRE��O DO ERRO DE UPLOAD (CRIAR PASTA AUTOMATICAMENTE)
-// ==============================================================================
-// Isso garante que a pasta de imagens exista antes de qualquer upload
+// ==================================================================
+// CONFIGURAÇÃO DE PASTAS DE UPLOAD
+// ==================================================================
 var uploadPath = Path.Combine(app.Environment.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot"), "imagens");
 if (!Directory.Exists(uploadPath))
 {
     Directory.CreateDirectory(uploadPath);
-    Console.WriteLine($"[SISTEMA] Pasta de uploads criada com sucesso: {uploadPath}");
+    Console.WriteLine($"[SISTEMA] Pasta de uploads criada: {uploadPath}");
 }
 
-// Configure the HTTP request pipeline.
+// Configure the HTTP request pipeline
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwagger(options =>
+    {
+        options.SerializeAsV2 = false;
+    });
+    
+    app.UseSwaggerUI(options =>
+    {
+        options.SwaggerEndpoint("/swagger/v1/swagger.json", "SIGA-PET API v2.0");
+        options.RoutePrefix = string.Empty; // Swagger em /
+    options.DocumentTitle = "SIGA-PET API - Documentação";
+        
+        // Configurações de UI
+        options.DefaultModelsExpandDepth(2);
+        options.DefaultModelExpandDepth(2);
+        options.DisplayRequestDuration();
+        options.ShowCommonExtensions();
+        options.EnableDeepLinking();
+        options.EnableFilter();
+        options.ShowExtensions();
+        
+        // Injetar CSS customizado
+        options.InjectStylesheet("/swagger-ui/custom.css");
+        
+        // Tema escuro (opcional)
+        // options.ConfigObject.AdditionalItems["syntaxHighlight"] = new Dictionary<string, object>
+        // {
+        //     ["theme"] = "monokai"
+        // };
+    });
 }
 
-// Habilita o uso de arquivos est�ticos (para conseguir ver as imagens depois de salvas)
+// Habilita arquivos estáticos
 app.UseStaticFiles();
 
 var imagensPath = Path.Combine(builder.Environment.ContentRootPath, "wwwroot", "imagens");
@@ -107,5 +278,24 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+Console.WriteLine(@"
+========================================
+  SIGA-PET API INICIADA COM SUCESSO
+========================================
+
+Documentacao: http://localhost:5000
+Swagger UI: http://localhost:5000/swagger
+Frontend: http://localhost:4200
+
+INICIO RAPIDO:
+1. Acesse http://localhost:5000
+2. Use POST /api/Database/reset-e-popular para criar o banco
+3. Use POST /api/Auth/login para autenticar
+4. Copie o token e clique em Authorize
+
+Sistema pronto para uso!
+========================================
+");
 
 app.Run();

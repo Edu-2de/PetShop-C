@@ -19,14 +19,14 @@
         </thead>
         <tbody>
           <tr *ngFor="let fornecedor of fornecedoresFiltrados()">
-            <th scope="row">{{ fornecedor.id }}</th>
+            <th scope="row">{{ fornecedor.fornecedorId }}</th>
             <td>{{ fornecedor.nome }}</td>
             <td>{{ fornecedor.cnpj }}</td>
             <td>{{ fornecedor.telefone }}</td>
             <td>{{ fornecedor.email }}</td>
             <td>
-              <button [routerLink]="['/fornecedores/editar', fornecedor.id]" class="btn btn-sm btn-primary me-2">Editar</button>
-              <button (click)="excluir(fornecedor.id)" class="btn btn-sm btn-danger">Excluir</button>
+              <button [routerLink]="['/fornecedores/editar', fornecedor.fornecedorId]" class="btn btn-sm btn-primary me-2">Editar</button>
+              <button (click)="excluir(fornecedor.fornecedorId)" class="btn btn-sm btn-danger">Excluir</button>
             </td>
           </tr>
         </tbody>

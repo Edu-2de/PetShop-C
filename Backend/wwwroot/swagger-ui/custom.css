@@ -1,0 +1,225 @@
+/* ========================================
+   ESTILOS CUSTOMIZADOS PARA SWAGGER UI
+   ======================================== */
+
+/* Logo e Título */
+.swagger-ui .topbar {
+    background: linear-gradient(135deg, #1abc9c 0%, #16a085 100%);
+    padding: 15px 0;
+}
+
+.swagger-ui .topbar .wrapper {
+    padding: 0 20px;
+}
+
+.swagger-ui .topbar-wrapper img {
+    display: none;
+}
+
+.swagger-ui .topbar-wrapper .link:before {
+    content: "?? ";
+    font-size: 24px;
+}
+
+/* Informações da API */
+.swagger-ui .info {
+    margin: 30px 0;
+}
+
+.swagger-ui .info .title {
+    font-size: 32px;
+    color: #1abc9c;
+    font-weight: 700;
+}
+
+.swagger-ui .info .description {
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+/* Botões */
+.swagger-ui .btn {
+    border-radius: 8px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.swagger-ui .btn.authorize {
+    background: #1abc9c;
+    border-color: #1abc9c;
+}
+
+.swagger-ui .btn.authorize:hover {
+    background: #16a085;
+    border-color: #16a085;
+}
+
+.swagger-ui .btn.execute {
+    background: #3498db;
+    border-color: #3498db;
+}
+
+.swagger-ui .btn.execute:hover {
+    background: #2980b9;
+    border-color: #2980b9;
+}
+
+/* Tags (Grupos de Endpoints) */
+.swagger-ui .opblock-tag {
+    border-bottom: 2px solid #1abc9c;
+    padding: 10px 20px;
+    margin: 20px 0;
+    background: #f8f9fa;
+    border-radius: 8px 8px 0 0;
+}
+
+.swagger-ui .opblock-tag:hover {
+    background: #ecf0f1;
+}
+
+/* Métodos HTTP */
+.swagger-ui .opblock.opblock-post {
+    border-color: #1abc9c;
+    background: rgba(26, 188, 156, 0.05);
+}
+
+.swagger-ui .opblock.opblock-post .opblock-summary-method {
+    background: #1abc9c;
+}
+
+.swagger-ui .opblock.opblock-get {
+    border-color: #3498db;
+    background: rgba(52, 152, 219, 0.05);
+}
+
+.swagger-ui .opblock.opblock-get .opblock-summary-method {
+    background: #3498db;
+}
+
+.swagger-ui .opblock.opblock-put {
+    border-color: #f39c12;
+    background: rgba(243, 156, 18, 0.05);
+}
+
+.swagger-ui .opblock.opblock-put .opblock-summary-method {
+    background: #f39c12;
+}
+
+.swagger-ui .opblock.opblock-delete {
+    border-color: #e74c3c;
+    background: rgba(231, 76, 60, 0.05);
+}
+
+.swagger-ui .opblock.opblock-delete .opblock-summary-method {
+    background: #e74c3c;
+}
+
+/* Respostas */
+.swagger-ui .responses-inner {
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 8px;
+}
+
+.swagger-ui .response-col_status {
+    font-weight: 700;
+}
+
+/* Tabelas */
+.swagger-ui table thead tr th {
+    background: #ecf0f1;
+    color: #2c3e50;
+    font-weight: 700;
+}
+
+.swagger-ui table tbody tr td {
+    padding: 12px 10px;
+}
+
+/* Code Blocks */
+.swagger-ui .highlight-code {
+    background: #2c3e50;
+    border-radius: 8px;
+}
+
+.swagger-ui .highlight-code .microlight {
+    color: #ecf0f1;
+}
+
+/* Schemas */
+.swagger-ui .model-box {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 15px;
+}
+
+.swagger-ui .model-title {
+    color: #1abc9c;
+    font-weight: 700;
+}
+
+/* Try it out */
+.swagger-ui .try-out__btn {
+    background: #1abc9c;
+    border-color: #1abc9c;
+    color: white;
+}
+
+.swagger-ui .try-out__btn:hover {
+    background: #16a085;
+    border-color: #16a085;
+}
+
+/* Authorize Button Highlight */
+.swagger-ui .btn.authorize.unlocked {
+    background: #27ae60;
+    border-color: #27ae60;
+}
+
+.swagger-ui .btn.authorize svg {
+    fill: white;
+}
+
+/* Melhorias de Responsividade */
+@media (max-width: 768px) {
+    .swagger-ui .info .title {
+        font-size: 24px;
+    }
+    
+    .swagger-ui .opblock-tag {
+        font-size: 16px;
+        padding: 8px 15px;
+    }
+}
+
+/* Badges customizados */
+.swagger-ui .opblock-summary-description code {
+    background: #1abc9c;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: 600;
+}
+
+/* Loading spinner */
+.swagger-ui .loading-container {
+    background: linear-gradient(135deg, #1abc9c 0%, #16a085 100%);
+}
+
+/* Scroll suave */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Mensagens de sucesso/erro mais visíveis */
+.swagger-ui .response .response-col_status {
+    font-size: 16px;
+}
+
+.swagger-ui .response.success {
+    border-left: 4px solid #27ae60;
+}
+
+.swagger-ui .response.error {
+    border-left: 4px solid #e74c3c;
+}

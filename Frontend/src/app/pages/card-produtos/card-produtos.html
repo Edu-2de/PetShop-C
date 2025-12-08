@@ -12,34 +12,44 @@
   <div class="col-md-3 col-sm-6" *ngFor="let produto of produtos">
     <div class="card h-100 shadow-sm border-0 product-card">
 
-      <a [routerLink]="['/produtos', produto.id]" style="cursor: pointer;">
+      <!-- Área Clicável para Ver Detalhes (somente imagem e descrição) -->
+      <div (click)="irParaDetalhes(produto)" style="cursor: pointer; flex-grow: 1;">
         <div class="position-relative" style="height: 200px; overflow: hidden;">
           <img [src]="getImagem(produto)" class="card-img-top w-100 h-100" style="object-fit: cover;" [alt]="produto.nome">
+
+          <div class="position-absolute top-0 start-0 p-2" *ngIf="produto.nomeCategoria">
+            <span class="badge bg-primary">{{ produto.nomeCategoria }}</span>
+          </div>
 
           <div class="position-absolute top-0 end-0 p-2" *ngIf="produto.quantidadeEstoque < 5">
             <span class="badge bg-danger">Últimas Unidades</span>
           </div>
         </div>
-      </a>
 
-      <div class="card-body d-flex flex-column">
-        <a [routerLink]="['/produtos', produto.id]" class="text-decoration-none text-dark">
-          <h5 class="card-title text-truncate" [title]="produto.nome" style="cursor: pointer;">
+        <div class="card-body d-flex flex-column" style="cursor: pointer;">
+          <h5 class="card-title text-truncate" [title]="produto.nome">
             {{ produto.nome }}
           </h5>
-        </a>
 
-        <p class="card-text text-muted small flex-grow-1" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
-          {{ produto.descricao }}
-        </p>
-
-        <div class="mt-3 d-flex justify-content-between align-items-center">
-          <span class="h5 mb-0 text-primary fw-bold">{{ produto.preco | currency:'BRL' }}</span>
-
-          <a [routerLink]="['/produtos', codificarId(produto.id)]" class="btn btn-outline-primary btn-sm rounded-pill">
-            Ver Detalhes
-          </a>
+          <p class="card-text text-muted small flex-grow-1" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+            {{ produto.descricao }}
+          </p>
         </div>
+      </div>
+
+      <!-- Footer com preço e botão (NÃO clicável para detalhes) -->
+      <div class="card-body pt-0 d-flex justify-content-between align-items-center">
+        <span class="h5 mb-0 text-primary fw-bold">{{ produto.preco | currency:'BRL' }}</span>
+        
+        <!-- Botão + para adicionar ao carrinho -->
+        <button 
+          class="btn btn-primary btn-sm rounded-circle"
+          style="width: 40px; height: 40px; padding: 0; flex-shrink: 0;"
+          (click)="adicionarAoCarrinho($event, produto)"
+          [disabled]="produto.quantidadeEstoque === 0"
+          title="Adicionar ao carrinho">
+          <i class="bi bi-plus-lg fs-5"></i>
+        </button>
       </div>
 
     </div>

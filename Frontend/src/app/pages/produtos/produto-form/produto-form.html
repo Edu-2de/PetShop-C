@@ -4,41 +4,56 @@
       <h2 class="mb-0">{{ titulo }}</h2>
     </div>
     <div class="card-body">
-      <form (ngSubmit)="salvar()">
+      <form #form="ngForm" (ngSubmit)="salvar()">
         <div class="mb-3">
           <label for="nome" class="form-label fw-bold">Nome do Produto</label>
-          <input type="text" class="form-control" id="nome" name="nome" [(ngModel)]="produto.nome" required placeholder="Ex: Ração Premium">
+          <input type="text" class="form-control" id="nome" name="nome" [(ngModel)]="produto.nome" required minlength="3" #nome="ngModel" placeholder="Ex: Ração Premium">
+          <div *ngIf="nome.invalid && (nome.dirty || nome.touched)" class="text-danger mt-1 small">
+            <div *ngIf="nome.errors?.['required']">O nome é obrigatório.</div>
+            <div *ngIf="nome.errors?.['minlength']">O nome deve ter no mínimo 3 caracteres.</div>
+          </div>
         </div>
 
         <div class="row">
           <div class="col-md-6 mb-3">
             <label for="categoria" class="form-label fw-bold">Categoria</label>
-            <select class="form-select" id="categoria" name="categoria" [(ngModel)]="produto.categoriaId">
+            <select class="form-select" id="categoria" name="categoriaId" [(ngModel)]="produto.categoriaId" required #categoriaId="ngModel">
               <option [ngValue]="undefined">Selecione uma categoria</option>
-              <option *ngFor="let cat of categorias" [value]="cat.id">
+              <option *ngFor="let cat of categorias" [value]="cat.categoriaId">
                 {{ cat.nome }}
               </option>
             </select>
+            <div *ngIf="categoriaId.invalid && (categoriaId.dirty || categoriaId.touched)" class="text-danger mt-1 small">
+              <div *ngIf="categoriaId.errors?.['required']">A categoria é obrigatória.</div>
+            </div>
           </div>
 
           <div class="col-md-6 mb-3">
             <label for="preco" class="form-label fw-bold">Preço</label>
             <div class="input-group">
               <span class="input-group-text">R$</span>
-              <input type="number" class="form-control" id="preco" name="preco" [(ngModel)]="produto.preco" required step="0.01">
+              <input type="number" class="form-control" id="preco" name="preco" [(ngModel)]="produto.preco" required min="0.01" #preco="ngModel" step="0.01">
+            </div>
+            <div *ngIf="preco.invalid && (preco.dirty || preco.touched)" class="text-danger mt-1 small">
+              <div *ngIf="preco.errors?.['required']">O preço é obrigatório.</div>
+              <div *ngIf="preco.errors?.['min']">O preço deve ser maior que zero.</div>
             </div>
           </div>
 
           <div class="col-md-6 mb-3">
             <label for="estoque" class="form-label fw-bold">Estoque</label>
-            <input type="number" class="form-control" id="estoque" name="estoque" [(ngModel)]="produto.quantidadeEstoque" required>
+            <input type="number" class="form-control" id="estoque" name="estoque" [(ngModel)]="produto.quantidadeEstoque" required min="0" #estoque="ngModel">
+            <div *ngIf="estoque.invalid && (estoque.dirty || estoque.touched)" class="text-danger mt-1 small">
+              <div *ngIf="estoque.errors?.['required']">O estoque é obrigatório.</div>
+              <div *ngIf="estoque.errors?.['min']">O estoque não pode ser negativo.</div>
+            </div>
           </div>
 
           <div class="col-md-6 mb-3">
             <label for="fornecedor" class="form-label fw-bold">Fornecedor</label>
-            <select class="form-select" id="fornecedor" [(ngModel)]="produto.fornecedorid" name="fornecedorid" required>
-              <option [ngValue]="0" disabled>Selecione um fornecedor</option>
-              <option *ngFor="let f of fornecedores" [value]="f.id">
+            <select class="form-select" id="fornecedor" [(ngModel)]="produto.fornecedorId" name="fornecedorId">
+              <option [ngValue]="null">Nenhum</option>
+              <option *ngFor="let f of fornecedores" [value]="f.fornecedorId">
                 {{ f.nome }}
               </option>
             </select>
@@ -80,7 +95,7 @@
 
         <div class="d-flex justify-content-end mt-4">
           <a routerLink="/produtos" class="btn btn-secondary me-2">Cancelar</a>
-          <button type="submit" class="btn btn-primary px-4" [disabled]="uploading">
+          <button type="submit" class="btn btn-primary px-4" [disabled]="uploading || form.invalid">
             {{ uploading ? 'Salvando...' : 'Salvar Produto' }}
           </button>
         </div>

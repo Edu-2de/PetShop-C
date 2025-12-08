@@ -33,8 +33,8 @@ export class TutorFormComponent implements OnInit {
   }
 
   salvar(): void {
-    if (this.isEdit && this.tutor.id) {
-      this.tutorService.atualizar(this.tutor.id, this.tutor as Tutor).subscribe(() => {
+    if (this.isEdit && this.tutor.tutorId) {
+      this.tutorService.atualizar(this.tutor.tutorId, this.tutor as Tutor).subscribe(() => {
         this.router.navigate(['/tutores']);
       });
     } else {

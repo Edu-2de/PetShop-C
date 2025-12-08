@@ -6,11 +6,15 @@ import { tap } from 'rxjs/operators';
 import { Observable } from 'rxjs';
 
 export interface User {
-  id: number;       // ADICIONADO: O backend retorna 'id'
+  usuarioId: number;
   nome: string;
   email: string;
   cargo: string;
-  funcionarioId?: number; // Mantido como opcional
+  funcionarioId?: number;
+  tutorId?: number;
+
+  // Alias para compatibilidade
+  id?: number;
 }
 
 interface LoginResponse {
@@ -18,13 +22,21 @@ interface LoginResponse {
   usuario: User;
 }
 
+interface RegisterData {
+  nome: string;
+  email: string;
+  senha: string;
+  telefone: string;
+  endereco: string;
+}
+
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class AuthService {
   private http = inject(HttpClient);
   private router = inject(Router);
-  private apiUrl = `${environment.apiUrl}/Auth/login`;
+  private apiUrl = `${environment.apiUrl}/Auth`;
 
   // Signals para estado reativo
   private currentUserSignal = signal<User | null>(null);
@@ -37,10 +49,31 @@ export class AuthService {
   }
 
   login(email: string, senha: string): Observable<LoginResponse> {
-    return this.http.post<LoginResponse>(this.apiUrl, { email, senha }).pipe(
-      tap(response => {
+    return this.http.post<LoginResponse>(`${this.apiUrl}/login`, { email, senha }).pipe(
+      tap((response) => {
         this.saveToken(response.token);
-        this.setCurrentUser(response.usuario);
+        this.setCurrentUser({
+          ...response.usuario,
+          id:
+            response.usuario.tutorId ||
+            response.usuario.funcionarioId ||
+            response.usuario.usuarioId,
+        });
+      })
+    );
+  }
+
+  register(data: RegisterData): Observable<LoginResponse> {
+    return this.http.post<LoginResponse>(`${this.apiUrl}/register`, data).pipe(
+      tap((response) => {
+        this.saveToken(response.token);
+        this.setCurrentUser({
+          ...response.usuario,
+          id:
+            response.usuario.tutorId ||
+            response.usuario.funcionarioId ||
+            response.usuario.usuarioId,
+        });
       })
     );
   }
@@ -65,7 +98,12 @@ export class AuthService {
     const userJson = localStorage.getItem(this.USER_KEY);
     if (userJson) {
       try {
-        this.currentUserSignal.set(JSON.parse(userJson));
+        const user = JSON.parse(userJson);
+        // Garantir compatibilidade com campo id
+        if (!user.id && (user.tutorId || user.funcionarioId || user.usuarioId)) {
+          user.id = user.tutorId || user.funcionarioId || user.usuarioId;
+        }
+        this.currentUserSignal.set(user);
       } catch {
         this.logout();
       }
@@ -74,6 +112,10 @@ export class AuthService {
 
   getCurrentUser() {
     return this.currentUserSignal.asReadonly();
+  }
+
+  getCurrentUserValue(): User | null {
+    return this.currentUserSignal();
   }
 
   getToken(): string | null {
@@ -90,19 +132,54 @@ export class AuthService {
       return false;
     }
     const cargo = user.cargo.toLowerCase().trim();
-    const cargosAdministrativos = [
-      'gerente',
-      'administrador',
-      'admin',
-      'veterinário',
-      'veterinario',
-      'atendente',
-      'tosador'
-    ];
-    return cargosAdministrativos.includes(cargo);
+    // Admin é apenas o cargo "Admin" específico
+    return cargo === 'admin' || cargo === 'administrador';
   }
 
+  // NOVO: Verificar se é funcionário (veterinário, tosador, atendente)
+  isFuncionario(): boolean {
+    const user = this.currentUserSignal();
+    if (!user || !user.cargo) {
+      return false;
+    }
+    const cargo = user.cargo.toLowerCase().trim();
+    const cargosFuncionario = ['veterinário', 'veterinario', 'tosador', 'atendente', 'funcionario'];
+    return cargosFuncionario.includes(cargo) || !!user.funcionarioId;
+  }
+
+  // NOVO: Verificar se é tutor/cliente
+  isTutor(): boolean {
+    const user = this.currentUserSignal();
+    if (!user) return false;
+
+    const cargo = user.cargo?.toLowerCase().trim();
+    return cargo === 'tutor' || !!user.tutorId;
+  }
+
+  // Atualizar isUser para ser mais específico
   isUser(): boolean {
     return !!this.currentUserSignal();
+  }
+
+  // NOVO: Verificar permissões administrativas (Admin + Funcionários)
+  hasAdminAccess(): boolean {
+    return this.isAdmin() || this.isFuncionario();
+  }
+
+  // NOVO: Recarregar informações do usuário do backend
+  reloadUserInfo(): Observable<User> {
+    const currentUser = this.currentUserSignal();
+    if (!currentUser) {
+      throw new Error('Nenhum usuário logado');
+    }
+
+    return this.http.get<User>(`${this.apiUrl}/user-info`).pipe(
+      tap((user) => {
+        this.setCurrentUser({
+          ...user,
+          id: user.tutorId || user.funcionarioId || user.usuarioId,
+        });
+      })
+    );
   }
 }
