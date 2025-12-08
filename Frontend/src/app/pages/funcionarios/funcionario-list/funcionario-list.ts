@@ -12,7 +12,9 @@ import { FuncionarioService, Funcionario } from '../../../service/funcionarios/f
       <div class="card shadow-sm">
         <div class="card-header bg-light py-3 d-flex justify-content-between align-items-center">
           <h2 class="mb-0">Equipe</h2>
-          <a routerLink="/funcionarios/novo" class="btn btn-primary"><i class="bi bi-person-plus me-1"></i> Contratar</a>
+          <a routerLink="/funcionarios/novo" class="btn btn-primary"
+            ><i class="bi bi-person-plus me-1"></i> Contratar</a
+          >
         </div>
         <div class="card-body">
           <table class="table table-hover align-middle">
@@ -29,13 +31,21 @@ import { FuncionarioService, Funcionario } from '../../../service/funcionarios/f
             <tbody>
               <tr *ngFor="let f of funcionarios()">
                 <td class="fw-medium">{{ f.nome }}</td>
-                <td><span class="badge bg-secondary">{{ f.cargo }}</span></td>
+                <td>
+                  <span class="badge bg-secondary">{{ f.cargo }}</span>
+                </td>
                 <td>{{ f.email }}</td>
                 <td>{{ f.telefone }}</td>
-                <td>{{ f.dataContratacao | date:'dd/MM/yyyy' }}</td>
+                <td>{{ f.dataContratacao | date : 'dd/MM/yyyy' }}</td>
                 <td class="text-end">
-                  <a [routerLink]="['/funcionarios/editar', f.funcionarioId]" class="btn btn-sm btn-outline-info me-2">Editar</a>
-                  <button (click)="excluir(f.funcionarioId)" class="btn btn-sm btn-outline-danger">Excluir</button>
+                  <a
+                    [routerLink]="['/funcionarios/editar', f.funcionarioId]"
+                    class="btn btn-sm btn-outline-info me-2"
+                    >Editar</a
+                  >
+                  <button (click)="excluir(f.funcionarioId)" class="btn btn-sm btn-outline-danger">
+                    Excluir
+                  </button>
                 </td>
               </tr>
             </tbody>
@@ -43,7 +53,7 @@ import { FuncionarioService, Funcionario } from '../../../service/funcionarios/f
         </div>
       </div>
     </div>
-  `
+  `,
 })
 export class FuncionarioListComponent implements OnInit {
   funcionarios = signal<Funcionario[]>([]);
@@ -54,7 +64,7 @@ export class FuncionarioListComponent implements OnInit {
   }
 
   carregar() {
-    this.service.listar().subscribe(data => this.funcionarios.set(data));
+    this.service.listar().subscribe((data) => this.funcionarios.set(data));
   }
 
   excluir(id: number) {
@@ -66,10 +76,10 @@ export class FuncionarioListComponent implements OnInit {
         },
         error: (err) => {
           console.error('Erro ao excluir funcionário:', err);
-          
+
           // Extrair mensagem de erro do backend
           let mensagemErro = '❌ Erro ao excluir funcionário. Tente novamente.';
-          
+
           if (err.error && typeof err.error === 'string') {
             mensagemErro = '❌ ' + err.error;
           } else if (err.error && err.error.message) {
@@ -77,9 +87,9 @@ export class FuncionarioListComponent implements OnInit {
           } else if (err.message) {
             mensagemErro = '❌ ' + err.message;
           }
-          
+
           alert(mensagemErro);
-        }
+        },
       });
     }
   }
