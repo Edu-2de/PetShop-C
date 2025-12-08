@@ -11,7 +11,7 @@ import { AuthService } from '../../service/auth/auth.service';
   standalone: true,
   imports: [CommonModule, RouterLink, FormsModule, CurrencyPipe],
   templateUrl: './servicos-pet.html',
-  styleUrls: ['./servicos-pet.scss']
+  styleUrls: ['./servicos-pet.scss'],
 })
 export class ServicoPetListComponent implements OnInit {
   private servicos = signal<ServicoPet[]>([]);
@@ -28,21 +28,19 @@ export class ServicoPetListComponent implements OnInit {
       return servicos;
     }
 
-    return servicos.filter(servico =>
-      servico.nome.toLowerCase().includes(termo)
-    );
+    return servicos.filter((servico) => servico.nome.toLowerCase().includes(termo));
   });
 
-  constructor(private servicoPetService: ServicoPetService) { }
+  constructor(private servicoPetService: ServicoPetService) {}
 
   ngOnInit(): void {
     this.carregarServicos();
   }
 
   carregarServicos(): void {
-    this.servicoPetService.listar().subscribe(data => {
+    this.servicoPetService.listar().subscribe((data) => {
       // Se for usuário, mostra apenas ativos. Se for admin, mostra todos.
-      const lista = this.authService.isAdmin() ? data : data.filter(s => s.ativo);
+      const lista = this.authService.isAdmin() ? data : data.filter((s) => s.ativo);
       this.servicos.set(lista);
     });
   }
@@ -59,13 +57,25 @@ export class ServicoPetListComponent implements OnInit {
 
     this.servicoPetService.deletar(id).subscribe({
       next: () => {
-        this.servicos.update(servicosAtuais => servicosAtuais.filter(s => s.servicoId !== id));
-        alert('Serviço excluído com sucesso!');
+        this.servicos.update((servicosAtuais) => servicosAtuais.filter((s) => s.servicoId !== id));
+        alert('✅ Serviço excluído com sucesso!');
       },
       error: (err) => {
         console.error('Erro ao excluir serviço:', err);
-        alert('Erro ao excluir serviço. Tente novamente.');
-      }
+
+        // Extrair mensagem de erro do backend
+        let mensagemErro = '❌ Erro ao excluir serviço. Tente novamente.';
+
+        if (err.error && typeof err.error === 'string') {
+          mensagemErro = '❌ ' + err.error;
+        } else if (err.error && err.error.message) {
+          mensagemErro = '❌ ' + err.error.message;
+        } else if (err.message) {
+          mensagemErro = '❌ ' + err.message;
+        }
+
+        alert(mensagemErro);
+      },
     });
   }
 

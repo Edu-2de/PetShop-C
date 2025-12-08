@@ -59,7 +59,28 @@ export class FuncionarioListComponent implements OnInit {
 
   excluir(id: number) {
     if (confirm('Tem certeza? Isso removerá o acesso deste usuário.')) {
-      this.service.deletar(id).subscribe(() => this.carregar());
+      this.service.deletar(id).subscribe({
+        next: () => {
+          this.carregar();
+          alert('✅ Funcionário excluído com sucesso!');
+        },
+        error: (err) => {
+          console.error('Erro ao excluir funcionário:', err);
+          
+          // Extrair mensagem de erro do backend
+          let mensagemErro = '❌ Erro ao excluir funcionário. Tente novamente.';
+          
+          if (err.error && typeof err.error === 'string') {
+            mensagemErro = '❌ ' + err.error;
+          } else if (err.error && err.error.message) {
+            mensagemErro = '❌ ' + err.error.message;
+          } else if (err.message) {
+            mensagemErro = '❌ ' + err.message;
+          }
+          
+          alert(mensagemErro);
+        }
+      });
     }
   }
 }
