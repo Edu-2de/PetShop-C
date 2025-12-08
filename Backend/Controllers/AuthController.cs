@@ -68,7 +68,7 @@ namespace SIGA_PET.Controllers
                 using var transaction = await _context.Database.BeginTransactionAsync();
                 try
                 {
-                    // 1. CRIAR USU�RIO PRIMEIRO (sempre obrigat�rio)
+                    // 1. CRIAR USUÁRIO PRIMEIRO (sempre obrigatório)
                     var usuario = new Usuario
                     {
                         Nome = registerDto.Nome, // Nome sempre vem do Usuario
@@ -81,7 +81,7 @@ namespace SIGA_PET.Controllers
                     _context.Usuarios.Add(usuario);
                     await _context.SaveChangesAsync();
 
-                    // 2. Criar tutor vinculado ao usu�rio
+                    // 2. Criar tutor vinculado ao usuário
                     var tutor = new Tutor
                     {
                         Nome = registerDto.Nome, // Sincroniza nome com Usuario
@@ -117,6 +117,35 @@ namespace SIGA_PET.Controllers
             {
                 return StatusCode(500, $"Erro interno: {ex.Message}");
             }
+        }
+
+        [HttpGet("user-info")]
+        public async Task<IActionResult> GetUserInfo()
+        {
+            // Obter email do token JWT
+            var emailClaim = User.FindFirst(ClaimTypes.Email)?.Value;
+            if (string.IsNullOrEmpty(emailClaim))
+            {
+                return Unauthorized("Token inválido.");
+            }
+
+            var usuario = await _context.Usuarios
+                .Include(u => u.Funcionario)
+                .Include(u => u.Tutor)
+                .AsNoTracking()
+                .FirstOrDefaultAsync(u => u.Email == emailClaim);
+
+            if (usuario == null)
+            {
+                return NotFound("Usuário não encontrado.");
+            }
+
+            var userInfo = _mapper.Map<UserInfo>(usuario);
+
+            // Debug: Log para verificar TutorId
+            Console.WriteLine($"DEBUG USER-INFO - Usuario: {usuario.Email}, TutorId: {usuario.Tutor?.TutorId}");
+
+            return Ok(userInfo);
         }
 
         private string GenerateJwtToken(Usuario usuario)

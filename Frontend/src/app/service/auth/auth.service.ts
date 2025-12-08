@@ -12,7 +12,7 @@ export interface User {
   cargo: string;
   funcionarioId?: number;
   tutorId?: number;
-  
+
   // Alias para compatibilidade
   id?: number;
 }
@@ -31,7 +31,7 @@ interface RegisterData {
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class AuthService {
   private http = inject(HttpClient);
@@ -50,11 +50,14 @@ export class AuthService {
 
   login(email: string, senha: string): Observable<LoginResponse> {
     return this.http.post<LoginResponse>(`${this.apiUrl}/login`, { email, senha }).pipe(
-      tap(response => {
+      tap((response) => {
         this.saveToken(response.token);
         this.setCurrentUser({
           ...response.usuario,
-          id: response.usuario.tutorId || response.usuario.funcionarioId || response.usuario.usuarioId
+          id:
+            response.usuario.tutorId ||
+            response.usuario.funcionarioId ||
+            response.usuario.usuarioId,
         });
       })
     );
@@ -62,11 +65,14 @@ export class AuthService {
 
   register(data: RegisterData): Observable<LoginResponse> {
     return this.http.post<LoginResponse>(`${this.apiUrl}/register`, data).pipe(
-      tap(response => {
+      tap((response) => {
         this.saveToken(response.token);
         this.setCurrentUser({
           ...response.usuario,
-          id: response.usuario.tutorId || response.usuario.funcionarioId || response.usuario.usuarioId
+          id:
+            response.usuario.tutorId ||
+            response.usuario.funcionarioId ||
+            response.usuario.usuarioId,
         });
       })
     );
@@ -137,13 +143,7 @@ export class AuthService {
       return false;
     }
     const cargo = user.cargo.toLowerCase().trim();
-    const cargosFuncionario = [
-      'veterinário',
-      'veterinario',
-      'tosador',
-      'atendente',
-      'funcionario'
-    ];
+    const cargosFuncionario = ['veterinário', 'veterinario', 'tosador', 'atendente', 'funcionario'];
     return cargosFuncionario.includes(cargo) || !!user.funcionarioId;
   }
 
@@ -151,7 +151,7 @@ export class AuthService {
   isTutor(): boolean {
     const user = this.currentUserSignal();
     if (!user) return false;
-    
+
     const cargo = user.cargo?.toLowerCase().trim();
     return cargo === 'tutor' || !!user.tutorId;
   }
@@ -164,5 +164,22 @@ export class AuthService {
   // NOVO: Verificar permissões administrativas (Admin + Funcionários)
   hasAdminAccess(): boolean {
     return this.isAdmin() || this.isFuncionario();
+  }
+
+  // NOVO: Recarregar informações do usuário do backend
+  reloadUserInfo(): Observable<User> {
+    const currentUser = this.currentUserSignal();
+    if (!currentUser) {
+      throw new Error('Nenhum usuário logado');
+    }
+
+    return this.http.get<User>(`${this.apiUrl}/user-info`).pipe(
+      tap((user) => {
+        this.setCurrentUser({
+          ...user,
+          id: user.tutorId || user.funcionarioId || user.usuarioId,
+        });
+      })
+    );
   }
 }

@@ -628,9 +628,16 @@ namespace SIGA_PET.Controllers
                 var horaAbertura = new TimeSpan(8, 0, 0);
                 var horaFechamento = new TimeSpan(18, 0, 0);
 
+                Console.WriteLine($"🕐 DEBUG Validação Horário:");
+                Console.WriteLine($"   Data/Hora recebida: {createCompletoDto.DataHora}");
+                Console.WriteLine($"   TimeOfDay: {horaAgendamento}");
+                Console.WriteLine($"   Hora abertura: {horaAbertura}");
+                Console.WriteLine($"   Hora fechamento: {horaFechamento}");
+
+                // Permite até 18:00:00 (inclusive)
                 if (horaAgendamento < horaAbertura || horaAgendamento > horaFechamento)
                 {
-                    return BadRequest("❌ Agendamentos só podem ser feitos entre 8:00 e 18:00.");
+                    return BadRequest($"❌ Agendamentos só podem ser feitos entre 8:00 e 18:00. Hora recebida: {horaAgendamento}");
                 }
 
                 if (createCompletoDto.DataHora.DayOfWeek == DayOfWeek.Sunday)
@@ -654,19 +661,40 @@ namespace SIGA_PET.Controllers
                 try
                 {
                     // 1. CRIAR OU ENCONTRAR TUTOR
+                    Console.WriteLine($"\n🔍 DEBUG TUTOR - Início da criação/busca");
+                    Console.WriteLine($"   Email recebido: {createCompletoDto.EmailTutor}");
+                    Console.WriteLine($"   Telefone recebido: {createCompletoDto.TelefoneTutor}");
+                    Console.WriteLine($"   Nome recebido: {createCompletoDto.NomeTutor}");
+                    
                     Tutor tutor;
                     
-                    // Verificar se tutor j� existe (por email ou telefone)
+                    // Verificar se tutor já existe (por email ou telefone)
                     Tutor? tutorExistente = null;
                     
+                    // PRIMEIRO: Verificar se o email pertence a um usuário que já tem tutor
                     if (!string.IsNullOrEmpty(createCompletoDto.EmailTutor))
                     {
+                        Console.WriteLine($"   🔎 Buscando usuário com email: {createCompletoDto.EmailTutor}");
                         var usuarioExistente = await _context.Usuarios
                             .FirstOrDefaultAsync(u => u.Email == createCompletoDto.EmailTutor);
+                        
                         if (usuarioExistente != null)
                         {
+                            Console.WriteLine($"   ✅ Usuário encontrado! UsuarioId: {usuarioExistente.UsuarioId}");
                             tutorExistente = await _context.Tutores
                                 .FirstOrDefaultAsync(t => t.UsuarioId == usuarioExistente.UsuarioId);
+                            if (tutorExistente != null)
+                            {
+                                Console.WriteLine($"   ✅ Tutor já existente encontrado! TutorId: {tutorExistente.TutorId}");
+                            }
+                            else
+                            {
+                                Console.WriteLine($"   ℹ️ Usuário não tem tutor ainda.");
+                            }
+                        }
+                        else
+                        {
+                            Console.WriteLine($"   ⚠️ Nenhum usuário encontrado com este email.");
                         }
                     }
 
@@ -678,22 +706,45 @@ namespace SIGA_PET.Controllers
 
                     if (tutorExistente != null)
                     {
+                        Console.WriteLine($"   📋 Usando tutor existente (TutorId: {tutorExistente.TutorId})");
                         tutor = tutorExistente;
                     }
                     else
                     {
-                        // Criar novo tutor
+                        Console.WriteLine($"   🆕 Criando novo tutor...");
+                        // Criar novo tutor e vincular ao usuário logado (se existir)
+                        int? usuarioIdParaTutor = null;
+                        
+                        // Buscar usuário pelo email para vincular
+                        if (!string.IsNullOrEmpty(createCompletoDto.EmailTutor))
+                        {
+                            Console.WriteLine($"   🔎 Buscando usuário novamente para vincular: {createCompletoDto.EmailTutor}");
+                            var usuario = await _context.Usuarios
+                                .FirstOrDefaultAsync(u => u.Email == createCompletoDto.EmailTutor);
+                            if (usuario != null)
+                            {
+                                usuarioIdParaTutor = usuario.UsuarioId;
+                                Console.WriteLine($"   ✅ Usuário encontrado para vincular! UsuarioId: {usuarioIdParaTutor}");
+                            }
+                            else
+                            {
+                                Console.WriteLine($"   ⚠️ Usuário NÃO encontrado. Tutor será criado SEM vínculo.");
+                            }
+                        }
+                        
                         tutor = new Tutor
                         {
-                            Nome = createCompletoDto.NomeTutor ?? "Cliente N�o Informado",
+                            Nome = createCompletoDto.NomeTutor ?? "Cliente Não Informado",
                             Telefone = createCompletoDto.TelefoneTutor ?? "",
-                            Endereco = createCompletoDto.EnderecoTutor ?? "N�o informado",
+                            Endereco = createCompletoDto.EnderecoTutor ?? "Não informado",
                             DataCadastro = DateTime.Now,
-                            UsuarioId = null // Tutor sem usu�rio de login
+                            UsuarioId = usuarioIdParaTutor // Vincula ao usuário logado
                         };
 
+                        Console.WriteLine($"   💾 Salvando novo tutor com UsuarioId: {usuarioIdParaTutor ?? 0}");
                         _context.Tutores.Add(tutor);
                         await _context.SaveChangesAsync();
+                        Console.WriteLine($"   ✅ Tutor criado com sucesso! TutorId: {tutor.TutorId}, UsuarioId: {tutor.UsuarioId}");
                     }
 
                     // 2. CRIAR ANIMAL

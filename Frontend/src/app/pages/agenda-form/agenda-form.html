@@ -52,9 +52,10 @@
               [(ngModel)]="agendamento.animalId"
               #petId="ngModel"
               [required]="!precisaCadastrarPet"
+              (change)="onPetChange()"
             >
-              <option [ngValue]="undefined" disabled>Selecione...</option>
-              <option *ngFor="let p of pets" [value]="p.animalId">
+              <option [ngValue]="undefined" disabled selected>Selecione...</option>
+              <option *ngFor="let p of pets" [ngValue]="p.animalId">
                 {{ p.nome }} ({{ p.raca || p.especie }})
               </option>
             </select>

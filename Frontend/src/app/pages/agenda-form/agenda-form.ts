@@ -157,7 +157,22 @@ export class AgendaFormComponent implements OnInit {
 
   atualizarDataHora(): void {
     if (this.dataSelecionada && this.horaSelecionada) {
-      const dataHora = new Date(`${this.dataSelecionada}T${this.horaSelecionada}:00`);
+      // CORREÇÃO: Criar data sem conversão de timezone
+      // Separar componentes da data e hora
+      const [ano, mes, dia] = this.dataSelecionada.split('-').map(Number);
+      const [hora, minutos] = this.horaSelecionada.split(':').map(Number);
+
+      // Criar data local sem conversão UTC
+      const dataHora = new Date(ano, mes - 1, dia, hora, minutos, 0, 0);
+
+      // DEBUG: Log para verificar valores
+      console.log('🔍 Validação hora:', {
+        hora,
+        minutos,
+        dataHora: dataHora.toISOString(),
+        horaLocal: dataHora.getHours(),
+        dataLocal: dataHora.toLocaleString('pt-BR'),
+      });
 
       // VALIDAÇÃO: Verificar se a data/hora não é no passado
       const agora = new Date();
@@ -173,14 +188,7 @@ export class AgendaFormComponent implements OnInit {
         return;
       }
 
-      // VALIDAÇÃO: Verificar horário de funcionamento (8:00 às 18:00 inclusive) - CORRIGIDO
-      const hora = dataHora.getHours();
-      const minutos = dataHora.getMinutes();
-
-      // DEBUG: Log para verificar valores
-      console.log('🔍 Validação hora:', { hora, minutos, dataHora: dataHora.toISOString() });
-
-      // Corrige: aceita de 8:00 até 18:00 (inclusive)
+      // VALIDAÇÃO: Verificar horário de funcionamento (8:00 às 18:00 inclusive)
       if (hora < 8 || hora > 18) {
         this.erroMsg =
           '❌ Atendemos apenas das 8:00 às 18:00. Por favor, escolha um horário dentro deste intervalo.';
@@ -269,13 +277,24 @@ export class AgendaFormComponent implements OnInit {
     this.petService.buscarPorTutor(tutorId).subscribe({
       next: (data) => {
         this.pets = data;
-        console.log('✅ Pets carregados:', this.pets.length, this.pets);
+        console.log('✅ Pets carregados do tutor:', this.pets.length, this.pets);
+
         if (this.pets.length === 0) {
           console.log('⚠️ Nenhum pet encontrado, forçando cadastro');
           this.precisaCadastrarPet = true;
         } else {
-          console.log('✅ Pets disponíveis, permitindo seleção');
+          console.log('✅ Pets disponíveis para seleção');
           this.precisaCadastrarPet = false;
+
+          // DEBUG: Verificar estrutura dos pets
+          this.pets.forEach((pet) => {
+            console.log('🔍 Pet:', {
+              animalId: pet.animalId,
+              nome: pet.nome,
+              especie: pet.especie,
+              tutorId: pet.tutorId,
+            });
+          });
         }
       },
       error: (err) => {
@@ -292,6 +311,12 @@ export class AgendaFormComponent implements OnInit {
       this.agendamento.animalId = undefined;
       this.agendamento.petid = undefined;
     }
+  }
+
+  onPetChange(): void {
+    console.log('🐾 Pet selecionado:', this.agendamento.animalId);
+    const petSelecionado = this.pets.find((p) => p.animalId === this.agendamento.animalId);
+    console.log('🔍 Dados do pet selecionado:', petSelecionado);
   }
 
   salvar(): void {
@@ -433,10 +458,13 @@ export class AgendaFormComponent implements OnInit {
       return;
     }
 
+    // Formatar dataHora corretamente para enviar ao backend
+    const dataHoraFormatada = this.formatarDataHoraParaBackend(this.agendamento.dataHora!);
+
     const agendamentoCompleto = {
       servicoId: this.agendamento.servicoId,
       funcionarioId: this.agendamento.funcionarioId,
-      dataHora: this.agendamento.dataHora,
+      dataHora: dataHoraFormatada,
       status: this.agendamento.status || 'Pendente',
       observacoes: this.agendamento.observacoes,
 
@@ -461,6 +489,15 @@ export class AgendaFormComponent implements OnInit {
     this.agendaService.criarCompleto(agendamentoCompleto).subscribe({
       next: (agendamentoCriado) => {
         console.log('Agendamento completo criado:', agendamentoCriado);
+
+        // RECARREGAR dados do usuário para atualizar tutorId
+        this.authService.reloadUserInfo().subscribe({
+          next: (userAtualizado: any) => {
+            console.log('✅ Usuário atualizado após criar tutor:', userAtualizado);
+          },
+          error: (err: any) => console.error('Erro ao atualizar usuário:', err),
+        });
+
         alert(
           '✅ Agendamento realizado com sucesso!\n\n🐾 Seu pet foi cadastrado automaticamente.\n👤 Agora você pode fazer novos agendamentos!'
         );
