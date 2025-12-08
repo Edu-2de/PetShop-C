@@ -118,7 +118,7 @@ namespace SIGA_PET.Controllers
 
                 if (agendamento == null)
                 {
-                    return NotFound($"Agendamento com ID {id} não encontrado.");
+                    return NotFound($"Agendamento com ID {id} nï¿½o encontrado.");
                 }
 
                 var agendamentoDto = _mapper.Map<AgendamentoDto>(agendamento);
@@ -186,13 +186,13 @@ namespace SIGA_PET.Controllers
         /// <remarks>
         /// Cria um novo agendamento no sistema.
         /// 
-        /// **Validações aplicadas:**
-        /// - Data e hora não podem ser no passado
-        /// - Funcionário deve estar disponível no horário
+        /// **Validaï¿½ï¿½es aplicadas:**
+        /// - Data e hora nï¿½o podem ser no passado
+        /// - Funcionï¿½rio deve estar disponï¿½vel no horï¿½rio
         /// - Animal deve existir e estar ativo
-        /// - Serviço deve estar ativo
+        /// - Serviï¿½o deve estar ativo
         /// 
-        /// **Exemplo de requisição:**
+        /// **Exemplo de requisiï¿½ï¿½o:**
         /// ```json
         /// {
         ///   "animalId": 1,
@@ -204,8 +204,8 @@ namespace SIGA_PET.Controllers
         /// ```
         /// </remarks>
         /// <response code="201">Agendamento criado com sucesso</response>
-        /// <response code="400">Dados inválidos ou conflito de horário</response>
-        /// <response code="404">Animal, serviço ou funcionário não encontrado</response>
+        /// <response code="400">Dados invï¿½lidos ou conflito de horï¿½rio</response>
+        /// <response code="404">Animal, serviï¿½o ou funcionï¿½rio nï¿½o encontrado</response>
         /// <response code="500">Erro interno do servidor</response>
         [HttpPost]
         [ProducesResponseType(typeof(AgendamentoDto), 201)]
@@ -219,55 +219,56 @@ namespace SIGA_PET.Controllers
                 if (!ModelState.IsValid)
                     return BadRequest(ModelState);
 
-                // VALIDAÇÃO: Verificar se a data não é no passado
+                // VALIDAï¿½ï¿½O: Verificar se a data nï¿½o ï¿½ no passado
                 var agora = DateTime.Now;
                 if (createAgendamentoDto.DataHora <= agora)
                 {
-                    return BadRequest($"? Não é possível agendar para uma data/hora que já passou. Data/hora atual: {agora:dd/MM/yyyy HH:mm}");
+                    return BadRequest($"? Nï¿½o ï¿½ possï¿½vel agendar para uma data/hora que jï¿½ passou. Data/hora atual: {agora:dd/MM/yyyy HH:mm}");
                 }
 
-                // VALIDAÇÃO: Verificar se a data não é muito no futuro (opcional - máximo 6 meses)
+                // VALIDAï¿½ï¿½O: Verificar se a data nï¿½o ï¿½ muito no futuro (opcional - mï¿½ximo 6 meses)
                 if (createAgendamentoDto.DataHora > agora.AddMonths(6))
                 {
-                    return BadRequest("? Não é possível agendar com mais de 6 meses de antecedência.");
+                    return BadRequest("? Nï¿½o ï¿½ possï¿½vel agendar com mais de 6 meses de antecedï¿½ncia.");
                 }
 
-                // VALIDAÇÃO: Verificar horário de funcionamento (8h às 18h)
+                // VALIDAÃ‡ÃƒO: Verificar horÃ¡rio de funcionamento (8h Ã s 18h INCLUSIVE)
                 var horaAgendamento = createAgendamentoDto.DataHora.TimeOfDay;
                 var horaAbertura = new TimeSpan(8, 0, 0);  // 8:00
                 var horaFechamento = new TimeSpan(18, 0, 0); // 18:00
 
+                // Corrigido: permite atÃ© 18:00 (antes do fechamento Ã s 18:01)
                 if (horaAgendamento < horaAbertura || horaAgendamento > horaFechamento)
                 {
-                    return BadRequest("? Agendamentos só podem ser feitos entre 8:00 e 18:00.");
+                    return BadRequest($"âŒ Agendamentos sÃ³ podem ser feitos entre 8:00 e 18:00. Hora recebida: {createAgendamentoDto.DataHora:HH:mm}");
                 }
 
-                // VALIDAÇÃO: Verificar se é domingo (opcional - não atendemos domingos)
+                // VALIDAï¿½ï¿½O: Verificar se ï¿½ domingo (opcional - nï¿½o atendemos domingos)
                 if (createAgendamentoDto.DataHora.DayOfWeek == DayOfWeek.Sunday)
                 {
-                    return BadRequest("? Não atendemos aos domingos. Escolha outro dia da semana.");
+                    return BadRequest("? Nï¿½o atendemos aos domingos. Escolha outro dia da semana.");
                 }
 
                 // Verificar se animal existe
                 var animal = await _context.Animais.FindAsync(createAgendamentoDto.AnimalId);
                 if (animal == null)
-                    return NotFound($"Animal com ID {createAgendamentoDto.AnimalId} não encontrado.");
+                    return NotFound($"Animal com ID {createAgendamentoDto.AnimalId} nï¿½o encontrado.");
 
-                // Verificar se serviço existe e está ativo
+                // Verificar se serviï¿½o existe e estï¿½ ativo
                 var servico = await _context.Servicos
                     .Include(s => s.ServicoFuncionarios)
                         .ThenInclude(sf => sf.Funcionario)
                     .FirstOrDefaultAsync(s => s.ServicoId == createAgendamentoDto.ServicoId);
 
                 if (servico == null)
-                    return NotFound($"Serviço com ID {createAgendamentoDto.ServicoId} não encontrado.");
+                    return NotFound($"Serviï¿½o com ID {createAgendamentoDto.ServicoId} nï¿½o encontrado.");
 
                 if (!servico.Ativo)
-                    return BadRequest("? Este serviço não está mais disponível.");
+                    return BadRequest("? Este serviï¿½o nï¿½o estï¿½ mais disponï¿½vel.");
 
                 var agendamento = _mapper.Map<Agendamento>(createAgendamentoDto);
 
-                // Auto-atribuir funcionário se não especificado
+                // Auto-atribuir funcionï¿½rio se nï¿½o especificado
                 if (!createAgendamentoDto.FuncionarioId.HasValue)
                 {
                     var funcionariosAptos = servico.ServicoFuncionarios
@@ -276,9 +277,9 @@ namespace SIGA_PET.Controllers
                         .ToList();
 
                     if (!funcionariosAptos.Any())
-                        return BadRequest("? Este serviço não possui funcionários disponíveis no momento.");
+                        return BadRequest("? Este serviï¿½o nï¿½o possui funcionï¿½rios disponï¿½veis no momento.");
 
-                    // Verificar qual funcionário tem menos agendamentos no dia
+                    // Verificar qual funcionï¿½rio tem menos agendamentos no dia
                     var dataAgendamento = createAgendamentoDto.DataHora.Date;
                     var funcionarioMenosOcupado = funcionariosAptos
                         .OrderBy(f => _context.Agendamentos.Count(a => 
@@ -290,23 +291,23 @@ namespace SIGA_PET.Controllers
                 }
                 else
                 {
-                    // Verificar se funcionário especificado existe e está ativo
+                    // Verificar se funcionï¿½rio especificado existe e estï¿½ ativo
                     var funcionario = await _context.Funcionarios.FindAsync(createAgendamentoDto.FuncionarioId);
                     if (funcionario == null)
-                        return NotFound($"Funcionário com ID {createAgendamentoDto.FuncionarioId} não encontrado.");
+                        return NotFound($"Funcionï¿½rio com ID {createAgendamentoDto.FuncionarioId} nï¿½o encontrado.");
 
                     if (!funcionario.Ativo)
-                        return BadRequest("? Este funcionário não está disponível no momento.");
+                        return BadRequest("? Este funcionï¿½rio nï¿½o estï¿½ disponï¿½vel no momento.");
 
-                    // Verificar se funcionário é apto para o serviço
+                    // Verificar se funcionï¿½rio ï¿½ apto para o serviï¿½o
                     var funcionarioApto = servico.ServicoFuncionarios
                         .Any(sf => sf.FuncionarioId == createAgendamentoDto.FuncionarioId.Value);
 
                     if (!funcionarioApto)
-                        return BadRequest($"? O funcionário {funcionario.Nome} não está habilitado para realizar este serviço.");
+                        return BadRequest($"? O funcionï¿½rio {funcionario.Nome} nï¿½o estï¿½ habilitado para realizar este serviï¿½o.");
                 }
 
-                // Verificar conflitos de horário
+                // Verificar conflitos de horï¿½rio
                 var dataInicio = agendamento.DataHora;
                 var dataFim = agendamento.DataHora.AddMinutes(servico.DuracaoMinutos);
 
@@ -325,10 +326,10 @@ namespace SIGA_PET.Controllers
                         .Select(f => f.Nome)
                         .FirstOrDefaultAsync();
 
-                    return BadRequest($"? Conflito de horário! {funcionarioNome} já possui um agendamento de {conflito.DataHora:dd/MM/yyyy HH:mm} às {conflito.DataHora.AddMinutes(conflito.Servico.DuracaoMinutos):HH:mm}.");
+                    return BadRequest($"? Conflito de horï¿½rio! {funcionarioNome} jï¿½ possui um agendamento de {conflito.DataHora:dd/MM/yyyy HH:mm} ï¿½s {conflito.DataHora.AddMinutes(conflito.Servico.DuracaoMinutos):HH:mm}.");
                 }
 
-                // Definir status padrão
+                // Definir status padrï¿½o
                 if (string.IsNullOrEmpty(agendamento.Status))
                 {
                     agendamento.Status = "Pendente";
@@ -368,12 +369,12 @@ namespace SIGA_PET.Controllers
         /// <remarks>
         /// Atualiza um agendamento existente.
         /// 
-        /// **Validações aplicadas:**
-        /// - Data e hora não podem ser no passado
-        /// - Funcionário deve estar disponível no horário
-        /// - Não pode alterar agendamentos já concluídos
+        /// **Validaï¿½ï¿½es aplicadas:**
+        /// - Data e hora nï¿½o podem ser no passado
+        /// - Funcionï¿½rio deve estar disponï¿½vel no horï¿½rio
+        /// - Nï¿½o pode alterar agendamentos jï¿½ concluï¿½dos
         /// 
-        /// **Exemplo de requisição:**
+        /// **Exemplo de requisiï¿½ï¿½o:**
         /// ```json
         /// {
         ///   "animalId": 1,
@@ -381,14 +382,14 @@ namespace SIGA_PET.Controllers
         ///   "funcionarioId": 1,
         ///   "dataHora": "2024-12-20T15:00:00",
         ///   "status": "Confirmado",
-        ///   "observacoes": "Reagendamento - cliente pediu mudança de horário"
+        ///   "observacoes": "Reagendamento - cliente pediu mudanï¿½a de horï¿½rio"
         /// }
         /// ```
         /// </remarks>
         /// <response code="204">Agendamento atualizado com sucesso</response>
-        /// <response code="400">Dados inválidos ou conflito de horário</response>
-        /// <response code="404">Agendamento não encontrado</response>
-        /// <response code="409">Agendamento não pode ser alterado (já concluído/cancelado)</response>
+        /// <response code="400">Dados invï¿½lidos ou conflito de horï¿½rio</response>
+        /// <response code="404">Agendamento nï¿½o encontrado</response>
+        /// <response code="409">Agendamento nï¿½o pode ser alterado (jï¿½ concluï¿½do/cancelado)</response>
         /// <response code="500">Erro interno do servidor</response>
         [HttpPut("{id}")]
         [ProducesResponseType(204)]
@@ -408,20 +409,20 @@ namespace SIGA_PET.Controllers
                     .FirstOrDefaultAsync(a => a.AgendamentoId == id);
 
                 if (agendamento == null)
-                    return NotFound($"Agendamento com ID {id} não encontrado.");
+                    return NotFound($"Agendamento com ID {id} nï¿½o encontrado.");
 
                 // Verificar se pode ser alterado
                 if (agendamento.Status == "Concluido")
-                    return Conflict("? Não é possível alterar um agendamento já concluído.");
+                    return Conflict("? Nï¿½o ï¿½ possï¿½vel alterar um agendamento jï¿½ concluï¿½do.");
 
-                // VALIDAÇÃO: Verificar se a nova data não é no passado
+                // VALIDAï¿½ï¿½O: Verificar se a nova data nï¿½o ï¿½ no passado
                 var agora = DateTime.Now;
                 if (updateAgendamentoDto.DataHora <= agora && updateAgendamentoDto.DataHora != agendamento.DataHora)
                 {
-                    return BadRequest($"? Não é possível reagendar para uma data/hora que já passou. Data/hora atual: {agora:dd/MM/yyyy HH:mm}");
+                    return BadRequest($"? Nï¿½o ï¿½ possï¿½vel reagendar para uma data/hora que jï¿½ passou. Data/hora atual: {agora:dd/MM/yyyy HH:mm}");
                 }
 
-                // VALIDAÇÃO: Verificar horário de funcionamento se a data mudou
+                // VALIDAï¿½ï¿½O: Verificar horï¿½rio de funcionamento se a data mudou
                 if (updateAgendamentoDto.DataHora != agendamento.DataHora)
                 {
                     var horaAgendamento = updateAgendamentoDto.DataHora.TimeOfDay;
@@ -430,29 +431,29 @@ namespace SIGA_PET.Controllers
 
                     if (horaAgendamento < horaAbertura || horaAgendamento > horaFechamento)
                     {
-                        return BadRequest("? Agendamentos só podem ser feitos entre 8:00 e 18:00.");
+                        return BadRequest("? Agendamentos sï¿½ podem ser feitos entre 8:00 e 18:00.");
                     }
 
-                    // Verificar se é domingo
+                    // Verificar se ï¿½ domingo
                     if (updateAgendamentoDto.DataHora.DayOfWeek == DayOfWeek.Sunday)
                     {
-                        return BadRequest("? Não atendemos aos domingos. Escolha outro dia da semana.");
+                        return BadRequest("? Nï¿½o atendemos aos domingos. Escolha outro dia da semana.");
                     }
                 }
 
-                // Verificar conflitos se horário ou funcionário mudaram
+                // Verificar conflitos se horï¿½rio ou funcionï¿½rio mudaram
                 if (updateAgendamentoDto.DataHora != agendamento.DataHora || 
                     updateAgendamentoDto.FuncionarioId != agendamento.FuncionarioId)
                 {
                     var servico = await _context.Servicos.FindAsync(updateAgendamentoDto.ServicoId);
                     if (servico == null)
-                        return BadRequest("? Serviço não encontrado.");
+                        return BadRequest("? Serviï¿½o nï¿½o encontrado.");
 
                     var dataInicio = updateAgendamentoDto.DataHora;
                     var dataFim = updateAgendamentoDto.DataHora.AddMinutes(servico.DuracaoMinutos);
 
                     var conflito = await _context.Agendamentos
-                        .Where(a => a.AgendamentoId != id && // Excluir o próprio agendamento
+                        .Where(a => a.AgendamentoId != id && // Excluir o prï¿½prio agendamento
                                    a.FuncionarioId == updateAgendamentoDto.FuncionarioId &&
                                    a.Status != "Cancelado" &&
                                    ((a.DataHora <= dataInicio && a.DataHora.AddMinutes(a.Servico.DuracaoMinutos) > dataInicio) ||
@@ -467,7 +468,7 @@ namespace SIGA_PET.Controllers
                             .Select(f => f.Nome)
                             .FirstOrDefaultAsync();
 
-                        return BadRequest($"? Conflito de horário! {funcionarioNome} já possui um agendamento de {conflito.DataHora:dd/MM/yyyy HH:mm} às {conflito.DataHora.AddMinutes(conflito.Servico.DuracaoMinutos):HH:mm}.");
+                        return BadRequest($"? Conflito de horï¿½rio! {funcionarioNome} jï¿½ possui um agendamento de {conflito.DataHora:dd/MM/yyyy HH:mm} ï¿½s {conflito.DataHora.AddMinutes(conflito.Servico.DuracaoMinutos):HH:mm}.");
                     }
                 }
 
@@ -489,7 +490,7 @@ namespace SIGA_PET.Controllers
             try
             {
                 var agendamento = await _context.Agendamentos.FindAsync(id);
-                if (agendamento == null) return NotFound($"Agendamento com ID {id} não encontrado.");
+                if (agendamento == null) return NotFound($"Agendamento com ID {id} nï¿½o encontrado.");
 
                 _context.Agendamentos.Remove(agendamento);
                 await _context.SaveChangesAsync();
@@ -498,7 +499,7 @@ namespace SIGA_PET.Controllers
             }
             catch (DbUpdateException ex)
             {
-                return StatusCode(500, $"Erro ao deletar: O agendamento pode ter referências que impedem a exclusão. Detalhes: {ex.InnerException?.Message}");
+                return StatusCode(500, $"Erro ao deletar: O agendamento pode ter referï¿½ncias que impedem a exclusï¿½o. Detalhes: {ex.InnerException?.Message}");
             }
             catch (Exception ex)
             {
@@ -517,13 +518,13 @@ namespace SIGA_PET.Controllers
                     .FirstOrDefaultAsync(s => s.ServicoId == servicoId);
 
                 if (servico == null)
-                    return BadRequest("Serviço não encontrado.");
+                    return BadRequest("Serviï¿½o nï¿½o encontrado.");
 
                 var funcionarioResponsavel = funcionarioId ?? servico.FuncionarioResponsavelId;
                 
                 var conflitos = new List<string>();
 
-                // Verificar conflito de funcionário
+                // Verificar conflito de funcionï¿½rio
                 if (funcionarioResponsavel.HasValue)
                 {
                     var conflitoFunc = await _context.Agendamentos
@@ -532,10 +533,10 @@ namespace SIGA_PET.Controllers
                                        && a.Status != "Cancelado");
                     
                     if (conflitoFunc)
-                        conflitos.Add("Funcionário já possui agendamento neste horário");
+                        conflitos.Add("Funcionï¿½rio jï¿½ possui agendamento neste horï¿½rio");
                 }
 
-                // Verificar conflito de serviço (se tem funcionário responsável específico)
+                // Verificar conflito de serviï¿½o (se tem funcionï¿½rio responsï¿½vel especï¿½fico)
                 if (servico.FuncionarioResponsavelId.HasValue)
                 {
                     var conflitoServ = await _context.Agendamentos
@@ -544,7 +545,7 @@ namespace SIGA_PET.Controllers
                                        && a.Status != "Cancelado");
                     
                     if (conflitoServ)
-                        conflitos.Add("Serviço já agendado para este horário");
+                        conflitos.Add("Serviï¿½o jï¿½ agendado para este horï¿½rio");
                 }
 
                 return Ok(new {
@@ -566,19 +567,19 @@ namespace SIGA_PET.Controllers
         /// <param name="createCompletoDto">Dados completos do agendamento</param>
         /// <remarks>
         /// Cria um agendamento completo no sistema, incluindo:
-        /// - Tutor (se não existir baseado no email/telefone)
+        /// - Tutor (se nï¿½o existir baseado no email/telefone)
         /// - Animal (sempre novo)
         /// - Agendamento
         /// 
-        /// **Ideal para:** Agendamentos rápidos onde o cliente não está cadastrado
+        /// **Ideal para:** Agendamentos rï¿½pidos onde o cliente nï¿½o estï¿½ cadastrado
         /// 
-        /// **Validações aplicadas:**
-        /// - Verifica se tutor já existe (por email ou telefone)
-        /// - Cria tutor automaticamente se não existir
+        /// **Validaï¿½ï¿½es aplicadas:**
+        /// - Verifica se tutor jï¿½ existe (por email ou telefone)
+        /// - Cria tutor automaticamente se nï¿½o existir
         /// - Cria animal sempre novo (vinculado ao tutor)
-        /// - Aplica todas as validações de agendamento
+        /// - Aplica todas as validaï¿½ï¿½es de agendamento
         /// 
-        /// **Exemplo de requisição:**
+        /// **Exemplo de requisiï¿½ï¿½o:**
         /// ```json
         /// {
         ///   "servicoId": 1,
@@ -588,7 +589,7 @@ namespace SIGA_PET.Controllers
         ///   "telefoneTutor": "(11) 98765-4321",
         ///   "enderecoTutor": "Rua Exemplo, 123",
         ///   "nomeAnimal": "Rex",
-        ///   "especieAnimal": "Cão",
+        ///   "especieAnimal": "Cï¿½o",
         ///   "racaAnimal": "Labrador",
         ///   "sexoAnimal": "Macho",
         ///   "pelagemAnimal": "Curta",
@@ -597,7 +598,7 @@ namespace SIGA_PET.Controllers
         /// ```
         /// </remarks>
         /// <response code="201">Agendamento criado com sucesso (tutor e animal criados)</response>
-        /// <response code="400">Dados inválidos ou conflito de horário</response>
+        /// <response code="400">Dados invï¿½lidos ou conflito de horï¿½rio</response>
         /// <response code="500">Erro interno do servidor</response>
         [HttpPost("completo")]
         [ProducesResponseType(typeof(AgendamentoDto), 201)]
@@ -610,16 +611,16 @@ namespace SIGA_PET.Controllers
                 if (!ModelState.IsValid)
                     return BadRequest(ModelState);
 
-                // VALIDAÇÕES DE DATA/HORA (mesmas do endpoint principal)
+                // VALIDAï¿½ï¿½ES DE DATA/HORA (mesmas do endpoint principal)
                 var agora = DateTime.Now;
                 if (createCompletoDto.DataHora <= agora)
                 {
-                    return BadRequest($"? Não é possível agendar para uma data/hora que já passou. Data/hora atual: {agora:dd/MM/yyyy HH:mm}");
+                    return BadRequest($"? Nï¿½o ï¿½ possï¿½vel agendar para uma data/hora que jï¿½ passou. Data/hora atual: {agora:dd/MM/yyyy HH:mm}");
                 }
 
                 if (createCompletoDto.DataHora > agora.AddMonths(6))
                 {
-                    return BadRequest("? Não é possível agendar com mais de 6 meses de antecedência.");
+                    return BadRequest("? Nï¿½o ï¿½ possï¿½vel agendar com mais de 6 meses de antecedï¿½ncia.");
                 }
 
                 var horaAgendamento = createCompletoDto.DataHora.TimeOfDay;
@@ -628,25 +629,25 @@ namespace SIGA_PET.Controllers
 
                 if (horaAgendamento < horaAbertura || horaAgendamento > horaFechamento)
                 {
-                    return BadRequest("? Agendamentos só podem ser feitos entre 8:00 e 18:00.");
+                    return BadRequest("? Agendamentos sï¿½ podem ser feitos entre 8:00 e 18:00.");
                 }
 
                 if (createCompletoDto.DataHora.DayOfWeek == DayOfWeek.Sunday)
                 {
-                    return BadRequest("? Não atendemos aos domingos. Escolha outro dia da semana.");
+                    return BadRequest("? Nï¿½o atendemos aos domingos. Escolha outro dia da semana.");
                 }
 
-                // Verificar se serviço existe
+                // Verificar se serviï¿½o existe
                 var servico = await _context.Servicos
                     .Include(s => s.ServicoFuncionarios)
                         .ThenInclude(sf => sf.Funcionario)
                     .FirstOrDefaultAsync(s => s.ServicoId == createCompletoDto.ServicoId);
 
                 if (servico == null)
-                    return NotFound($"Serviço com ID {createCompletoDto.ServicoId} não encontrado.");
+                    return NotFound($"Serviï¿½o com ID {createCompletoDto.ServicoId} nï¿½o encontrado.");
 
                 if (!servico.Ativo)
-                    return BadRequest("? Este serviço não está mais disponível.");
+                    return BadRequest("? Este serviï¿½o nï¿½o estï¿½ mais disponï¿½vel.");
 
                 using var transaction = await _context.Database.BeginTransactionAsync();
                 try
@@ -654,7 +655,7 @@ namespace SIGA_PET.Controllers
                     // 1. CRIAR OU ENCONTRAR TUTOR
                     Tutor tutor;
                     
-                    // Verificar se tutor já existe (por email ou telefone)
+                    // Verificar se tutor jï¿½ existe (por email ou telefone)
                     Tutor? tutorExistente = null;
                     
                     if (!string.IsNullOrEmpty(createCompletoDto.EmailTutor))
@@ -683,11 +684,11 @@ namespace SIGA_PET.Controllers
                         // Criar novo tutor
                         tutor = new Tutor
                         {
-                            Nome = createCompletoDto.NomeTutor ?? "Cliente Não Informado",
+                            Nome = createCompletoDto.NomeTutor ?? "Cliente Nï¿½o Informado",
                             Telefone = createCompletoDto.TelefoneTutor ?? "",
-                            Endereco = createCompletoDto.EnderecoTutor ?? "Não informado",
+                            Endereco = createCompletoDto.EnderecoTutor ?? "Nï¿½o informado",
                             DataCadastro = DateTime.Now,
-                            UsuarioId = null // Tutor sem usuário de login
+                            UsuarioId = null // Tutor sem usuï¿½rio de login
                         };
 
                         _context.Tutores.Add(tutor);
@@ -710,7 +711,7 @@ namespace SIGA_PET.Controllers
                     _context.Animais.Add(animal);
                     await _context.SaveChangesAsync();
 
-                    // 3. AUTO-ATRIBUIR FUNCIONÁRIO se não especificado
+                    // 3. AUTO-ATRIBUIR FUNCIONï¿½RIO se nï¿½o especificado
                     int? funcionarioId = createCompletoDto.FuncionarioId;
                     
                     if (!funcionarioId.HasValue)
@@ -721,9 +722,9 @@ namespace SIGA_PET.Controllers
                             .ToList();
 
                         if (!funcionariosAptos.Any())
-                            return BadRequest("? Este serviço não possui funcionários disponíveis no momento.");
+                            return BadRequest("? Este serviï¿½o nï¿½o possui funcionï¿½rios disponï¿½veis no momento.");
 
-                        // Escolher funcionário com menos agendamentos no dia
+                        // Escolher funcionï¿½rio com menos agendamentos no dia
                         var dataAgendamento = createCompletoDto.DataHora.Date;
                         var funcionarioMenosOcupado = funcionariosAptos
                             .OrderBy(f => _context.Agendamentos.Count(a => 
@@ -734,7 +735,7 @@ namespace SIGA_PET.Controllers
                         funcionarioId = funcionarioMenosOcupado.FuncionarioId;
                     }
 
-                    // 4. VERIFICAR CONFLITOS DE HORÁRIO
+                    // 4. VERIFICAR CONFLITOS DE HORï¿½RIO
                     var dataInicio = createCompletoDto.DataHora;
                     var dataFim = createCompletoDto.DataHora.AddMinutes(servico.DuracaoMinutos);
 
@@ -753,7 +754,7 @@ namespace SIGA_PET.Controllers
                             .Select(f => f.Nome)
                             .FirstOrDefaultAsync();
 
-                        return BadRequest($"? Conflito de horário! {funcionarioNome} já possui um agendamento de {conflito.DataHora:dd/MM/yyyy HH:mm} às {conflito.DataHora.AddMinutes(conflito.Servico.DuracaoMinutos):HH:mm}.");
+                        return BadRequest($"? Conflito de horï¿½rio! {funcionarioNome} jï¿½ possui um agendamento de {conflito.DataHora:dd/MM/yyyy HH:mm} ï¿½s {conflito.DataHora.AddMinutes(conflito.Servico.DuracaoMinutos):HH:mm}.");
                     }
 
                     // 5. CRIAR AGENDAMENTO

@@ -20,7 +20,7 @@ import { switchMap, of, Observable } from 'rxjs';
   standalone: true,
   imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './agenda-form.html',
-  styleUrls: ['./agenda-form.scss']
+  styleUrls: ['./agenda-form.scss'],
 })
 export class AgendaFormComponent implements OnInit {
   private agendaService = inject(AgendaService);
@@ -72,7 +72,7 @@ export class AgendaFormComponent implements OnInit {
       // CORREÇÃO: Se usuário não tem tutorId, permitir que ele se torne tutor ao cadastrar pet
       this.tutorIdLogado = user.tutorId || 0;
       console.log('TutorId logado:', this.tutorIdLogado); // DEBUG
-      
+
       if (this.tutorIdLogado > 0) {
         this.carregarPetsDoTutor(this.tutorIdLogado);
       } else {
@@ -90,7 +90,7 @@ export class AgendaFormComponent implements OnInit {
     if (id) {
       this.isEdit = true;
       this.titulo = 'Editar Agendamento';
-      this.agendaService.buscarPorId(Number(id)).subscribe(data => {
+      this.agendaService.buscarPorId(Number(id)).subscribe((data) => {
         this.agendamento = data;
         if (this.agendamento.dataHora) {
           const dataHora = new Date(this.agendamento.dataHora);
@@ -108,7 +108,7 @@ export class AgendaFormComponent implements OnInit {
     const hoje = new Date();
     this.dataSelecionada = hoje.toISOString().split('T')[0];
 
-    this.route.queryParams.subscribe(params => {
+    this.route.queryParams.subscribe((params) => {
       if (params['servicoId']) {
         this.agendamento.servicoId = Number(params['servicoId']);
         this.onServicoChange();
@@ -128,7 +128,9 @@ export class AgendaFormComponent implements OnInit {
 
   onServicoChange(): void {
     if (this.agendamento.servicoId) {
-      this.servicoSelecionado = this.servicos.find(s => s.servicoId === this.agendamento.servicoId);
+      this.servicoSelecionado = this.servicos.find(
+        (s) => s.servicoId === this.agendamento.servicoId
+      );
       this.carregarFuncionariosAptos(this.agendamento.servicoId);
       // Reset funcionário selecionado quando troca serviço
       this.agendamento.funcionarioId = undefined;
@@ -149,7 +151,7 @@ export class AgendaFormComponent implements OnInit {
       error: (err) => {
         console.error('Erro ao carregar funcionários aptos:', err);
         this.funcionariosAptos = [];
-      }
+      },
     });
   }
 
@@ -165,7 +167,8 @@ export class AgendaFormComponent implements OnInit {
       }
 
       // VALIDAÇÃO: Verificar se é domingo
-      if (dataHora.getDay() === 0) { // 0 = Domingo
+      if (dataHora.getDay() === 0) {
+        // 0 = Domingo
         this.erroMsg = '❌ Não atendemos aos domingos. Por favor, escolha outro dia da semana.';
         return;
       }
@@ -173,12 +176,19 @@ export class AgendaFormComponent implements OnInit {
       // VALIDAÇÃO: Verificar horário de funcionamento (8:00 às 18:00 inclusive) - CORRIGIDO
       const hora = dataHora.getHours();
       const minutos = dataHora.getMinutes();
-      
+
+      // DEBUG: Log para verificar valores
+      console.log('🔍 Validação hora:', { hora, minutos, dataHora: dataHora.toISOString() });
+
       // Corrige: aceita de 8:00 até 18:00 (inclusive)
       if (hora < 8 || hora > 18) {
-        this.erroMsg = '❌ Atendemos apenas das 8:00 às 18:00. Por favor, escolha um horário dentro deste intervalo.';
+        this.erroMsg =
+          '❌ Atendemos apenas das 8:00 às 18:00. Por favor, escolha um horário dentro deste intervalo.';
+        console.error('❌ Horário rejeitado:', hora);
         return;
       }
+
+      console.log('✅ Horário aceito:', hora);
 
       // Se passou por todas as validações, limpar erro e atualizar
       this.erroMsg = '';
@@ -199,7 +209,8 @@ export class AgendaFormComponent implements OnInit {
         return;
       }
 
-      if (dataSelecionada.getDay() === 0) { // Domingo
+      if (dataSelecionada.getDay() === 0) {
+        // Domingo
         this.erroMsg = '❌ Não atendemos aos domingos. Por favor, escolha outro dia.';
         return;
       }
@@ -235,9 +246,7 @@ export class AgendaFormComponent implements OnInit {
   }
 
   carregarServicos() {
-    this.servicoPetService.listarAtivos().subscribe(data =>
-      this.servicos = data
-    );
+    this.servicoPetService.listarAtivos().subscribe((data) => (this.servicos = data));
   }
 
   carregarFuncionarios() {
@@ -247,12 +256,12 @@ export class AgendaFormComponent implements OnInit {
       },
       error: (err) => {
         console.error('Erro ao carregar funcionários:', err);
-      }
+      },
     });
   }
 
   carregarTodosPets() {
-    this.petService.listar().subscribe(data => this.pets = data);
+    this.petService.listar().subscribe((data) => (this.pets = data));
   }
 
   carregarPetsDoTutor(tutorId: number) {
@@ -263,7 +272,7 @@ export class AgendaFormComponent implements OnInit {
           this.precisaCadastrarPet = true;
         }
       },
-      error: () => console.error('Erro ao buscar pets do tutor')
+      error: () => console.error('Erro ao buscar pets do tutor'),
     });
   }
 
@@ -334,7 +343,7 @@ export class AgendaFormComponent implements OnInit {
       email: user.email,
       telefone: '', // Usuário pode preencher depois
       endereco: '', // Usuário pode preencher depois
-      senha: '' // Não precisa, já tem usuário
+      senha: '', // Não precisa, já tem usuário
     };
 
     console.log('Criando tutor automaticamente:', novoTutor);
@@ -344,14 +353,14 @@ export class AgendaFormComponent implements OnInit {
         console.log('Tutor criado:', tutorCriado);
         this.tutorIdLogado = tutorCriado.tutorId;
         this.novoPet.tutorId = tutorCriado.tutorId;
-        
+
         // Agora criar o pet
         this.criarPetEAgendar();
       },
       error: (err) => {
         console.error('Erro ao criar tutor:', err);
         this.erroMsg = '❌ Erro ao criar perfil de tutor. Tente novamente.';
-      }
+      },
     });
   }
 
@@ -359,31 +368,40 @@ export class AgendaFormComponent implements OnInit {
   criarPetEAgendar() {
     console.log('Criando pet com dados:', this.novoPet);
 
-    this.petService.criar(this.novoPet).pipe(
-      switchMap((petCriado) => {
-        console.log('Pet criado:', petCriado);
-        this.agendamento.animalId = petCriado.animalId || petCriado.id;
-        this.agendamento.petid = petCriado.animalId || petCriado.id;
+    this.petService
+      .criar(this.novoPet)
+      .pipe(
+        switchMap((petCriado) => {
+          console.log('Pet criado:', petCriado);
+          this.agendamento.animalId = petCriado.animalId || petCriado.id;
+          this.agendamento.petid = petCriado.animalId || petCriado.id;
 
-        if (this.isEdit && this.agendamento.agendamentoId) {
-          return this.agendaService.atualizar(this.agendamento.agendamentoId, this.agendamento as Agenda);
-        }
-        return this.agendaService.criar(this.agendamento as Agenda);
-      })
-    ).subscribe({
-      next: () => {
-        alert('Pet cadastrado e consulta agendada com sucesso!');
-        this.router.navigate(['/agenda']);
-      },
-      error: (err: any) => this.tratarErro(err)
-    });
+          if (this.isEdit && this.agendamento.agendamentoId) {
+            return this.agendaService.atualizar(
+              this.agendamento.agendamentoId,
+              this.agendamento as Agenda
+            );
+          }
+          return this.agendaService.criar(this.agendamento as Agenda);
+        })
+      )
+      .subscribe({
+        next: () => {
+          alert('Pet cadastrado e consulta agendada com sucesso!');
+          this.router.navigate(['/agenda']);
+        },
+        error: (err: any) => this.tratarErro(err),
+      });
   }
 
   salvarAgendamento() {
     let operation: Observable<any>;
 
     if (this.isEdit && this.agendamento.agendamentoId) {
-      operation = this.agendaService.atualizar(this.agendamento.agendamentoId, this.agendamento as Agenda);
+      operation = this.agendaService.atualizar(
+        this.agendamento.agendamentoId,
+        this.agendamento as Agenda
+      );
     } else {
       operation = this.agendaService.criar(this.agendamento as Agenda);
     }
@@ -393,7 +411,7 @@ export class AgendaFormComponent implements OnInit {
         alert(this.isEdit ? 'Atualizado com sucesso!' : 'Agendamento realizado!');
         this.router.navigate(['/agenda']);
       },
-      error: (err: any) => this.tratarErro(err)
+      error: (err: any) => this.tratarErro(err),
     });
   }
 
@@ -411,13 +429,13 @@ export class AgendaFormComponent implements OnInit {
       dataHora: this.agendamento.dataHora,
       status: this.agendamento.status || 'Pendente',
       observacoes: this.agendamento.observacoes,
-      
+
       // Dados do tutor (usar dados do usuário logado)
       nomeTutor: user.nome,
       emailTutor: user.email,
       telefoneTutor: '', // Usuário pode cadastrar depois
       enderecoTutor: 'A definir', // Usuário pode cadastrar depois
-      
+
       // Dados do pet
       nomeAnimal: this.novoPet.nome,
       especieAnimal: this.novoPet.especie,
@@ -425,7 +443,7 @@ export class AgendaFormComponent implements OnInit {
       sexoAnimal: this.novoPet.sexo,
       dataNascimentoAnimal: this.novoPet.dataNascimento,
       pelagemAnimal: this.novoPet.pelagem || 'Curta',
-      observacoesAnimal: this.novoPet.observacoes
+      observacoesAnimal: this.novoPet.observacoes,
     };
 
     console.log('Criando agendamento completo:', agendamentoCompleto);
@@ -433,13 +451,15 @@ export class AgendaFormComponent implements OnInit {
     this.agendaService.criarCompleto(agendamentoCompleto).subscribe({
       next: (agendamentoCriado) => {
         console.log('Agendamento completo criado:', agendamentoCriado);
-        alert('✅ Agendamento realizado com sucesso!\n\n🐾 Seu pet foi cadastrado automaticamente.\n👤 Agora você pode fazer novos agendamentos!');
+        alert(
+          '✅ Agendamento realizado com sucesso!\n\n🐾 Seu pet foi cadastrado automaticamente.\n👤 Agora você pode fazer novos agendamentos!'
+        );
         this.router.navigate(['/agenda']);
       },
       error: (err) => {
         console.error('Erro ao criar agendamento completo:', err);
         this.tratarErro(err);
-      }
+      },
     });
   }
 

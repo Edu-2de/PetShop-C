@@ -41,7 +41,7 @@ namespace SIGA_PET.Controllers
         {
             if (id != categoriaDto.CategoriaId)
             {
-                return BadRequest("ID da categoria não corresponde.");
+                return BadRequest("ID da categoria nï¿½o corresponde.");
             }
 
             if (!ModelState.IsValid)
@@ -52,7 +52,7 @@ namespace SIGA_PET.Controllers
             var categoria = await _context.Categorias.FindAsync(id);
             if (categoria == null)
             {
-                return NotFound("Categoria não encontrada.");
+                return NotFound("Categoria nï¿½o encontrada.");
             }
 
             _mapper.Map(categoriaDto, categoria);
@@ -79,16 +79,36 @@ namespace SIGA_PET.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteCategoria(int id)
         {
-            var categoria = await _context.Categorias.FindAsync(id);
-            if (categoria == null)
+            try
             {
-                return NotFound("Categoria não encontrada.");
+                var categoria = await _context.Categorias
+                    .Include(c => c.Produtos)
+                    .FirstOrDefaultAsync(c => c.CategoriaId == id);
+
+                if (categoria == null)
+                {
+                    return NotFound("Categoria nÃ£o encontrada.");
+                }
+
+                // Verificar se hÃ¡ produtos associados
+                if (categoria.Produtos != null && categoria.Produtos.Any())
+                {
+                    return BadRequest($"NÃ£o Ã© possÃ­vel excluir a categoria pois existem {categoria.Produtos.Count} produto(s) associado(s). Remova os produtos ou altere suas categorias primeiro.");
+                }
+
+                _context.Categorias.Remove(categoria);
+                await _context.SaveChangesAsync();
+
+                return NoContent();
             }
-
-            _context.Categorias.Remove(categoria);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
+            catch (DbUpdateException ex)
+            {
+                return StatusCode(500, $"Erro ao deletar categoria: {ex.InnerException?.Message ?? ex.Message}");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Erro interno: {ex.Message}");
+            }
         }
     }
 }
