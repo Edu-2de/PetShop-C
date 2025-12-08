@@ -430,15 +430,21 @@ export class AgendaFormComponent implements OnInit {
   }
 
   salvarAgendamento() {
+    // Formatar dataHora corretamente antes de enviar
+    const agendamentoParaEnviar = {
+      ...this.agendamento,
+      dataHora: this.formatarDataHoraParaBackend(this.agendamento.dataHora!),
+    };
+
     let operation: Observable<any>;
 
     if (this.isEdit && this.agendamento.agendamentoId) {
       operation = this.agendaService.atualizar(
         this.agendamento.agendamentoId,
-        this.agendamento as Agenda
+        agendamentoParaEnviar as any
       );
     } else {
-      operation = this.agendaService.criar(this.agendamento as Agenda);
+      operation = this.agendaService.criar(agendamentoParaEnviar as any);
     }
 
     operation.subscribe({
@@ -529,6 +535,19 @@ export class AgendaFormComponent implements OnInit {
     const seisMesesFuture = new Date();
     seisMesesFuture.setMonth(seisMesesFuture.getMonth() + 6);
     return seisMesesFuture.toISOString().split('T')[0];
+  }
+
+  // NOVO: Formatar data/hora para enviar ao backend sem conversão de timezone
+  formatarDataHoraParaBackend(data: Date): string {
+    const ano = data.getFullYear();
+    const mes = String(data.getMonth() + 1).padStart(2, '0');
+    const dia = String(data.getDate()).padStart(2, '0');
+    const hora = String(data.getHours()).padStart(2, '0');
+    const minutos = String(data.getMinutes()).padStart(2, '0');
+    const segundos = String(data.getSeconds()).padStart(2, '0');
+
+    // Formato: YYYY-MM-DDTHH:mm:ss (sem timezone)
+    return `${ano}-${mes}-${dia}T${hora}:${minutos}:${segundos}`;
   }
 
   // NOVO: Validação mais robusta no método salvar - CORRIGIDA

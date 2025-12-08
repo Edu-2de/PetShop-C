@@ -41,7 +41,7 @@ namespace SIGA_PET.Data
             modelBuilder.Entity<Tutor>(entity =>
             {
                 entity.HasOne(t => t.Usuario)
-                      .WithOne()
+                      .WithOne(u => u.Tutor)
                       .HasForeignKey<Tutor>(t => t.UsuarioId)
                       .OnDelete(DeleteBehavior.Cascade);
             });
@@ -50,7 +50,7 @@ namespace SIGA_PET.Data
             modelBuilder.Entity<Funcionario>(entity =>
             {
                 entity.HasOne(f => f.Usuario)
-                      .WithOne()
+                      .WithOne(u => u.Funcionario)
                       .HasForeignKey<Funcionario>(f => f.UsuarioId)
                       .OnDelete(DeleteBehavior.Cascade);
             });
